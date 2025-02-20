@@ -10,7 +10,8 @@ The premise is straightfoward: You are an alien (or two) that falls into the des
 Limited timer, gets progressively difficult and offers some randomization for better replayability.
 The entire game can be played with no more than 4 movement keys! (WASD or ARROWS), and it also supports mouse inputs for menu accessibility.
 
-Gameplay wise though? It's just pure movement, meant to replicate the breakout experience with a full-on flip on the concept!
+Gameplay wise though? It's just pure movement, and the shield is all you have to manually defend the UFO before timer runs out!
+This way it aims to replicate the breakout experience with a full-on flip on the concept!
 
 # ![bot_shooter](https://github.com/user-attachments/assets/4cf8ec26-975e-4e29-b416-40380c9d35eb) [ What to expect ] ![bot_shooter](https://github.com/user-attachments/assets/4cf8ec26-975e-4e29-b416-40380c9d35eb)
 I'm planning to make the game feel... well, like a game! Initially the goal was just to get the basic gameplay working and be there, done that.
