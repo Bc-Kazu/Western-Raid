@@ -8,7 +8,7 @@ import sys
 
 from western_raid import Game
 
-DEBUG = True
+DEBUG = False
 
 if __name__ == '__main__':
     pg.init()

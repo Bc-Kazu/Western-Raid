@@ -17,9 +17,7 @@ def handle_events(game):
     for event in pg.event.get():
         # Quit the components
         if event.type == pg.QUIT:
-            game.save_data()
-            pg.quit()
-            sys.exit()
+            game.running = False
 
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
             mouse_down = True

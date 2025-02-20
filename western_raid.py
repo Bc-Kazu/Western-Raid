@@ -22,6 +22,7 @@ from config import DATA_FORMAT, PLAYER_COLORS
 import pygame as pg
 import os
 import json
+import zlib
 
 class Game:
     def __init__(self):
@@ -33,7 +34,8 @@ class Game:
         self.level = None
         self.player_count = 0
 
-        # Screen configuration
+        # Screen and game loop configuration
+        self.running = True
         self.FPS = 60
         self.screen_width = 960
         self.screen_height = 620
@@ -136,17 +138,21 @@ class Game:
         ]
 
     def save_data(self):
-        file_path = os.path.join('images/other', f'image_config.json')
+        file_path = os.path.join('components', 'contentlib.wb')
 
         if not os.path.exists(file_path):
             self.data = DATA_FORMAT.copy()
 
-        with open(file_path, 'w') as file:
-            json.dump(self.data, file, indent=4)
-        print(f"> Data saved.")
+        dados_json = json.dumps(self.data)
+        dados_comprimidos = zlib.compress(dados_json.encode())
+
+        with open(file_path, "wb") as f:
+            print(f'> Saving user data for Western Raid.')
+            f.write(dados_comprimidos)
 
     def load_data(self):
-        file_path = os.path.join('images/other', f'image_config.json')
+        file_path = os.path.join('components', f'contentlib.wb')
+        print(f'> Loading user data for Western Raid.')
 
         # Check if filepath doesn't exist and create new file
         if not os.path.exists(file_path):
@@ -155,13 +161,14 @@ class Game:
 
         # Try to load existing data without errors
         try:
-            with open(file_path, 'r') as file:
-                data = json.load(file)
+            with open(file_path, "rb") as file:
+                data_fetched = file.read()
+                decompiled_data = zlib.decompress(data_fetched).decode()
+                data = json.loads(decompiled_data)
 
                 # Check and update missing keys
                 updated_data = self.sort_data(data, DATA_FORMAT)
                 self.data = updated_data
-                print(f"> Data loaded.")
         except json.JSONDecodeError:
             print("Error reading player file, check for any problems in the file"
                   "\nor delete it so a new one can be created.")
@@ -194,7 +201,7 @@ class Game:
     def run(self):
         self.initialize()
 
-        while True:
+        while self.running:
             self.update_state()
             handle_events(self)
 

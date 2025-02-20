@@ -4,6 +4,7 @@ Module for loading and configuring components assets.
 This module handles the initialization of fonts and the loading and transformation
 of image resources. It centralizes asset management to keep the main code clean.
 """
+import sys
 
 import pygame as pg
 import os
@@ -44,6 +45,12 @@ def init_loading(string, progress=None, reset_progress=False):
     INIT_LOADING_DESC.draw(None, SCREEN)
     INIT_LOADING_TEXT.draw(None, SCREEN)
     pg.display.flip()
+
+    for event in pg.event.get():
+        # Quit the components
+        if event.type == pg.QUIT:
+            pg.quit()
+            sys.exit()
 
     if reset_progress:
         loading_progress = 0

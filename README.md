@@ -3,6 +3,7 @@ expanded into a personal little passion project to expand on the idea and learn 
 
 `This repository was made to keep the team's and university privacy, and for easier organization.`
 # What is Western Raid?
+
 It's a very simple, atari-inspired game that follows similar rules to the old arcade game **Breakout**, 
 but instead of breaking the bricks, you protect them at all costs in a chaotic experience!
 
