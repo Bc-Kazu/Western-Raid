@@ -44,9 +44,9 @@ class Game:
 
         # Key configuration
         self.keys_pressed = []
-        self.key_down = False
         self.esc_pressed = None
         self.debug = False
+        self.key_ui_pressed = False
 
         # Getting initial classes
         init_loading('creating hazzards', 3)
@@ -94,7 +94,7 @@ class Game:
         self.start_animate = True
 
         self.escape_tick = 0
-        self.escape_hold_time = 180
+        self.escape_hold_time = 90
 
         self.base_ambush_start = [False, 0, 5, 0, 60, False, 0, 300, False]
         self.base_begin_start = [True, 0, 600]
@@ -239,17 +239,38 @@ class Game:
     
     def add_player(self, controls):
         if not self.player_1:
-            color = PLAYER_COLORS[self.player_count]
-            self.player_count += 1
+            self.player_count = 1
+            color = PLAYER_COLORS[0]
             self.player_1 = Player(controls, self.player_count, color)
             self.player_1.rect.center = ((self.screen_width / 2) - 120, self.screen_height / 2)
             self.sound.play_sfx('join')
         elif not self.player_2 and self.player_1.controls != controls:
-            color = PLAYER_COLORS[self.player_count]
-            self.player_count += 1
+            self.player_count = 2
+            color = PLAYER_COLORS[1]
             self.player_2 = Player(controls, self.player_count, color)
             self.player_2.rect.center = ((self.screen_width / 2) + 120, self.screen_height / 2)
             self.sound.play_sfx('join')
+
+    def start_round(self):
+        if self.data[f'level{self.base_level}']['unlocked']:
+            self.sound.play_sfx('start')
+            self.base_config = self.base_level
+            self.state = 'loading_round'
+        else:
+            self.sound.play_sfx('push')
+
+    def set_level(self, level_index, is_mouse=False):
+        allowed_levels = [1, 2, 3]
+
+        # Only allow levels avaliable in list
+        if level_index in allowed_levels:
+            if self.base_level != level_index:
+                self.sound.play_sfx('ui_select')
+                self.base_level = level_index
+            elif is_mouse:
+                self.start_round()
+        else:
+            self.sound.play_sfx('push')
 
     def set_final_score(self, score_type='nil'):
         new_best = 0

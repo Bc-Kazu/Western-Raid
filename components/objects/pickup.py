@@ -99,11 +99,11 @@ class PickUp(GameObject):
             collided = player.rect
 
         if collided:
-            self.push(player)
+            self.push(collided)
 
     def update(self, game):
         super().update(game)
-        if self.lifetime >= self.max_lifetime - self.blink_seconds:
+        if self.lifetime >= self.max_lifetime - self.blink_seconds and not self.can_blink:
             self.set_blink(True)
 
         self.collide_check(game, game.player_1)
@@ -123,8 +123,13 @@ class PickUp(GameObject):
             if 3 <= self.lifetime < 5:
                 if not self.explode[4]:
                     self.explode[4] = True
-                    self.set_color(colors.ruby)
                     self.set_blink(True, 30)
+
+                if self.explode[1] % 4 == 0:
+                    if self.explode[3]:
+                        self.set_color(colors.ruby)
+                    else:
+                        self.set_color(colors.orange)
 
                 if self.explode[1] >= 8:
                     self.explode[1] = 0

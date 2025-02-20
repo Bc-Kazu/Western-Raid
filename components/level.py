@@ -211,7 +211,7 @@ class Level:
             if gadget.alive:
                 gadget.update(game)
             else:
-                self.objects.remove(gadget)
+                self.gadgets.remove(gadget)
 
         # Updating bandits
         for bandit in self.bandits:

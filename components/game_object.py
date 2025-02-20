@@ -331,7 +331,7 @@ class GameObject:
                 self.kill()
         
     def draw(self, game):
-        if self.visible or self.blink:
+        if self.visible and not self.blink:
             game.screen.blit(self.sprite, self.rect)
 
         if game.debug and self.destined_point:

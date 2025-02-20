@@ -513,6 +513,7 @@ def render_round(game):
                 game.sound.play('escape')
                 game.victory_transition[2] = True
                 game.ufo.can_get_in = False
+                game.ufo.always_on_top = True
 
             game.victory_transition[3] += 1
             game.ufo.victory_ufo(game.player_1, game.player_2)
@@ -530,6 +531,7 @@ def render_round(game):
             game.victory_transition[7] += 1
             game.screen.fill(colors.black)
         else:
+            game.ufo.always_on_top = False
             game.screen.fill(colors.black)
             game.victory_transition[9] = False
             game.victory_transition[-1] = True
