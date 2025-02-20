@@ -1,0 +1,85 @@
+{
+    "total_score": 12015,
+    "accumulated_score": 56792,
+    "victories": 18,
+    "defeats": 26,
+    "terrain_destroyed": 294,
+    "bricks_destroyed": 3164,
+    "bricks_restored": 1626,
+    "p1_stats": {
+        "bullets_reflected": 15140,
+        "bandits_killed": 6309,
+        "bandits_pushed": 3346,
+        "items_collected": 1822,
+        "powerups_collected": 998,
+        "bandit_contacts": 0,
+        "bullets_shot": 3121,
+        "damaged": 651
+    },
+    "p2_stats": {
+        "bullets_reflected": 1210,
+        "bandits_killed": 541,
+        "bandits_pushed": 178,
+        "items_collected": 62,
+        "powerups_collected": 33,
+        "bandit_contacts": 0,
+        "bullets_shot": 42,
+        "damaged": 103
+    },
+    "level1": {
+        "unlocked": true,
+        "best_score": 3250,
+        "p1_score": 3250,
+        "p2_score": 1125
+    },
+    "level2": {
+        "unlocked": true,
+        "best_score": 8765,
+        "p1_score": 6705,
+        "p2_score": 2060
+    },
+    "level3": {
+        "unlocked": true,
+        "best_score": 5320,
+        "p1_score": 4345,
+        "p2_score": 975
+    },
+    "level4": {
+        "unlocked": false,
+        "best_score": 0,
+        "p1_score": 0,
+        "p2_score": 0
+    },
+    "level5": {
+        "unlocked": false,
+        "best_score": 0,
+        "p1_score": 0,
+        "p2_score": 0
+    },
+    "achievements": {
+        "defeat_A": false,
+        "defeat_B": false,
+        "defeat_C": false,
+        "victory_A": false,
+        "victory_B": false,
+        "victory_C": false,
+        "bandits_killed_A": false,
+        "bandits_killed_C": false,
+        "bandits_killed_B": false,
+        "bandits_pushed": false,
+        "bricks_collected": false,
+        "terrain_destroyed": false,
+        "damaged_A": false,
+        "damaged_B": false,
+        "loot": false,
+        "boost": false,
+        "contact": false,
+        "score_A": false,
+        "score_B": false,
+        "score_C": false,
+        "finish_story": false,
+        "lucky_statue": false
+    },
+    "blocks_destroyed": 4785,
+    "blocks_restored": 2255
+}

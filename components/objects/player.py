@@ -1,0 +1,355 @@
+"""
+Class for player(s) functionalities, so we can make multiple players
+with their own properties.
+"""
+from random import randint
+from math import log
+
+from components.objects.gadgets.bot_shooter import BotShooter
+from components.objects.gadgets.turret_shield import TurretShield
+from components.objects.gadgets.turret_shooter import TurretShooter
+from config import BASE_SHIELD_X, BASE_SHIELD_Y, BASE_PLAYER_SPEED, SHIELD_DISTANCE, POWER_UPS, ITEMS
+from assets import PLAYER_CONFIG, TURRET_SHOOTER_CONFIG, TURRET_SHIELD_CONFIG, BOT_SHOOTER_CONFIG
+from components.game_object import GameObject
+import pygame as pg
+
+from utils.colors import Colors
+colors = Colors()
+
+def load_player_sprite(player, name):
+    image = pg.image.load(f'assets/player_sprites/{player.id}/{name}.png')
+    image = pg.transform.scale(image, player.size)
+
+    if 'eyes' in name:
+        player.eyes_dict[name] = image
+    return image
+
+class Player(GameObject):
+    def __init__(self, choosen_controls, player_count, color):
+        super().__init__(PLAYER_CONFIG, player_count)
+        self.type = 'player'
+        self.controls = choosen_controls
+        self.color = color
+        self.current_eyes = None
+        self.eyes_dict = {}
+
+        self.sprite = load_player_sprite(self, 'body')
+        self.base_eyes = load_player_sprite(self, 'base_eyes')
+        self.happy_eyes = load_player_sprite(self, 'happy_eyes')
+        self.closed_eyes = load_player_sprite(self, 'closed_eyes')
+        self.shock_eyes = load_player_sprite(self, 'shock_eyes')
+        self.current_eyes = self.base_eyes
+        self.config['image'] = self.sprite.copy()
+
+        # Creating hitbox with smaller size and accurate position to the player sprite
+        self.hitbox_area = pg.Surface((int(self.size[0] * 0.8), self.size[1] // 2), pg.SRCALPHA)
+        self.hitbox_area.fill(colors.yellow)
+        self.hitbox_area.set_alpha(150)
+        self.hitbox = self.hitbox_area.get_rect()
+
+        # Player's shield
+        self.shield_x = 0
+        self.shield_y = SHIELD_DISTANCE
+        self.shield_width = BASE_SHIELD_X
+        self.shield_height = BASE_SHIELD_Y
+        self.shield_rect = pg.Rect(0, 0, self.shield_width, self.shield_height)
+        self.shield_rect.topleft = self.rect.topleft
+
+        # Player values
+        self.score = 0
+        self.speed = BASE_PLAYER_SPEED
+        self.shield_tick = 0
+        self.shield_cooldown = 150
+        self.push_power = 15
+        self.shoot_cooldown = 100
+        self.holding = None
+
+        self.super_color_list = [colors.yellow, colors.cyan]
+        self.super_color_shift = False
+        self.super_color_interval = 5
+        self.super_color_index = 0
+
+        self.victory_tick = 0
+        self.victory_cooldown = 60
+
+        self.recovery_tick = 0
+        self.recovery_cd = 100
+
+        self.alive = True
+        self.stay_within_screen = True
+        self.facing_up = False
+        self.last_key = ''
+        self.last_direction = [0, 0]
+        self.rect_offset = [0, 0]
+        self.eyes_offset = [0, 0]
+
+        # Dictionary list for power-ups the player will collect
+        self.PU_list = {}
+
+        # Special buff values
+        self.shield_buff = pg.Surface((int(self.size[0] * 1.2), int(self.size[0] * 1.2)), pg.SRCALPHA)
+        self.shield_buff.fill(colors.light_blue)
+        self.shield_buff.set_alpha(0)
+        self.shield_buff_hp = 0
+
+    def super_effect(self):
+        if self.super_color_shift and self.tick % self.super_color_interval == 0:
+            self.super_color_index += 1
+            if self.super_color_index > len(self.super_color_list) - 1:
+                self.super_color_index = 0
+
+            new_color = self.super_color_list[self.super_color_index]
+            self.set_color(new_color)
+
+    def set_super(self):
+        self.super_color_shift = not self.super_color_shift
+
+        if not self.super_color_shift:
+            self.reset_sprite()
+
+    def get_powerup(self, game, power_up):
+        heal = False
+        if power_up in self.PU_list:
+            print(self.PU_list[power_up])
+
+            if self.PU_list[power_up] < POWER_UPS[power_up][2]:
+                self.PU_list[power_up] += 1
+                game.sound.play_sfx('powerup_get')
+            else:
+                self.score += POWER_UPS[power_up][3]
+                game.sound.play_sfx('points')
+                game.sound.play_sfx('points_extra')
+        else:
+            game.sound.play_sfx('powerup_get')
+            self.PU_list[power_up] = 1
+
+            if power_up == 'space_shield':
+                heal = True
+
+        game.ufo.space_shield_set(game, heal)
+
+    def get_item(self, game, item):
+        game.sound.play_sfx('item_get')
+
+        if item == 'shield':
+            self.shield_buff_hp += 2
+            if self.shield_buff_hp > 5:
+                self.shield_buff_hp = 5
+                self.score += ITEMS[item][3] * (self.shield_buff_hp - 5)
+                game.sound.play_sfx('points')
+
+            self.shield_buff.set_alpha(self.shield_buff_hp * 20)
+        if item == 'healing_ufo':
+            game.ufo.set_regenerate(True, self, game)
+        if item == 'turret_shooter':
+            new_turret = TurretShooter(TURRET_SHOOTER_CONFIG)
+            new_turret.spawn(self.rect.center, (0, 0), self)
+            game.level.gadgets.append(new_turret)
+            self.holding = new_turret
+        if item == 'turret_shield':
+            new_turret = TurretShield(TURRET_SHIELD_CONFIG)
+            new_turret.spawn(self.rect.center, (0, 0), self)
+            game.level.gadgets.append(new_turret)
+            self.holding = new_turret
+        if item == 'bot_shooter':
+            new_bot = BotShooter(BOT_SHOOTER_CONFIG)
+            new_bot.spawn(self.rect.center, (0, 0), self)
+            game.level.gadgets.append(new_bot)
+
+    def get_score(self, game, amount):
+        if not game.player_2:
+            self.score += int(amount)
+        else:
+            self.score += int(amount // 2)
+
+    # Handle player behaviour depending on direction given
+    # The self.last_key conditions allows the shield to not break on diagonal movement
+    def change_direction(self, direction):
+        shield_increment_x = 15 * self.PU_list.get('shield_size', 0)
+        shield_increment_y = 2 * self.PU_list.get('shield_size', 0)
+        speed_increment = 2 * self.PU_list.get('ghost_fury', 0) if not self.alive else 0
+
+        if direction == 'left':
+            self.velocity_x = -(self.speed + speed_increment)
+            self.last_direction[0] = -2
+
+            if self.last_key != 'up' and self.last_key != 'down':
+                self.shield_y = 0
+                self.shield_width = BASE_SHIELD_Y + shield_increment_y
+                self.shield_height = BASE_SHIELD_X + shield_increment_x
+                self.last_direction[1] = 0
+            self.eyes_offset = [-4, 0]
+            self.shield_x = -SHIELD_DISTANCE
+        if direction == 'right':
+            self.velocity_x = self.speed + speed_increment
+            self.last_direction[0] = 2
+
+            if self.last_key != 'up' and self.last_key != 'down':
+                self.shield_y = 0
+                self.shield_width = BASE_SHIELD_Y + shield_increment_y
+                self.shield_height = BASE_SHIELD_X + shield_increment_x
+                self.last_direction[1] = 0
+            self.eyes_offset = [4, 0]
+            self.shield_x = SHIELD_DISTANCE
+        if direction == 'down':
+            self.velocity_y = self.speed + speed_increment
+            self.last_direction[1] = 2
+
+            if self.last_key == 'left' or self.last_key == 'right':
+                self.eyes_offset[1] = 4
+            else:
+                self.last_direction[0] = 0
+                self.eyes_offset = [0, 4]
+                self.shield_x = 0
+                self.shield_width = BASE_SHIELD_X + shield_increment_x
+                self.shield_height = BASE_SHIELD_Y + shield_increment_y
+            self.shield_y = SHIELD_DISTANCE
+        if direction == 'up':
+            self.velocity_y = -(self.speed + speed_increment)
+            self.last_direction[1] = -2
+
+            if self.last_key == 'left' or self.last_key == 'right':
+                self.eyes_offset[1] = -4
+            else:
+                self.last_direction[0] = 0
+                self.facing_up = True
+                self.shield_x = 0
+                self.shield_width = BASE_SHIELD_X + shield_increment_x
+                self.shield_height = BASE_SHIELD_Y + shield_increment_y
+            self.shield_y = -SHIELD_DISTANCE
+        else:
+            self.facing_up = False
+
+        self.last_key = direction
+
+    # Handle controls and changing sprites (shield, eyes, etc.)
+    def update(self, game):
+        self.eyes_offset = [0, 0]
+        self.set_velocity(0, 0)
+
+        # Define a dictionary that maps control types to their respective key mappings
+        key_mappings = {
+            'WASD': {'left': pg.K_a, 'right': pg.K_d, 'down': pg.K_s, 'up': pg.K_w},
+            'ARROWS': {'left': pg.K_LEFT, 'right': pg.K_RIGHT, 'down': pg.K_DOWN, 'up': pg.K_UP}
+        }
+
+        # Checking different keys depending on the current player controls
+        controls = key_mappings.get(self.controls, {})
+        buttons_pressed = 0
+        for direction, key in controls.items():
+            if game.keys_pressed[key]:
+                buttons_pressed += 1
+                self.change_direction(direction)
+
+        super().update(game)
+
+        # Update the shield rotation and position
+        self.shield_rect.width = self.shield_width
+        self.shield_rect.height = self.shield_height
+        self.shield_rect.center = self.rect.center
+        self.shield_rect.x += self.shield_x
+        self.shield_rect.y += self.shield_y
+
+        # Adjust hitbox position
+        self.hitbox.center = (self.rect.centerx, self.rect.centery + self.size[1] // 4)
+
+        # Allowing custom player bullet_sprites from power-up
+        if 'auto_shoot' in self.PU_list and not game.level.victory:
+            power = self.PU_list['auto_shoot']
+
+            if 'ghost_fury' in self.PU_list and not self.alive:
+                power += self.PU_list['ghost_fury']
+
+            if self.tick % int((self.shoot_cooldown / power)) == 0:
+                speed_x = (self.last_direction[0] * 2) * (2 + log(power + 1))
+                speed_y = (self.last_direction[1] * 2) * (2 + log(power + 1))
+                self.shoot(game, (speed_x, speed_y))
+                game.sound.play_sfx('player_shoot')
+
+                if 'extra_reflect' in self.PU_list:
+                    chance = self.PU_list['extra_reflect'] * 18 > randint(1, 100)
+                    if chance:
+                        self.shoot(game, (-speed_x, -speed_y))
+
+        if 'recovery' in self.PU_list:
+            self.recovery_cd = 100 + 80 * self.PU_list['recovery']
+            self.shield_cooldown = 150 - 15 * self.PU_list['recovery']
+
+        # Applying shield cooldown timer
+        if not self.alive:
+            self.shield_tick += 1
+            if self.shield_tick % self.shield_cooldown == 0:
+                self.alive = True
+                game.sound.play_sfx('ghost')
+        else:
+            self.recovery_tick += 1
+
+    def shoot(self, game, velocity):
+        extra_size = 2 * self.PU_list.get('bullet_size', 0)
+
+        new_bullet = game.bullet_pool_dict['bullet'].get()
+        new_bullet.spawn(self.rect.center, velocity, self)
+        size = (new_bullet.size[0] + extra_size, new_bullet.size[1] + extra_size)
+        new_bullet.set_size(size)
+
+        game.level.bullets.append(new_bullet)
+        game.data[f"p{self.id}_stats"]["bullets_shot"] += 1
+
+    def damage(self, game):
+        if self.alive and self.recovery_tick >= self.recovery_cd:
+            game.data[f"p{self.id}_stats"]["damaged"] += 1
+            self.recovery_tick = 0
+
+            if self.shield_buff_hp > 0:
+                self.shield_buff_hp -= 1
+                self.shield_buff.set_alpha(self.shield_buff_hp * 20)
+                game.sound.play_sfx('shield_hit')
+                return
+
+            self.kill()
+            self.shield_tick = 0
+            game.sound.play_sfx('player_damage')
+    
+    def set_offset(self, rect_offset=None, eyes_offset=None):
+        self.rect_offset = rect_offset
+        self.eyes_offset = eyes_offset
+
+    def set_eyes(self, name):
+        self.current_eyes = self.eyes_dict[name]
+
+    def draw(self, game):
+        if game.victory_transition[2]:
+            return
+
+        self.super_effect()
+        super().draw(game)
+
+        if game.state == 'defeat':
+            self.eyes_offset = [-2, 2] if self.id == 1 else [2, 2]
+            self.alive = True
+
+        if not self.facing_up:
+            eyes_pos = (self.rect.x + self.eyes_offset[0], self.rect.y + self.eyes_offset[1])
+            game.screen.blit(self.current_eyes, eyes_pos)
+
+        # Conditions for certain things to be drawn
+        if self.alive:
+            self.current_eyes.set_alpha(255)
+            self.sprite.set_alpha(255)
+
+            if not game.level.defeat:
+                pg.draw.rect(game.screen, self.color, self.shield_rect)
+
+            if self.shield_buff_hp > 0:
+                shield_offset = int(self.size[0] / 1.65)
+                game.screen.blit(self.shield_buff, (self.rect.centerx - shield_offset, 
+                                                    self.rect.centery - shield_offset))
+        else:
+            self.current_eyes.set_alpha(128)
+            self.sprite.set_alpha(128)
+
+        if game.state == 'defeat':
+            self.rect.center = (game.screen_width / 2, game.screen_height - 160)
+            if self.rect_offset:
+                self.rect.x += self.rect_offset[0]
+                self.rect.y += self.rect_offset[1]
