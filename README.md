@@ -34,6 +34,7 @@ The game is planned to offer a variety of goods, or bads, depending on your game
 - This whole github sharade
 - Unecessary Details
 - Somewhat Necessary But Still Nitpicky Details...
+
 A lot of the initial logic was built with the help of my team though, so this wouldn't have gotten this far without them!
 
 # But why make this? On PYGAME????
