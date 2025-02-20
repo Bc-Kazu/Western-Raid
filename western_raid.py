@@ -186,7 +186,7 @@ class Game:
     def initialize(self):
         # Setting up the display window customization
         pg.display.set_icon(TITLE_SPRITE)
-        pg.display.set_caption('WESTERN RAID v0.62')
+        pg.display.set_caption('< WESTERN RAID > v0.62')
 
         self.load_data()
         self.sound.play('menu', -1)
