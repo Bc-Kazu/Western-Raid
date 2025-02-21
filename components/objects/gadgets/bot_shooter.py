@@ -87,7 +87,7 @@ class BotShooter(GameObject):
         self.shoot_area.set_alpha(15)
 
         self.find_interval = self.find_interval_base - 60 * owner.PU_list.get('magnet', 0)
-        self.destined_velocity = 5 + 1 * owner.PU_list.get('ghost_fury', 0)
+        self.destined_velocity = 2 + 1 * owner.PU_list.get('ghost_fury', 0)
         self.is_placed = False
 
     def place(self, game):
@@ -244,7 +244,7 @@ class BotShooter(GameObject):
 
             if game.level.defeat:
                 offset_rect.center = self.rect.center
-                offset_rect.y += 4
+                offset_rect.y += 2
 
             game.screen.blit(self.current_eyes, offset_rect)
 

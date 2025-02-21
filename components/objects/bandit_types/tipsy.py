@@ -16,6 +16,7 @@ class Bandit(BanditModel):
         self.points_value = 25
         self.move_interval_base = [60, 180]
         self.last_side = [self.size[0] - 20, 0]
+        self.destined_velocity = 3
 
         self.puddle_color = colors.moss_green
         self.bottle = BULLET_CACHE['bottle'].copy()
@@ -39,8 +40,8 @@ class Bandit(BanditModel):
     def update(self, game):
         super().update(game)
         # Choosing the side position and flipping bottle depending on position
-        left_distance = [[self.size - 20, 0], 0 + self.rect.x, -90]
-        right_distance = [[-self.size + 20, 0], game.screen_width - self.rect.x, 90]
+        left_distance = [[self.size[0] - 20, 0], 0 + self.rect.x, -90]
+        right_distance = [[-self.size[0] + 20, 0], game.screen_width - self.rect.x, 90]
         smallest_x = min(left_distance[1], right_distance[1])
 
         side_goal = left_distance if smallest_x == left_distance[1] else right_distance

@@ -17,6 +17,7 @@ class BanditModel(GameObject):
         self.screen_limited = True
         self.can_push = True
 
+        self.base_health = 1
         self.health = 1
         self.points_value = 20
         self.drop_chances = {'power_up': 10, 'item': 25, 'brick': 50}
@@ -61,14 +62,19 @@ class BanditModel(GameObject):
         higher_size = (self.size[0] + 5, self.size[1] + 5)
         self.size = choice([lower_size, self.size, higher_size])
         self.move_interval_range = self.move_interval_base[:]
-        self.health = 1
+        self.health = self.base_health
         self.target = None
         self.despawning = False
-        self.move_interval = 120
+        self.move_interval = randint(40, 120)
         self.move_tick = 0
         self.shoot_tick = 0
         self.shoot_interval = self.base_shoot_interval
         self.spawn_grace = True
+
+        self.movement_surface = pg.Surface((self.move_range, self.move_range), pg.SRCALPHA)
+        self.movement_surface.fill(colors.purple)
+        self.movement_surface.set_alpha(50)
+        self.movement_rect = pg.Rect(0, 0, self.move_range, self.move_range)
 
         super().spawn(position, velocity, owner)
 
@@ -113,7 +119,7 @@ class BanditModel(GameObject):
             self.sprite.fill(colors.lime, special_flags=pg.BLEND_RGBA_MULT)
 
     def get_target(self, game):
-        if self.name != 'bandit_hitman' or not game.player_1:
+        if self.name != 'hitman' or not game.player_1:
             target = choice(game.ufo.blocks)
         else:
             if game.player_2:
@@ -151,19 +157,15 @@ class BanditModel(GameObject):
     def shoot(self, game, target):
         direction_x = target.rect.centerx - self.rect.centerx
         direction_y = target.rect.centery - self.rect.centery
-        if self.is_moving:
-            direction_x += randint(-10, 10)
-            direction_y += randint(-10, 10)
-
         magnitude = math.sqrt(direction_x ** 2 + direction_y ** 2)
 
         if magnitude != 0 and self.can_shoot:
             direction = (int((direction_x / magnitude) * self.bullet_speed),
                          int((direction_y / magnitude) * self.bullet_speed))
 
-            bullet = game.bullet_pool_dict[self.bullet_type].get()
-            bullet.spawn(self.rect.center, direction, self)
-            game.level.bullets.append(bullet)
+            new_bullet = game.bullet_pool_dict[self.bullet_type].get()
+            new_bullet.spawn(self.rect.center, direction, self)
+            game.level.bullets.append(new_bullet)
 
             game.sound.play_sfx('bandit_shoot')
 

@@ -6,7 +6,6 @@ from random import choice
 from utils.particles import ParticleEmitter
 
 from components.objects.bullet import Bullet
-from components.objects.bandit_model import BanditModel
 from components.objects.player import Player
 from components.objects.ufo import Ufo
 from components.text_storage import TextStorage
@@ -15,6 +14,9 @@ from components.controls import handle_events
 from components.pool import Pool
 from components import level
 from components import display
+
+from components.objects.bandit_types import (
+    basic, bomber, dicer, hitman, shielded, skilled, tipsy)
 
 from assets import (TITLE_SPRITE, init_loading, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG)
 from config import DATA_FORMAT, PLAYER_COLORS
@@ -44,7 +46,6 @@ class Game:
 
         # Key configuration
         self.keys_pressed = []
-        self.esc_pressed = None
         self.debug = False
         self.key_ui_pressed = False
 
@@ -61,13 +62,13 @@ class Game:
         }
 
         self.bandit_pool_dict = {
-            "basic": Pool(BanditModel, BANDITS_CONFIG["basic"], 15),
-            "skilled": Pool(BanditModel, BANDITS_CONFIG["skilled"], 8),
-            "hitman": Pool(BanditModel, BANDITS_CONFIG["hitman"], 3),
-            "bomber": Pool(BanditModel, BANDITS_CONFIG["bomber"], 5),
-            "shielded": Pool(BanditModel, BANDITS_CONFIG["shielded"], 3),
-            "dicer": Pool(BanditModel, BANDITS_CONFIG["dicer"], 3),
-            "tipsy": Pool(BanditModel, BANDITS_CONFIG["tipsy"], 3)
+            "basic": Pool(basic.Bandit, BANDITS_CONFIG["basic"], 15),
+            "skilled": Pool(skilled.Bandit, BANDITS_CONFIG["skilled"], 8),
+            "hitman": Pool(hitman.Bandit, BANDITS_CONFIG["hitman"], 3),
+            "bomber": Pool(bomber.Bandit, BANDITS_CONFIG["bomber"], 5),
+            "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 3),
+            "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 3),
+            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 3)
         }
 
         init_loading('creating particles', 1, True)
@@ -93,6 +94,7 @@ class Game:
         self.menu_loop = [35, False]
         self.start_animate = True
 
+        self.esc_pressed = False
         self.escape_tick = 0
         self.escape_hold_time = 90
 

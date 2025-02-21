@@ -11,4 +11,5 @@ class Bandit(BanditModel):
         self.item_chance = 70
         self.points_value = 40
         self.bullet_speed = 5
+        self.destined_velocity = 3
         self.move_interval_base = [120, 700]

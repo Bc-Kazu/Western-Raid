@@ -126,6 +126,8 @@ def handle_events(game):
 
     # Checking for quitting round
     if keys[pg.K_ESCAPE]:
+        game.esc_pressed = True
+
         if game.state == 'round':
             if game.escape_tick > game.escape_hold_time:
                 game.escape_tick = 0
@@ -136,8 +138,8 @@ def handle_events(game):
                 game.escape_tick += 1
                 game.text.escape_text.current_color = (
                     255,
-                    255 - game.escape_tick,
-                    255 - game.escape_tick * 3
+                    max(255 - game.escape_tick, 0),
+                    max(255 - game.escape_tick * 3, 0)
                 )
     else:
         game.esc_pressed = False

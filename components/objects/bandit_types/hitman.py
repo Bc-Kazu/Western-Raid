@@ -7,10 +7,14 @@ class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
         self.base_shoot_interval = 240
-        self.move_range = 800
+        self.move_range = 500
         self.drop_chances = {'power_up': 20, 'item': 60, 'brick': 100}
-        self.points_value = 50
-        self.move_interval_base = [90, 300]
+        self.points_value = 80
+        self.move_interval_base = [40, 200]
+        self.destined_velocity = 4
         self.can_push = False
         self.bullet_speed = 7
-        self.bullet_type = 'card'
+
+    def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
+        super().spawn(position, velocity, owner)
+        self.move_interval = 0

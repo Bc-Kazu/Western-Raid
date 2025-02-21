@@ -14,12 +14,13 @@ class Bandit(BanditModel):
         self.move_interval_base = [10, 60]
 
         self.explode = [False, 0, 90, False, False]
-        self.random_near_ufo = randint(80, 140)
+        self.random_near_ufo = randint(60, 120)
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
-        self.random_near_ufo = randint(40, 100)
+        self.random_near_ufo = randint(60, 120)
         self.explode = [False, 0, 90, False, False]
         super().spawn(position, velocity, owner)
+        super().set_color()
 
     def update(self, game):
         super().update(game)
@@ -43,5 +44,5 @@ class Bandit(BanditModel):
         elif self.lifetime >= 8 and not self.explode[0]:  # Creating the explosion
             self.kill()
             self.explode[0] = False
-            new_explosion = Explosion(game, self.rect.center, self.size * 2)
+            new_explosion = Explosion(game, self.rect.center, self.size[1] * 2)
             game.level.objects.append(new_explosion)

@@ -69,5 +69,6 @@ class Bandit(BanditModel):
         super().collide_check(game)
 
     def draw(self, game):
+        super().draw(game)
         if self.shield_enabled:
             game.screen.blit(self.shield, self.shield_rect)

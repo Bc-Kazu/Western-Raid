@@ -18,7 +18,7 @@ class Bullet(GameObject):
         self.times_reflected = 0
         self.sfx_interval = 0
         self.screen_limited = True
-        self.max_velocity = 5
+        self.max_velocity = 10
         self.max_lifetime = 10
 
         if self.type == 'card':
@@ -71,6 +71,7 @@ class Bullet(GameObject):
 
     def reflect(self, rect, player=None, game=None):
         self.times_reflected += 1
+        self.set_max_velocity(5)
 
         # Get the relative position of the collision
         relative_collision_x = (self.rect.centerx - rect.left) / rect.width
@@ -81,6 +82,8 @@ class Bullet(GameObject):
         # Adjust direction depending on bullet movement
         speed_x = int(offset_x * self.max_velocity)
         speed_y = int(offset_y * self.max_velocity)
+        speed_x = min(max(round(speed_x * 5, 1), -5), 5)
+        speed_y = min(max(round(speed_y * 5, 1), -5), 5)
 
         if self.sfx_interval >= 15:
             self.sfx_interval = 0
@@ -118,14 +121,13 @@ class Bullet(GameObject):
                     for i in range(extra_count)]
 
                 for angle in angles:
-                    speed_x = math.cos(angle) * self.max_velocity
-                    speed_y = math.sin(angle) * self.max_velocity
+                    speed_x = math.cos(angle) * 5
+                    speed_y = math.sin(angle) * 5
                     new_bullet = game.bullet_pool_dict[self.name].get()
+                    new_bullet.set_max_velocity(5)
                     new_bullet.spawn(self.rect.center, (speed_x, speed_y), player)
 
         # Adjust direction depending on bullet movement
-        speed_x = round(speed_x * self.max_velocity, 1)
-        speed_y = round(speed_y * self.max_velocity, 1)
         if speed_x == 0 == speed_y:
             speed_x = self.velocity_x * -1
             speed_y = self.velocity_y * -1

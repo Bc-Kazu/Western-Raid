@@ -284,7 +284,7 @@ LEVEL_CONFIG = [
         "terrain_area_reduction": 1,
 
         "round_time": 240,
-        "max_bandits": 2,
+        "max_bandits": 200,
         "max_spawn_count": 2,
         "bandit_spawnrate": 300,
         "bandit_spawn_multi": [1, 2],

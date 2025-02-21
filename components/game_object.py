@@ -60,7 +60,7 @@ class GameObject:
         self.area_movement = False
         self.destined_point = None
         self.destined_position = (0, 0)
-        self.destined_velocity = 5
+        self.destined_velocity = 2
 
         # Following settings
         self.min_magnitude = 0
@@ -129,6 +129,9 @@ class GameObject:
         elif len(args) == 2:
             self.velocity_x = min(max(args[0], -self.max_velocity), self.max_velocity)
             self.velocity_y = min(max(args[1], -self.max_velocity), self.max_velocity)
+
+    def set_max_velocity(self, max_velocity):
+        self.max_velocity = max_velocity
 
     # Sets the current position vectors for the object at given X and Y coordinates.
     # Allows tuple, lists, separate values and boolean for setting the rect center at the position.
@@ -285,7 +288,7 @@ class GameObject:
             self.destined_point.center = self.destined_position
             self.max_magnitude = 2000
             self.min_magnitude = 10
-            self.follow(self.destined_point, 2)
+            self.follow(self.destined_point, self.destined_velocity)
 
         # System for exponential pushing, ignored if push_velocity never changes
         if self.push_velocity != (0, 0):
