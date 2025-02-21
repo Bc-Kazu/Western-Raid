@@ -185,6 +185,8 @@ class Level:
         # increasing difficulty every 15 seconds
         if self.time_elapsed % self.difficulty_time == 0:
             self.bandit_spawnrate = max(60, self.bandit_spawnrate - 15)
+        if self.time_elapsed % int(self.difficulty_time * 2 == 0):
+            self.max_bandits += 1
 
         for terrain in self.map:
             if terrain.alive:

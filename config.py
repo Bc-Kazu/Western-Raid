@@ -234,7 +234,7 @@ POWER_UPS = {
 }
 
 ITEMS = {
-    'bomb': ['bomb', 5000, 0, 0],
+    'bomb': ['bomb', 50, 0, 0],
     'shield': ['shield', 40, 3, 30],
     'turret_shooter': ['turret_shooter', 30, 5, 100],
     'turret_shield': ['turret_shield', 30, 5, 100],

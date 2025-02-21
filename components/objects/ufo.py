@@ -231,8 +231,8 @@ class Ufo(GameObject):
         best_cooldown = check_best_powerup(game, 'recovery')
         best_size = check_best_powerup(game, 'shield_size')
 
-        max_health = 3 + (best_max_health if best_max_health else 0)
-        cooldown = 300 - (80 * best_cooldown if best_cooldown else 0)
+        max_health = 2 + (best_max_health if best_max_health else 0)
+        cooldown = 300 - (60 * best_cooldown if best_cooldown else 0)
         size_x = int(self.size[0] * 1.5) + (20 * best_size if best_size else 0)
         size_y = int(self.size[1] * 1.5) + (20 * best_size if best_size else 0)
 
