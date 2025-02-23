@@ -136,18 +136,13 @@ class BanditModel(GameObject):
             game.level.bandits.append(bandit)
 
     def get_target(self, game):
-        if self.name != 'hitman' or not game.player_1:
-            target = choice(game.ufo.blocks)
+        if self.name == 'hitman' and game.player_1:
+            possible_targets = [game.player_1, game.player_2 if game.player_2 else game.player_1]
+            target = possible_targets[randint(0, 1)]
+        elif self.name == 'dicer' and len(game.level.bandits) > 0:
+            target = choice(game.level.bandits)
         else:
-            if game.player_2:
-                if randint(1, 2) == 1 and game.player_1:
-                    target = game.player_1
-                else:
-                    target = game.player_2
-            elif game.player_1:
-                target = game.player_1
-            else:
-                target = choice(game.ufo.blocks)
+            target = choice(game.ufo.blocks)
 
         if hasattr(target, 'rect'):
             self.target = target

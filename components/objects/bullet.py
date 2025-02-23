@@ -4,8 +4,10 @@ they have a position to be spawned at and a direction to constantly go.
 """
 from random import randint, choice
 import math
+import pygame as pg
 
 from components.game_object import GameObject
+from components.hazzards.explosion import Explosion
 from utils.colors import Colors
 colors = Colors()
 
@@ -20,6 +22,7 @@ class Bullet(GameObject):
         self.screen_limited = True
         self.max_velocity = 10
         self.max_lifetime = 10
+        self.explosion_size = (3 * self.size[0], 3 * self.size[1])
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         super().spawn(position, velocity, owner)
@@ -27,6 +30,8 @@ class Bullet(GameObject):
         if self.name == 'card':
             self.reset_sprite()
             self.set_buff(choice(['protection', 'duplicate', 'evil', 'lucky']))
+        if self.name == 'dynamite':
+            self.reset_sprite()
 
     def reset(self):
         super().reset()
@@ -37,7 +42,7 @@ class Bullet(GameObject):
     def set_owner(self, owner):
         super().set_owner(owner)
 
-        if self.name == 'bullet':
+        if self.name == 'bullet' or self.name == 'dynamite':
             self.set_color()
 
     def set_buff(self, buff):
@@ -61,6 +66,11 @@ class Bullet(GameObject):
         self.collide_check(game)
         super().update(game)
         self.sfx_interval += 1
+
+        speed = int((self.velocity_x**2 + self.velocity_y**2) ** 0.7)
+        rotate_interval = max(20 - speed, 5)
+        if self.name == 'dynamite' and self.tick % rotate_interval == 0:
+            self.sprite = pg.transform.rotate(self.sprite, 90)
 
     def reflect(self, rect, player=None, game=None):
         self.times_reflected += 1
@@ -97,7 +107,8 @@ class Bullet(GameObject):
                 if boost > 0:
                     self.set_size(self.size[0] + boost, self.size[1] + boost)
 
-            if 'extra_reflect' in player.PU_list:
+            extra_count = player.PU_list.get('extra_reflect', 0)
+            if randint(0, 33 * extra_count) > randint(0, 100):
                 BASE_SPREAD_ANGLE = 25
                 MAX_SPREAD = 90
 
@@ -119,6 +130,7 @@ class Bullet(GameObject):
                     new_bullet = game.bullet_pool_dict[self.name].get()
                     new_bullet.set_max_velocity(5)
                     new_bullet.spawn(self.rect.center, (speed_x, speed_y), player)
+                    game.level.bullets.append(new_bullet)
 
         # Adjust direction depending on bullet movement
         if speed_x == 0 == speed_y:
@@ -140,6 +152,12 @@ class Bullet(GameObject):
         elif self.rect.colliderect(player.hitbox) and self.owner.type == 'enemy':
             player.damage(game)
             self.kill()
+
+    def explode(self, game):
+        self.kill()
+        new_explosion = Explosion(game, self.rect.center, self.explosion_size, 'explode2')
+        new_explosion.set_lifetick(20)
+        game.level.objects.append(new_explosion)
 
     def collide_check(self, game):
         if not self.alive:
@@ -170,4 +188,7 @@ class Bullet(GameObject):
                     if not self.alive:
                         game.data[f"p{self.owner.id}_stats"]["bandits_killed"] += 1
                         break
+
+        if not self.alive and self.name == 'dynamite':
+            self.explode(game)
 

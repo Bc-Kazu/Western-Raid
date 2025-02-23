@@ -1,9 +1,9 @@
 import pygame as pg
 
 class Explosion:
-    def __init__(self, game, position, size):
+    def __init__(self, game, position, size, sound='explode'):
         self.type = 'explosion'
-        self.rect = pg.Rect(0, 0, size, size)
+        self.rect = pg.Rect((0, 0), size)
         self.rect.center = position
         self.life_tick = 0
         self.color_tick = 0
@@ -16,7 +16,11 @@ class Explosion:
         self.ufo_collided = False
         self.already_hit = []    # List of objects that already got hit, to avoid multiple checks
 
-        game.sound.play_sfx('explode')
+        if sound:
+            game.sound.play_sfx(sound)
+
+    def set_lifetick(self, new_max):
+        self.max_lifetick = new_max
 
     def set_color(self, color1=(255, 130, 0), color2=(255, 240, 0)):
         self.explode_color1 = color1

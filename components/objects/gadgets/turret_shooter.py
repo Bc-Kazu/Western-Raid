@@ -192,6 +192,9 @@ class TurretShooter(GameObject):
                     self.damage(game, 1)
                     bullet.kill()
 
+                    if bullet.name == 'dynamite':
+                        bullet.explode(game)
+
     def draw(self, game):
         super().draw(game)
 

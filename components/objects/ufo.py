@@ -111,9 +111,6 @@ class Ufo(GameObject):
                     self.blocks.append(new_block)
 
     def collide_check(self, game, bullet):
-        if not self.blocks or bullet.owner.type == 'player':
-            return
-
         if (self.space_shield_rect.colliderect(bullet.rect) and bullet.owner.type == 'enemy'
                 and self.space_shield_hp > 0):
             self.space_shield_update(-1)
@@ -130,16 +127,20 @@ class Ufo(GameObject):
             return
 
         # check the collides by the lists
-        blocks_alive = 0
+        if self.blocks or bullet.owner.type != 'player':
+            blocks_alive = 0
 
-        for block in self.blocks:
-            if block.collide_check(bullet):
-                self.take_damage(game, block)
-            if block.strength > 0:
-                blocks_alive += 1
+            for block in self.blocks:
+                if block.collide_check(bullet):
+                    self.take_damage(game, block)
 
-        if blocks_alive <= 0:
-            self.kill()
+                    if bullet.name == 'dynamite':
+                        bullet.explode(game)
+                if block.strength > 0:
+                    blocks_alive += 1
+
+            if blocks_alive <= 0:
+                self.kill()
 
     def take_damage(self, game, block):
         if block.strength > 1:

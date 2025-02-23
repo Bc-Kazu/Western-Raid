@@ -16,9 +16,9 @@ from components import level
 from components import display
 
 from components.objects.bandit_types import (
-    basic, bomber, dicer, hitman, shielded, skilled, tipsy)
+    basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, bullseye, tangler)
 
-from assets import (TITLE_SPRITE, init_loading, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG)
+from assets import (TITLE_SPRITE, init_loading, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG, DYNAMITE_CONFIG)
 from config import DATA_FORMAT, PLAYER_COLORS
 
 import pygame as pg
@@ -58,7 +58,8 @@ class Game:
         # Getting pool classes for each object/dynamic class
         self.bullet_pool_dict = {
             "bullet": Pool(Bullet, BULLET_CONFIG, 50),
-            "card": Pool(Bullet, CARD_CONFIG, 30)
+            "card": Pool(Bullet, CARD_CONFIG, 30),
+            "dynamite": Pool(Bullet, DYNAMITE_CONFIG, 30),
         }
 
         self.bandit_pool_dict = {
@@ -68,7 +69,10 @@ class Game:
             "bomber": Pool(bomber.Bandit, BANDITS_CONFIG["bomber"], 5),
             "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 3),
             "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 3),
-            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 3)
+            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 3),
+            "boomstick": Pool(boomstick.Bandit, BANDITS_CONFIG["boomstick"], 3),
+            "bullseye": Pool(bullseye.Bandit, BANDITS_CONFIG["bullseye"], 3),
+            "tangler": Pool(tangler.Bandit, BANDITS_CONFIG["tangler"], 3),
         }
 
         init_loading('creating particles', 1, True)

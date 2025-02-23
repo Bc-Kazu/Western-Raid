@@ -240,7 +240,7 @@ ITEMS = {
     'turret_shield': ['turret_shield', 30, 5, 100],
     'bot_shooter': ['bot_shooter', 20, 5, 100],
     'healing_ufo': ['healing_ufo', 20, 1, 100],
-    'gift_bomb': ['gift_bomb', 2, 0, 0],
+    'gift_bomb': ['gift_bomb', 0.3, 0, 0],
 }
 
 BRICKS = {
@@ -318,8 +318,10 @@ LEVEL_CONFIG = [
         "background": (30, 25, 20),
         "spawn_types":
             [
-                ["skilled", 80, False, -10],
-                ["bomber", 20, False, 20],
+                ["basic", 30, False, -10],
+                ["skilled", 50, False, -10],
+                ["boomstick", 30, False, 20],
+                ["bomber", 5, False, 25],
                 ["hitman", 10, True, 0],
             ],
         "terrain_noise": 10,

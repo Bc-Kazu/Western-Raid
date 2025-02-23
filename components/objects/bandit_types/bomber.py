@@ -12,9 +12,10 @@ class Bandit(BanditModel):
         self.base_drop_chances = {'power_up': 10, 'item': 40, 'brick': 0}
         self.points_value = 40
         self.move_interval_base = [10, 60]
-
-        self.explode = [False, 0, 90, False, False]
         self.random_near_ufo = randint(60, 120)
+
+        # Values for explosion process
+        self.explode = [False, 0, 90, False, False]
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.random_near_ufo = randint(60, 120)
@@ -44,5 +45,6 @@ class Bandit(BanditModel):
         elif self.lifetime >= 8 and not self.explode[0]:  # Creating the explosion
             self.kill()
             self.explode[0] = False
-            new_explosion = Explosion(game, self.rect.center, self.size[1] * 2)
+            explosion_size = (self.size[0] * 2, self.size[1] * 2)
+            new_explosion = Explosion(game, self.rect.center, explosion_size)
             game.level.objects.append(new_explosion)

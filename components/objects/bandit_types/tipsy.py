@@ -58,6 +58,7 @@ class Bandit(BanditModel):
         # Drink puddle animation and spawning process
         if self.lifetime > self.random_drink_time:
             self.can_move = False
+            self.can_push = False
 
             if not self.drink_anim[0]:
                 self.bottle = pg.transform.rotate(self.bottle, side_goal[-1])

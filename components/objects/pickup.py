@@ -31,6 +31,7 @@ class PickUp(GameObject):
         self.pointer_tick = 0
         self.pointer_interval = 20
         self.pointer_pos = 5
+        self.can_follow = True
 
         # Configuration depending on item type
         self.max_lifetime = config['despawn_time']
@@ -43,12 +44,13 @@ class PickUp(GameObject):
             self.has_frame = False
             self.can_push = True
             self.can_explode = True
+            self.can_follow = False
 
     def collide_check(self, game, player):
         if not player:
             return
 
-        if 'magnet' in player.PU_list:
+        if 'magnet' in player.PU_list and self.can_follow:
             self.follow_strength = player.PU_list['magnet'] + 1
             self.max_magnitude = 100 + 20 * player.PU_list['magnet']
             self.follow(player.rect)
@@ -139,11 +141,11 @@ class PickUp(GameObject):
                 self.alive = False
                 self.explode[0] = False
                 if self.name != 'gift_bomb':
-                    size = self.size[1] * 3
+                    explosion_size = (self.size[0] * 3, self.size[1] * 3)
                 else:
-                    size = self.size[1] * 4
+                    explosion_size = (self.size[0] * 4, self.size[1] * 4)
 
-                new_explosion = Explosion(game, self.rect.center, size)
+                new_explosion = Explosion(game, self.rect.center, explosion_size)
                 game.level.objects.append(new_explosion)
 
                 if self.name == 'gift_bomb':

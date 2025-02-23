@@ -113,6 +113,14 @@ CARD_CONFIG = {
     'image': BULLET_CACHE['card']
 }
 
+DYNAMITE_CONFIG = {
+    'name': 'dynamite',
+    'type': 'bullet',
+    'size': (26, 26),
+    'color': colors.coral,
+    'image': BULLET_CACHE['dynamite']
+}
+
 TERRAIN_CONFIG = {'name': 'any', 'type': 'terrain','size': (180, 180)}
 
 EXPLOSION_CONFIG = {
@@ -192,6 +200,12 @@ BANDITS_CONFIG = {
                      'color': colors.white, 'image': BANDIT_CACHE['dicer'].copy()},
     "tipsy": {'name': 'tipsy', 'type': 'enemy', 'size': (60, 60),
                      'color': colors.white, 'image': BANDIT_CACHE['basic'].copy()},
+    "boomstick": {'name': 'boomstick', 'type': 'enemy', 'size': (60, 60),
+              'color': colors.white, 'image': BANDIT_CACHE['boomstick'].copy()},
+    "bullseye": {'name': 'bullseye', 'type': 'enemy', 'size': (60, 60),
+              'color': colors.white, 'image': BANDIT_CACHE['bullseye'].copy()},
+    "tangler": {'name': 'tangler', 'type': 'enemy', 'size': (60, 60),
+              'color': colors.white, 'image': BANDIT_CACHE['tangler'].copy()},
 }
 init_loading('loading assets', len(BANDITS_CONFIG))
 

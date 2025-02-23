@@ -132,7 +132,7 @@ class Level:
         spawn_multiplier = self.bandit_spawn_multi[1] if self.ambush_mode else self.bandit_spawn_multi[0]
         number_spawned = randint(1, self.max_spawn_count + game.player_count * self.ambush_mode)
         max_bandits = self.max_bandits + (spawn_multiplier * game.player_count)
-        bandit_spawnrate = max(1, self.bandit_spawnrate - (15 * game.player_count))  # Prevent division by zero
+        bandit_spawnrate = max(1, self.bandit_spawnrate - (15 * game.player_count))
 
         # Creating bandits
         if game.tick % bandit_spawnrate == 0 and self.bandit_count < max_bandits:
