@@ -1,12 +1,13 @@
 import pygame as pg
 from random import randint, choice
+from assets import BULLET_CACHE
 
 class Poison:
     def __init__(self, position, size, color=(255, 255, 255), alpha=160):
         self.type = 'poison'
         self.size = [size // 4, size // 4]
         self.color = color
-        self.sprite = pg.image.load(f'assets/bullet_sprites/puddle.png').convert_alpha()
+        self.sprite = BULLET_CACHE['poison'].copy()
         self.sprite = pg.transform.scale(self.sprite, (self.size[0], self.size[1]))
         self.sprite = pg.transform.rotate(self.sprite, choice([90, 180, 270, 360]))
 

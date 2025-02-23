@@ -26,7 +26,7 @@ class Level:
         self.bandit_spawnrate = config['bandit_spawnrate']
         self.bandit_spawn_multi = config['bandit_spawn_multi']
         self.max_spawn_count = config['max_spawn_count']
-        self.can_spawn_early = config['can_spawn_early']
+        self.spawn_start_time = config['spawn_start_time']
         self.max_increase_time = 50
 
         # Setting map and base values
@@ -34,6 +34,7 @@ class Level:
         self.victory = False
         self.defeat = False
         self.difficulty_incremented = False
+        self.can_spawn_bandits = True
         self.time_elapsed = 0
         self.bandit_count = 0
 
@@ -62,17 +63,21 @@ class Level:
         self.map = self.create_map(game)
 
         for terrain in self.map:
+            terrain.draw(game)
+            terrain.set_decoration()
+
+        for terrain in self.map:
             terrain.distance_check(self)
 
         for terrain in self.map:
-            terrain.set_decoration()
+            if not terrain.alive:
+                self.map.remove(terrain)
 
         game.state = 'round'
         game.sound.play('sandwreck', -1)
 
 
-    ''' This function takes care of drawing the map automatically, but manually making a
-        grid in the same size as the game's display. '''
+    # This function takes care of drawing the map randomly and automatically.
     def create_map(self, game):
         terrain_list = []
         terrain_amount = 50
@@ -123,84 +128,77 @@ class Level:
         self.objects.append(new_pickup)
 
     def spawn_bandit(self, game):
+        # Determine spawn settings
+        spawn_multiplier = self.bandit_spawn_multi[1] if self.ambush_mode else self.bandit_spawn_multi[0]
+        number_spawned = randint(1, self.max_spawn_count + game.player_count * self.ambush_mode)
+        max_bandits = self.max_bandits + (spawn_multiplier * game.player_count)
+        bandit_spawnrate = max(1, self.bandit_spawnrate - (15 * game.player_count))  # Prevent division by zero
+
         # Creating bandits
-        if not self.ambush_mode:
-            number_spawned = randint(1, self.max_spawn_count)
-            max_bandits = self.max_bandits + (self.bandit_spawn_multi[0] * game.player_count)
-        else:
-            number_spawned = randint(0, self.max_spawn_count + game.player_count)
-            max_bandits = self.max_bandits + (self.bandit_spawn_multi[1] * game.player_count)
-
-        bandit_spawnrate = int(self.bandit_spawnrate - (15 * game.player_count))
-
         if game.tick % bandit_spawnrate == 0 and self.bandit_count < max_bandits:
-            for new_bandit in range(number_spawned):
+            for _ in range(number_spawned):
+                # Spawn position logic
                 spawn_direction = choice(['left', 'right'])
-                start_pos = [0, 0,  # Position that spawns at first
-                             0, 0]  # Destined spawnpoint
+                spawn_settings = {
+                    'left': (-50, randint(10, game.screen_height - 40), randint(30, 100)),
+                    'right': (game.screen_width, randint(10, game.screen_height - 40),
+                              game.screen_width - randint(70, 140))}
+                x, y, dest_x = spawn_settings[spawn_direction]
+                start_pos = [x, y, dest_x, y]
 
-                if spawn_direction == 'left':
-                    start_pos[0] = -50
-                    start_pos[1] = randint(10, game.screen_height - 40)
-                    start_pos[2] = randint(30, 100)
-                    start_pos[3] = start_pos[1]
-                if spawn_direction == 'right':
-                    start_pos[0] = game.screen_width
-                    start_pos[1] = randint(10, game.screen_height - 40)
-                    start_pos[2] = game.screen_width - randint(70, 140)
-                    start_pos[3] = start_pos[1]
+                # Bandit selection logic
+                spawns = [bandit for bandit in self.spawn_types
+                    if not bandit[2] or (bandit[2] and self.ambush_mode)]
+                chances = [bandit[1] + (bandit[3] if self.ambush_mode else 0) for bandit in spawns]
 
-                # Get a random bandit to spawn depending on chance
-                spawns = []
-                chances = []
-
-                for bandit_type in self.spawn_types:
-                    if not bandit_type[2]:
-                        spawns.append(bandit_type)
-                        if not self.ambush_mode:
-                            chances.append(bandit_type[1])
-                        else:
-                            chances.append(bandit_type[1] + bandit_type[3])
-                    elif bandit_type[2] and self.ambush_mode:
-                        spawns.append(bandit_type)
-                        chances.append(bandit_type[1])
-
-                choosen_bandit = choices(population=spawns, weights=chances)[0]
-                bandit = game.bandit_pool_dict[choosen_bandit[0]].get()
+                chosen_bandit = choices(population=spawns, weights=chances)[0]
+                bandit = game.bandit_pool_dict[chosen_bandit[0]].get()
                 bandit.spawn(start_pos, None, self)
                 self.bandits.append(bandit)
 
+    # Base function for updating all instances in a list
+    def update_instance(self, game, instance_list):
+        for instance in instance_list:
+            if instance.alive:
+                instance.update(game)
+
+                if instance.type == 'bullet':
+                    self.ufo.collide_check(game, instance)
+                if instance.type == 'enemy' and instance.active:
+                    self.bandit_count += 1
+            else:
+                instance_list.remove(instance)
+
+    # Main function to run the gameplay logic and physics.
     def run(self, game):
+        # Clearing the map depending on certain conditions
         if self.defeat or game.victory_transition[0]:
             self.bandits = []
             self.bullets = []
             self.objects = []
-            self.can_spawn_early = False
             self.ufo.set_regenerate(False)
+            self.can_spawn_bandits = False
 
-        if self.can_spawn_early: self.spawn_bandit(game)
-        self.bandit_count = len(self.bandits)
+        if self.time_elapsed >= self.spawn_start_time and self.can_spawn_bandits:
+            self.spawn_bandit(game)
 
+        # Counting every second of the round elapsed
         if game.tick % game.FPS == 0 and not self.defeat:
             self.time_elapsed += 1
             self.difficulty_incremented = False
 
-        # increasing difficulty every 15 seconds
+        # Increasing difficulty every difficulty_time interval
         if (self.time_elapsed != 0 and self.time_elapsed % self.difficulty_time == 0
                 and not self.difficulty_incremented):
             self.difficulty_incremented = True
             self.bandit_spawnrate = max(60, self.bandit_spawnrate - 15)
 
+            # Increasing max bandit count every max_increase_time interval
             if self.time_elapsed % self.max_increase_time == 0:
                 self.max_bandits += 1
 
-        for terrain in self.map:
-            if terrain.alive:
-                terrain.update(game)
-            else:
-                self.map.remove(terrain)
-
-        # Updating UFO
+        self.bandit_count = 0
+        # Updating every game component class
         if not self.defeat:
             if game.player_1:
                 game.player_1.update(game)
@@ -208,41 +206,8 @@ class Level:
                 game.player_2.update(game)
 
         self.ufo.update(game)
-
-        for obj in self.objects:
-            if obj.alive:
-                obj.update(game)
-            else:
-                self.objects.remove(obj)
-
-        for gadget in self.gadgets:
-            if gadget.alive:
-                gadget.update(game)
-            else:
-                self.gadgets.remove(gadget)
-
-        # Updating bandits
-        for bandit in self.bandits:
-            if bandit.alive:
-                # Getting a random target
-                bandit.get_target(game)
-
-                # Applhying chance to spawn loot on death
-                bandit.update(game)
-                bandit.collide_check(game)
-
-                bandit.push_check(game, game.player_1)
-                bandit.push_check(game, game.player_2)
-            else:
-                self.bandits.remove(bandit)
-
-        for bullet in self.bullets:
-            if bullet.alive and bullet.lifetime <= bullet.max_lifetime:
-                bullet.update(game)
-
-                # Collision check with players, shields and UFO
-                bullet.collide_check(game, game.player_1)
-                bullet.collide_check(game, game.player_2)
-                self.ufo.collide_check(game, bullet)
-            else:
-                self.bullets.remove(bullet)
+        self.update_instance(game, self.map)
+        self.update_instance(game, self.objects)
+        self.update_instance(game, self.gadgets)
+        self.update_instance(game, self.bandits)
+        self.update_instance(game, self.bullets)

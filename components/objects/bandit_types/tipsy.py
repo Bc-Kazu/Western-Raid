@@ -33,6 +33,7 @@ class Bandit(BanditModel):
         self.bottle_rect = self.bottle.get_rect()
         self.drink_anim = [False, 0 , 120, False,  0, 60, 0, 40, False]
         self.random_drink_time = randint(4, 7)
+        self.reset_sprite()
 
         super().spawn(position, velocity, owner)
 
@@ -56,6 +57,8 @@ class Bandit(BanditModel):
 
         # Drink puddle animation and spawning process
         if self.lifetime > self.random_drink_time:
+            self.can_move = False
+
             if not self.drink_anim[0]:
                 self.bottle = pg.transform.rotate(self.bottle, side_goal[-1])
                 self.drink_anim[0] = True
@@ -69,6 +72,8 @@ class Bandit(BanditModel):
             elif not self.drink_anim[3]:
                 self.sprite = pg.transform.rotate(self.sprite, -side_goal[-1])
                 self.drink_anim[3] = True
+                self.active = False
+                self.can_collide = False
             elif self.drink_anim[6] < self.drink_anim[7]:
                 self.drink_anim[6] += 1
             elif not self.drink_anim[8]:
@@ -77,14 +82,6 @@ class Bandit(BanditModel):
                 # Spawning the weird liquid thingy after the animation ends
                 puddle = Poison(self.rect.center, self.size[1], self.puddle_color)
                 game.level.objects.append(puddle)
-
-    def shield_collide_check(self, game, player):
-        if self.drink_anim[3]: return
-        super().push_check(game, player)
-
-    def collide_check(self, game):
-        if self.drink_anim[3]: return
-        super().collide_check(game)
 
     def draw(self, game):
         super().draw(game)

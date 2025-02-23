@@ -284,12 +284,12 @@ LEVEL_CONFIG = [
         "terrain_area_reduction": 1,
 
         "round_time": 240,
-        "max_bandits": 200,
+        "max_bandits": 2,
         "max_spawn_count": 2,
         "bandit_spawnrate": 300,
         "bandit_spawn_multi": [1, 2],
         "difficulty_time": 15,
-        "can_spawn_early": False,
+        "spawn_start_time": 8,
 
     },
     { # ===== LEVEL 2 ( SALOON ) CONFIGURATIONS =====
@@ -309,9 +309,9 @@ LEVEL_CONFIG = [
         "max_bandits": 3,
         "max_spawn_count": 2,
         "bandit_spawnrate": 240,
-        "bandit_spawn_multi": [1, 1.5],
+        "bandit_spawn_multi": [1, 2],
         "difficulty_time": 15,
-        "can_spawn_early": True,
+        "spawn_start_time": 3,
 
     },
     { # ===== LEVEL 3 ( BARREN ) CONFIGURATIONS =====
@@ -331,7 +331,7 @@ LEVEL_CONFIG = [
         "bandit_spawnrate": 200,
         "bandit_spawn_multi": [1, 3],
         "difficulty_time": 30,
-        "can_spawn_early": True,
+        "spawn_start_time": 3,
     }
 
 ]

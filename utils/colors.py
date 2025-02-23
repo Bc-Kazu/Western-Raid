@@ -27,6 +27,7 @@ class Colors:
         self.dark_yellow = (120, 120, 0)
         self.burnt_amber = (188, 156, 0)
         self.burnt_yellow = (168, 145, 0)
+        self.pale_yellow = (140, 135, 60)
         self.gold = (255, 215, 0)
         self.orange = (255, 165, 0)
         self.light_orange = (255, 200, 100)
@@ -75,7 +76,7 @@ class Colors:
 
         # Brown Tones
         self.brown = (139, 69, 19)
-        self.saddle_brown = (139, 69, 19)
+        self.saddle_brown = (120, 76, 28)
         self.sienna = (160, 82, 45)
         self.chocolate = (210, 105, 30)
         self.tan = (210, 180, 140)

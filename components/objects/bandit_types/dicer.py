@@ -9,6 +9,6 @@ class Bandit(BanditModel):
         self.bullet_type = 'card'
         self.base_shoot_interval = 200
         self.move_range = 500
-        self.drop_chances = {'power_up': 50, 'item': 30, 'brick': 20}
+        self.base_drop_chances = {'power_up': 50, 'item': 30, 'brick': 20}
         self.points_value = 50
         self.move_interval_base = [100, 500]

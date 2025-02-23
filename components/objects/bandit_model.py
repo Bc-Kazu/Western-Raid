@@ -20,7 +20,8 @@ class BanditModel(GameObject):
         self.base_health = 1
         self.health = 1
         self.points_value = 20
-        self.drop_chances = {'power_up': 10, 'item': 25, 'brick': 50}
+        self.base_drop_chances = {'power_up': 10, 'item': 25, 'brick': 50}
+        self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
 
         # Movement settings
@@ -33,6 +34,7 @@ class BanditModel(GameObject):
 
         self.despawn_time = 20
         self.despawning = False
+        self.active = True
 
         # Shooting settings
         self.can_shoot = True
@@ -63,6 +65,7 @@ class BanditModel(GameObject):
         self.size = choice([lower_size, self.size, higher_size])
         self.move_interval_range = self.move_interval_base[:]
         self.health = self.base_health
+        self.drop_chances = self.base_drop_chances
         self.target = None
         self.despawning = False
         self.move_interval = randint(40, 120)
@@ -76,7 +79,14 @@ class BanditModel(GameObject):
         self.movement_surface.set_alpha(50)
         self.movement_rect = pg.Rect(0, 0, self.move_range, self.move_range)
 
+        protection_size = (int(self.size[0] * 1.2), int(self.size[1] * 1.2))
+        self.protection = pg.Surface(protection_size, pg.SRCALPHA)
+        self.protection.fill((80, 80, 255, 30))
+        self.protection_rect = self.protection.get_rect()
+        self.protection_hp = 0
+
         super().spawn(position, velocity, owner)
+        self.set_color()
 
     def get_drop(self):
         # Chance to give the bandit an item to drop at death
@@ -104,19 +114,26 @@ class BanditModel(GameObject):
 
         self.set_destination(new_x, new_y)
 
-    def get_buff(self, buff):
+    def get_buff(self, game, buff):
         if buff == 'shield':
             self.protection_hp += 1
             self.protection.set_alpha(self.protection_hp * 30)
         if buff == 'evil':
-            self.base_shoot_interval //= 2
+            self.shoot_interval //= 2
             self.move_interval_range[0] = int(self.move_interval_range[0] * 0.5)
             self.move_interval_range[1] = int(self.move_interval_range[1] * 0.5)
-            if self.base_shoot_interval < 30: self.base_shoot_interval = 30
+            if self.shoot_interval < 30: self.shoot_interval = 30
             self.sprite.fill(colors.salmon, special_flags=pg.BLEND_RGBA_MULT)
         if buff == 'lucky':
-            for drop in self.drop_chances: self.drop_chances[drop] *= 2
+            for drop in self.drop_chances:
+                self.drop_chances[drop] *= 2
             self.sprite.fill(colors.lime, special_flags=pg.BLEND_RGBA_MULT)
+        if buff == 'duplicate':
+            bandit = game.bandit_pool_dict[self.name].get()
+            bandit.spawn(self.rect.center, None, None)
+            bandit.push_velocity = (randint(-5, 5), randint(-5, 5))
+            bandit.sprite.fill(colors.light_orange, special_flags=pg.BLEND_RGBA_MULT)
+            game.level.bandits.append(bandit)
 
     def get_target(self, game):
         if self.name != 'hitman' or not game.player_1:
@@ -182,30 +199,6 @@ class BanditModel(GameObject):
                     self.kill()
                     game.level.spawn_pickup(self.get_drop(), self.rect.center)
 
-
-    def collide_check(self, game):
-        if not self.alive:
-            return
-
-        for bullet in game.level.bullets:
-            # Verify bullet collision with bandit
-            if bullet.rect.colliderect(self.rect) and bullet.alive:
-                # Verify if bullet has a buff effect
-                if bullet.random_buff and bullet.spawner != self:
-                    self.get_buff(bullet.random_buff)
-                    game.sound.play_sfx('random_buff')
-                    bullet.kill()
-
-                # Damaging the bandit
-                if bullet.owner.type == 'player':
-                    self.damage(game, 1)
-                    bullet.owner.get_score(game, self.points_value)
-                    bullet.kill()
-
-                    if not self.alive:
-                        game.data[f"p{bullet.owner.id}_stats"]["bandits_killed"] += 1
-                        break
-
     def push_check(self, game, player):
         if not player:
             return
@@ -222,7 +215,12 @@ class BanditModel(GameObject):
                 self.lifetime = 2
 
     def update(self, game):
+        self.get_target(game)
+        self.push_check(game, game.player_1)
+        self.push_check(game, game.player_2)
+
         super().update(game)
+
         if not self.is_moving:
             self.move_tick += 1
 
@@ -250,8 +248,6 @@ class BanditModel(GameObject):
 
         # Updating shooting system
         if self.shoot_tick >= self.shoot_interval and self.target and self.can_shoot:
-            new_interval = self.base_shoot_interval
-            self.shoot_interval = randint(new_interval, int(new_interval * 2))
             self.shoot_tick = 0
             self.shoot(game, self.target)
 

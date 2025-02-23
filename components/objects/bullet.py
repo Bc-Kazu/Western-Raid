@@ -21,8 +21,12 @@ class Bullet(GameObject):
         self.max_velocity = 10
         self.max_lifetime = 10
 
-        if self.type == 'card':
-            self.set_buff(choice(['protection', 'wild', 'evil', 'lucky']))
+    def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
+        super().spawn(position, velocity, owner)
+
+        if self.name == 'card':
+            self.reset_sprite()
+            self.set_buff(choice(['protection', 'duplicate', 'evil', 'lucky']))
 
     def reset(self):
         super().reset()
@@ -42,7 +46,7 @@ class Bullet(GameObject):
 
         if buff == 'protection':
             buff_color = colors.light_blue
-        if buff == 'wild':
+        if buff == 'duplicate':
             buff_color = colors.light_orange
         if buff == 'evil':
             buff_color = colors.crimson
@@ -54,20 +58,9 @@ class Bullet(GameObject):
 
     # Constantly update the instance
     def update(self, game):
+        self.collide_check(game)
         super().update(game)
         self.sfx_interval += 1
-
-        if self.random_buff and self.random_buff == 'wild':
-            self.wild_tick[0] += 1
-            if self.wild_tick[0] >= self.wild_tick[1]:
-                self.wild_tick[0] = 0
-                self.wild_tick[1] = randint(15, 60)
-                new_x = randint(-5, 5)
-                new_y = randint(-5, 5)
-                while new_x not in (-1, 0, 1) or new_y not in (-1, 0, 1):
-                    new_x = randint(-5, 5)
-                    new_y = randint(-5, 5)
-                self.set_velocity(new_x, new_y)
 
     def reflect(self, rect, player=None, game=None):
         self.times_reflected += 1
@@ -134,26 +127,47 @@ class Bullet(GameObject):
 
         self.set_velocity(speed_x, speed_y)
 
-    def collide_check(self, game, player):
-        if not player or self.owner.type == 'player':
+    def player_collide(self, game, player):
+        if not player or self.owner.type == 'player' or not player.alive:
             return
 
-        # Check if the player's shield is being hit
-        shield_rect = player.shield_rect
-
-        if self.rect.colliderect(shield_rect) and self.owner.type == 'enemy' and player.alive:
-            # Convert bullet's ownership to the player, now allowing it to damage enemies
-            self.reflect(shield_rect, player, game)
+        # Check player shield collision to apply bullet reflection
+        if self.rect.colliderect(player.shield_rect) and self.owner.type == 'enemy':
+            self.reflect(player.shield_rect, player, game)
             self.set_owner(player)
             game.data[f"p{player.id}_stats"]["bullets_reflected"] += 1
-        '''elif self.owner.type == 'enemy' and player.alive:
-            if 'magnet' in player.PU_list:
-                self.follow_strength = 1 + player.PU_list['magnet'] / 4
-                self.max_magnitude = 50 + 20 * player.PU_list['magnet']
-                super().follow(shield_rect)'''
-
-        if self.rect.colliderect(player.hitbox) and player.alive and self.owner.type == 'enemy':
-            # Deactivate shield and start cooldown timer if hit player
+        # Check if the player is being hit to damage them
+        elif self.rect.colliderect(player.hitbox) and self.owner.type == 'enemy':
             player.damage(game)
             self.kill()
+
+    def collide_check(self, game):
+        if not self.alive:
+            return
+
+        self.player_collide(game, game.player_1)
+        self.player_collide(game, game.player_2)
+
+        for bandit in game.level.bandits:
+            if not self.alive:
+                break
+            if not bandit.alive or not bandit.can_collide:
+                continue
+
+            # Verify bullet collision with bandit
+            if self.rect.colliderect(bandit.rect):
+                # Verify if bullet has a buff effect
+                if self.random_buff and self.spawner != bandit:
+                    bandit.get_buff(game, self.random_buff)
+                    game.sound.play_sfx('random_buff')
+                    self.kill()
+                # Damaging the bandit
+                elif self.owner.type == 'player':
+                    bandit.damage(game, 1)
+                    self.owner.get_score(game, bandit.points_value)
+                    self.kill()
+
+                    if not self.alive:
+                        game.data[f"p{self.owner.id}_stats"]["bandits_killed"] += 1
+                        break
 

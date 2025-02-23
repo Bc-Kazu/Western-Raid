@@ -9,7 +9,7 @@ class Bandit(BanditModel):
         super().__init__(config, bandit_id)
         self.base_shoot_interval = 400
         self.move_range = 150
-        self.drop_chances = {'power_up': 10, 'item': 30, 'brick': 100}
+        self.base_drop_chances = {'power_up': 10, 'item': 30, 'brick': 100}
         self.points_value = 40
         self.move_interval_base = [500, 1200]
         self.shield_enabled = True
@@ -49,6 +49,8 @@ class Bandit(BanditModel):
             self.points_value = 50
             self.move_interval_range = [180, 900]
 
+        self.shield_check(game)
+
     def shield_check(self, game):
         for bullet in game.level.bullets:
             if bullet.owner.type != 'player':
@@ -65,8 +67,6 @@ class Bandit(BanditModel):
 
                 if self.shield_health <= 0:
                     game.sound.play_sfx('bandit_damage')
-
-        super().collide_check(game)
 
     def draw(self, game):
         super().draw(game)

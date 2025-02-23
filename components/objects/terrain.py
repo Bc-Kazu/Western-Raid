@@ -24,16 +24,23 @@ class Terrain(GameObject):
             config = LUCK_STATUE
 
         super().__init__(config, terrain_id)
+        self.alive = True
+        self.follow_strength = 1
+        self.decorations = []
+
         self.area_rect = pg.Rect(self.rect.x, self.rect.y,
                                  self.size[0] / level.terrain_area_reduction,
                                  self.size[1] / level.terrain_area_reduction)
+
+        if self.name == 'table':
+            self.area_rect.size = (self.size[0], self.size[1] // 1.5)
+        if self.name == 'large_table':
+            self.area_rect.size = (self.size[0], self.size[1] // 3)
+
         self.area_rect.center = self.rect.center
         self.area_surface = pg.Surface(self.area_rect.size, pg.SRCALPHA)
         self.area_surface.fill(colors.orange)
         self.area_surface.set_alpha(40)
-        self.decorations = []
-        self.alive = True
-        self.follow_strength = 1
 
 
     def set_decoration(self):
@@ -54,8 +61,9 @@ class Terrain(GameObject):
             seats_amount = randint(0, 2)
 
             for seat in range(seats_amount):
-                random_seat = ['chair', (100, 60, 65)]
-                if randint(1, 10) == 1: random_seat = ['funny_chair', (100, 60, 65)]
+                random_seat = ['chair', colors.mundane_orange]
+                if randint(1, 10) == 1:
+                    random_seat[0] = 'funny_chair'
 
                 if seat == 1:
                     seat_pos = [self.rect.x - self.size[0] + 10, self.rect.y]
@@ -99,18 +107,26 @@ class Terrain(GameObject):
         self.area_rect.center = self.rect.center
 
     def distance_check(self, level):
+        if self.name == 'luck_statue':
+            return
+
         if self.area_rect.colliderect(level.ufo.rect):
             self.kill()
             return
 
-        if self.name == 'luck_statue':
-            return
-
         # Check if there are any terrain too close to the hitbox, and remove it
         for terrain in level.map:
-            if self.area_rect.colliderect(terrain.area_rect) and terrain.id != self.id and terrain.alive:
+            if terrain == self or not terrain.alive:
+                continue
+
+            if self.area_rect.colliderect(terrain.area_rect):
                 self.kill()
                 break
+
+            for decoration in self.decorations:
+                if decoration.name == 'chair' or decoration.name == 'funny_chair':
+                    if decoration.rect.colliderect(terrain.area_rect):
+                        self.decorations.remove(decoration)
 
     def destroy(self, game):
         if self.alive:
@@ -126,6 +142,11 @@ class Terrain(GameObject):
 
     def draw(self, game):
         self.area_rect.center = self.rect.center
+
+        if self.name == 'table':
+            self.area_rect.y += self.size[1] // 4
+        if self.name == 'large_table':
+            self.area_rect.y += self.size[1] // 3
 
         if game.debug:
             game.screen.blit(self.area_surface, self.area_rect)

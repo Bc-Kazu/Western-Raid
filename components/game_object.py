@@ -31,13 +31,15 @@ class GameObject:
         self.rect = self.sprite.get_rect()
 
         # Object state attributes
+        self.alive = False
         self.visible = True
         self.can_collide = True
         self.can_touch = True
         self.can_push = False
         self.can_die = True
+        self.can_move = True
+
         self.is_moving = False
-        self.alive = False
         self.always_on_top = False
 
         # Dealing with hazzards far from screen
@@ -93,24 +95,27 @@ class GameObject:
 
     # Resets the base values from the object
     def reset(self):
-        self.alive = True
         self.owner = None
         self.spawner = None
-        self.destined_point = None
+
+        self.alive = True
+        self.visible = True
+        self.can_collide = True
+        self.can_touch = True
+        self.can_move = True
         self.is_moving = False
 
         self.spawnpoint = (0, 0)
         self.set_velocity(0, 0)
         self.push_velocity = (0, 0)
         self.destined_position = (0, 0)
+        self.destined_point = None
         self.tick = 0
         self.lifetime = 0
         self.set_size(self.base_size)
 
     def kill(self):
         self.alive = False
-        if self.type == 'enemy':
-            print(f'Killed {self.name} enemy at {self.rect.center} [id: {self.id}]')
 
     def set_owner(self, owner):
         self.owner = owner
@@ -275,6 +280,8 @@ class GameObject:
         self.push_velocity = (force_x, force_y)
     
     def update(self, game):
+        self.tick += 1
+
         velocity_x, velocity_y = self.velocity_x, self.velocity_y
         if velocity_x == 0 == velocity_y:
             self.is_moving = False
@@ -304,9 +311,9 @@ class GameObject:
             if abs(self.push_velocity[0]) < 0.1 > abs(self.push_velocity[1]):
                 self.push_velocity = (0, 0)
 
-        self.rect.x += velocity_x
-        self.rect.y += velocity_y
-        self.tick += 1
+        if self.can_move:
+            self.rect.x += velocity_x
+            self.rect.y += velocity_y
 
         if self.stay_within_screen:
             # Making sure the object stays on screen
