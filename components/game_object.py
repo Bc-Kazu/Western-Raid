@@ -40,6 +40,7 @@ class GameObject:
         self.can_move = True
 
         self.is_moving = False
+        self.stuck = None
         self.always_on_top = False
 
         # Dealing with hazzards far from screen
@@ -180,7 +181,7 @@ class GameObject:
         self.rect = pg.Rect(self.rect.topleft, self.size)
 
     # Changes or resets the color of the object, including alpha values.
-    def set_color(self, custom=None):
+    def set_color(self, custom=None, custom_sprite=None):
         if custom:
             new_color = custom
         else:
@@ -192,15 +193,20 @@ class GameObject:
 
         # Setting each pixel of the image manually, properly avoiding transparent backgrounds.
         # Locking the image might help performance, but not sure if it helps.
-        self.sprite.lock()
+        if custom_sprite:
+            sprite = custom_sprite
+        else:
+            sprite = self.sprite
+
+        sprite.lock()
 
         for x in range(width):
             for y in range(height):
-                current_pixel = self.sprite.get_at((x, y))
+                current_pixel = sprite.get_at((x, y))
                 if current_pixel.a > 0:
-                    self.sprite.set_at((x, y), (r, g, b, color_alpha))
+                    sprite.set_at((x, y), (r, g, b, color_alpha))
 
-        self.sprite.unlock()
+        sprite.unlock()
 
     def set_destination(self, *args):
         self.area_movement = True

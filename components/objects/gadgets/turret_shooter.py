@@ -114,9 +114,10 @@ class TurretShooter(GameObject):
             if not self.owner.alive:
                 lower_interval = 15 * self.owner.PU_list.get('ghost_fury', 0)
 
-            if self.shoot_tick >= self.shoot_interval - lower_interval and self.can_shoot:
-                self.shoot_tick = 0
-                self.shoot(game)
+            if not self.stuck:
+                if self.shoot_tick >= self.shoot_interval - lower_interval and self.can_shoot:
+                    self.shoot_tick = 0
+                    self.shoot(game)
         else:
             self.rect.center = self.owner.rect.center
             self.rect.x += 50 * self.owner.last_direction[0]

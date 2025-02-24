@@ -156,12 +156,13 @@ class TurretShield(GameObject):
             if not bullet.owner.type == 'enemy':
                 continue
 
-            if self.shield_rect.colliderect(bullet.rect) and self.shield_health > 0:
-                self.shield_update(-1)
+            if not self.stuck:
+                if self.shield_rect.colliderect(bullet.rect) and self.shield_health > 0:
+                    self.shield_update(-1)
 
-                game.sound.play_sfx('shield_hit')
-                bullet.reflect(self.shield_rect, self.owner, game)
-                return
+                    game.sound.play_sfx('shield_hit')
+                    bullet.reflect(self.shield_rect, self.owner, game)
+                    return
 
             # Verify bullet collision with bandit
             if bullet.rect.colliderect(self.rect) and bullet.alive:

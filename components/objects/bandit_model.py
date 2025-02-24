@@ -214,6 +214,9 @@ class BanditModel(GameObject):
         self.push_check(game, game.player_1)
         self.push_check(game, game.player_2)
 
+        if self.stuck and self.push_velocity == (0, 0):
+            self.set_velocity(0, 0)
+
         super().update(game)
 
         if not self.is_moving:
@@ -242,7 +245,8 @@ class BanditModel(GameObject):
         self.protection_rect.center = self.rect.center
 
         # Updating shooting system
-        if self.shoot_tick >= self.shoot_interval and self.target and self.can_shoot:
+        if (self.shoot_tick >= self.shoot_interval and self.target
+                and self.can_shoot and not self.stuck):
             self.shoot_tick = 0
             self.shoot(game, self.target)
 

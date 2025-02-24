@@ -25,6 +25,12 @@ def load_player_sprite(player, name):
     return image
 
 class Player(GameObject):
+    # Define a dictionary that maps control types to their respective key mappings
+    CONTROL_MAPPING = {
+        'WASD': {'left': pg.K_a, 'right': pg.K_d, 'down': pg.K_s, 'up': pg.K_w},
+        'ARROWS': {'left': pg.K_LEFT, 'right': pg.K_RIGHT, 'down': pg.K_DOWN, 'up': pg.K_UP}
+    }
+
     def __init__(self, choosen_controls, player_count, color):
         super().__init__(PLAYER_CONFIG, player_count)
         self.type = 'player'
@@ -32,6 +38,8 @@ class Player(GameObject):
         self.color = color
         self.current_eyes = None
         self.eyes_dict = {}
+        self.key_mapping = self.CONTROL_MAPPING[self.controls]
+        self.control_keys = self.key_mapping.values()
 
         self.sprite = load_player_sprite(self, 'body')
         self.base_eyes = load_player_sprite(self, 'base_eyes')
@@ -40,6 +48,10 @@ class Player(GameObject):
         self.shock_eyes = load_player_sprite(self, 'shock_eyes')
         self.current_eyes = self.base_eyes
         self.config['image'] = self.sprite.copy()
+
+        self.outline = pg.image.load(f'assets/player_sprites/{self.id}/outline.png')
+        self.outline = pg.transform.scale(self.outline, (self.size[0] + 4, self.size[1] + 4))
+        self.outline_rect = self.outline.get_rect()
 
         # Creating hitbox with smaller size and accurate position to the player sprite
         self.hitbox_area = pg.Surface((int(self.size[0] * 0.8), self.size[1] // 2), pg.SRCALPHA)
@@ -83,6 +95,9 @@ class Player(GameObject):
         self.rect_offset = [0, 0]
         self.eyes_offset = [0, 0]
 
+        # Value for the number of times an input has been pressed
+        self.keys_pressed = 0
+
         # Dictionary list for power-ups the player will collect
         self.PU_list = {}
 
@@ -99,13 +114,13 @@ class Player(GameObject):
                 self.super_color_index = 0
 
             new_color = self.super_color_list[self.super_color_index]
-            self.set_color(new_color)
+            self.set_color(new_color, self.outline)
 
     def set_super(self):
         self.super_color_shift = not self.super_color_shift
 
         if not self.super_color_shift:
-            self.reset_sprite()
+            self.set_color(colors.white, self.outline)
 
     def get_powerup(self, game, power_up):
         heal = False
@@ -227,22 +242,17 @@ class Player(GameObject):
         self.eyes_offset = [0, 0]
         self.set_velocity(0, 0)
 
-        # Define a dictionary that maps control types to their respective key mappings
-        key_mappings = {
-            'WASD': {'left': pg.K_a, 'right': pg.K_d, 'down': pg.K_s, 'up': pg.K_w},
-            'ARROWS': {'left': pg.K_LEFT, 'right': pg.K_RIGHT, 'down': pg.K_DOWN, 'up': pg.K_UP}
-        }
-
         # Checking different keys depending on the current player controls
-        controls = key_mappings.get(self.controls, {})
-        buttons_pressed = 0
-        for direction, key in controls.items():
+        for direction, key in self.key_mapping.items():
             if game.keys_pressed[key]:
-                buttons_pressed += 1
                 self.change_direction(direction)
+
+        if self.stuck:
+            self.set_velocity(0, 0)
 
         super().update(game)
 
+        self.outline_rect.center = self.rect.center
         # Update the shield rotation and position
         self.shield_rect.width = self.shield_width
         self.shield_rect.height = self.shield_height
@@ -322,6 +332,9 @@ class Player(GameObject):
             return
 
         self.super_effect()
+        if self.super_color_shift:
+            game.screen.blit(self.outline, self.outline_rect)
+
         super().draw(game)
 
         if game.state == 'defeat':
@@ -336,6 +349,7 @@ class Player(GameObject):
         if self.alive:
             self.current_eyes.set_alpha(255)
             self.sprite.set_alpha(255)
+            self.outline.set_alpha(255)
 
             if not game.level.defeat:
                 pg.draw.rect(game.screen, self.color, self.shield_rect)
@@ -347,6 +361,7 @@ class Player(GameObject):
         else:
             self.current_eyes.set_alpha(128)
             self.sprite.set_alpha(128)
+            self.outline.set_alpha(128)
 
         if game.state == 'defeat':
             self.rect.center = (game.screen_width / 2, game.screen_height - 160)

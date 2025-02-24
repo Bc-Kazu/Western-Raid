@@ -71,11 +71,20 @@ class Explosion:
                 if obj in self.already_hit:
                     continue
 
-                if self.rect.colliderect(obj.rect) and hasattr(obj, 'health'):
-                    obj.damage(game, 3)
+                if self.rect.colliderect(obj.rect) and obj.type == 'rope':
+                    obj.kill()
 
                     if obj.alive:
                         self.already_hit.append(obj)
+
+            for gadget in game.level.gadgets:
+                if gadget in self.already_hit:
+                    continue
+
+                if self.rect.colliderect(gadget.rect):
+                    gadget.damage(game, 3)
+                    if gadget.alive:
+                        self.already_hit.append(gadget)
 
             for terrain in game.level.map:
                 if terrain in self.already_hit:

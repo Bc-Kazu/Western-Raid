@@ -24,6 +24,9 @@ class Bullet(GameObject):
         self.max_lifetime = 10
         self.explosion_size = (3 * self.size[0], 3 * self.size[1])
 
+        self.screen_reflect_tick = 0
+        self.screen_reflect_interval = 15
+
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         super().spawn(position, velocity, owner)
 
@@ -71,6 +74,22 @@ class Bullet(GameObject):
         rotate_interval = max(20 - speed, 5)
         if self.name == 'dynamite' and self.tick % rotate_interval == 0:
             self.sprite = pg.transform.rotate(self.sprite, 90)
+
+        self.screen_reflect_tick += 1
+        if 0 < self.times_reflected <= 1 and self.owner and self.owner.type == 'player':
+            if self.screen_reflect_tick > self.screen_reflect_interval:
+                if self.rect.left <= 0 or self.rect.right >= game.screen_width:
+                    if self.velocity_y == 0:
+                        self.velocity_y = randint(-5, 5)
+                    self.velocity_x *= -1
+                    self.screen_reflect_tick = 0
+                    self.times_reflected += 1
+                if self.rect.top <= 0 or self.rect.bottom >= game.screen_height:
+                    if self.velocity_x == 0:
+                        self.velocity_x = randint(-5, 5)
+                    self.velocity_y *= -1
+                    self.screen_reflect_tick = 0
+                    self.times_reflected += 1
 
     def reflect(self, rect, player=None, game=None):
         self.times_reflected += 1

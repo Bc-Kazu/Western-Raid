@@ -61,7 +61,7 @@ class BotShooter(GameObject):
         self.move_interval_range = self.move_interval_base[:]
         self.move_tick = self.move_interval
 
-        self.find_interval_base = 600
+        self.find_interval_base = 360
         self.find_interval = self.find_interval_base
         self.find_tick = 0
 
@@ -155,19 +155,22 @@ class BotShooter(GameObject):
             if not self.owner.alive:
                 lower_interval = 15 * self.owner.PU_list.get('ghost_fury', 0)
 
-            if self.shoot_tick >= self.shoot_interval - lower_interval and self.can_shoot:
-                self.shoot_tick = 0
-                self.shoot(game)
+            if not self.stuck:
+                if self.shoot_tick >= self.shoot_interval - lower_interval and self.can_shoot:
+                    self.shoot_tick = 0
+                    self.shoot(game)
 
-            # Randomly moving the bandit
-            if self.move_tick >= self.move_interval and not self.is_moving:
-                self.move_interval = randint(self.move_interval_range[0], self.move_interval_range[1])
-                self.move_tick = 0
-                self.get_random_destination(game)
+                # Randomly moving the bandit
+                if self.move_tick >= self.move_interval and not self.is_moving:
+                    self.move_interval = randint(self.move_interval_range[0], self.move_interval_range[1])
+                    self.move_tick = 0
+                    self.get_random_destination(game)
 
-            if self.find_tick >= self.find_interval:
-                self.find_tick = 0
-                self.get_enemy_destination(game)
+                if self.find_tick >= self.find_interval:
+                    self.find_tick = 0
+                    self.get_enemy_destination(game)
+            else:
+                self.set_velocity(0, 0)
         else:
             self.place(game)
 
@@ -211,10 +214,6 @@ class BotShooter(GameObject):
             if self.health < 1:
                 game.sound.play_sfx('remove')
                 self.kill()
-            if self.health <= 3:
-                self.current_eyes = self.closed_eyes_sprite
-            else:
-                self.current_eyes = self.base_eyes_sprite
 
     def collide_check(self, game):
         for bullet in game.level.bullets:
@@ -238,8 +237,13 @@ class BotShooter(GameObject):
 
             if game.victory_transition[2]:
                 self.current_eyes = self.happy_eyes_sprite
-            elif game.level.defeat:
+            elif game.level.defeat or self.stuck:
                 self.current_eyes = self.sad_eyes_sprite
+            else:
+                if self.health <= 3:
+                    self.current_eyes = self.closed_eyes_sprite
+                else:
+                    self.current_eyes = self.base_eyes_sprite
 
             offset_rect = self.rect.copy()
             offset_rect.x += max(min(self.velocity_x * 2, 5), -5)

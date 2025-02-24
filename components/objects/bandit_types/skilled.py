@@ -8,7 +8,6 @@ class Bandit(BanditModel):
         self.base_shoot_interval = 90
         self.move_range = 400
         self.base_drop_chances = {'power_up': 15, 'item': 40, 'brick': 70}
-        self.item_chance = 70
         self.points_value = 40
         self.bullet_speed = 5
         self.destined_velocity = 3

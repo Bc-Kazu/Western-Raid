@@ -19,7 +19,7 @@ class Level:
         self.terrain_area_reduction = config['terrain_area_reduction']
 
         self.round_time = config['round_time']
-        self.ambush_time = randint(self.round_time - 120, self.round_time - 100)
+        self.ambush_time = randint(self.round_time - 130, self.round_time - 110)
         self.difficulty_time = config['difficulty_time']
 
         self.max_bandits = config['max_bandits']
