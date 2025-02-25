@@ -185,7 +185,7 @@ class Ufo(GameObject):
         # If no blocks were healed, give points instead
         if healed_blocks < 1:
             if player:
-                player.get_score(game, 30 * amount)
+                player.get_score(game, 30 * amount, True, player.rect.midtop)
             else:
                 if game.player_2:
                     game.player_1.get_score(game, 10 * amount)
@@ -196,6 +196,11 @@ class Ufo(GameObject):
             game.sound.play_sfx('points')
         else:
             game.sound.play_sfx('brick_get')
+
+            if player:
+                text = f'+{amount} Block'
+                text += 's' if amount > 1 else ''
+                game.level.spawn_message('popup', text, player.rect.center)
 
     def victory_ufo(self, player1, player2):
         check_1 = False

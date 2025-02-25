@@ -72,7 +72,7 @@ def render_menu(game):
         game.text.choose_text.toggle(False)
         offset1 = 100
 
-        game.text.player1_text.set_text(None, (game.screen_width / 2 - offset1, 350))
+        game.text.player1_text.set_position(game.screen_width / 2 - offset1, 350)
         game.text.player2_text.draw(game)
 
         TITLE_SPRITE_RECT.centerx = game.screen_width / 2 - offset1
@@ -84,7 +84,7 @@ def render_menu(game):
         game.screen.blit(TITLE_SPRITE_EYES, TITLE_SPRITE_EYES_RECT)
         game.screen.blit(UFO_SPRITE, UFO_SPRITE_RECT)
     else:
-        game.text.player1_text.set_text(None, (game.screen_width / 2, 350))
+        game.text.player1_text.set_position(game.screen_width / 2, 350)
         game.text.select_text.draw(game)
         WASD_RECT_A.center = (game.screen_width / 2 - 100, 450)
         game.screen.blit(WASD_CONTROLS_A, WASD_RECT_A)
@@ -323,6 +323,9 @@ def render_round(game):
 
     if game.ufo.always_on_top:
         game.ufo.draw(game)
+
+    for message in game.level.message_popups:
+        message.draw(game)
 
     time_left = game.level.round_time - game.level.time_elapsed
     seconds = time_left % 60

@@ -7,7 +7,7 @@ class Bandit(BanditModel):
         super().__init__(config, bandit_id)
         self.base_shoot_interval = 90
         self.move_range = 400
-        self.base_drop_chances = {'power_up': 15, 'item': 40, 'brick': 70}
+        self.base_drop_chances = {'power_up': 15, 'item': 30, 'brick': 60}
         self.points_value = 40
         self.bullet_speed = 5
         self.destined_velocity = 3

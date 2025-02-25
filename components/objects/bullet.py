@@ -201,7 +201,7 @@ class Bullet(GameObject):
                 # Damaging the bandit
                 elif self.owner.type == 'player':
                     bandit.damage(game, 1)
-                    self.owner.get_score(game, bandit.points_value)
+                    self.owner.get_score(game, bandit.points_value, True, bandit.rect.center)
                     self.kill()
 
                     if not self.alive:

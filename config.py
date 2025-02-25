@@ -277,8 +277,7 @@ LEVEL_CONFIG = [
             [
                 ["basic", 80, False, -15],
                 ["skilled", 20, False, 10],
-                ["tangler", 20, True, 0],
-                ["bomber", 15, True, 0],
+                ["bomber", 18, True, 0],
                 ["hitman", 10, True, 0],
             ],
         "terrain_noise": 10,
@@ -291,7 +290,6 @@ LEVEL_CONFIG = [
         "bandit_spawn_multi": [1, 2],
         "difficulty_time": 15,
         "spawn_start_time": 5,
-
     },
     { # ===== LEVEL 2 ( SALOON ) CONFIGURATIONS =====
         "background": (60, 40, 35),
@@ -321,9 +319,9 @@ LEVEL_CONFIG = [
             [
                 ["basic", 30, False, -20],
                 ["skilled", 50, False, -10],
-                ["boomstick", 30, False, 20],
-                ["bomber", 5, False, 35],
-                ["tangler", 30, True, 0],
+                ["boomstick", 30, False, 10],
+                ["bomber", 5, False, 25],
+                ["tangler", 5, False, 25],
                 ["hitman", 10, True, 0],
             ],
         "terrain_noise": 10,
@@ -334,7 +332,7 @@ LEVEL_CONFIG = [
         "max_spawn_count": 1,
         "bandit_spawnrate": 200,
         "bandit_spawn_multi": [1, 3],
-        "difficulty_time": 30,
+        "difficulty_time": 15,
         "spawn_start_time": 3,
     }
 

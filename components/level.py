@@ -1,10 +1,13 @@
 from random import randint, choice, choices
 from config import LEVEL_CONFIG, POWER_UPS, ITEMS, BRICKS
-from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG
+from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG, SMALL_FONT, TEXT_FONT, NORMAL_FONT
 
 from components.objects.terrain import Terrain
 from components.objects.pickup import PickUp
 from utils.chance import weight_choices
+from utils.text import Text
+from utils.colors import Colors
+colors = Colors()
 
 class Level:
     def __init__(self, index, config, game):
@@ -43,6 +46,7 @@ class Level:
         self.gadgets = []
         self.bullets = []
         self.bandits = []
+        self.message_popups = []
 
         # Default style settings
         self.ufo = game.ufo
@@ -156,6 +160,20 @@ class Level:
                 bandit.spawn(start_pos, None, self)
                 self.bandits.append(bandit)
 
+    def spawn_message(self, style, text, position):
+        message = Text(text, position, SMALL_FONT)
+        message.preset(style, (0, 0), 120)
+
+        if style == 'popup':
+            if text[1].isdigit():
+                message.preset('popup', (0, -4), 50)
+            elif text[-2:] == 'PU':
+                message.set_font(TEXT_FONT)
+                message.preset('popup', (0, -5), 80)
+                message.set_color_blink(True, colors.light_pink, 8)
+
+        self.message_popups.append(message)
+
     # Base function for updating all instances in a list
     def update_instance(self, game, instance_list):
         for instance in instance_list:
@@ -166,6 +184,11 @@ class Level:
                     self.ufo.collide_check(game, instance)
                 if instance.type == 'enemy' and instance.active:
                     self.bandit_count += 1
+                if instance.type == 'text' and instance.style == 'popup':
+                    instance.set_velocity(
+                        instance.velocity_x * 0.9,
+                        instance.velocity_y * 0.9,
+                    )
             else:
                 instance_list.remove(instance)
 
@@ -176,6 +199,7 @@ class Level:
             self.bandits = []
             self.bullets = []
             self.objects = []
+            self.message_popups = []
             self.ufo.set_regenerate(False)
             self.can_spawn_bandits = False
 
@@ -211,3 +235,4 @@ class Level:
         self.update_instance(game, self.gadgets)
         self.update_instance(game, self.bandits)
         self.update_instance(game, self.bullets)
+        self.update_instance(game, self.message_popups)

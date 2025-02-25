@@ -14,6 +14,7 @@ from components.game_object import GameObject
 import pygame as pg
 
 from utils.colors import Colors
+
 colors = Colors()
 
 def load_player_sprite(player, name):
@@ -124,19 +125,21 @@ class Player(GameObject):
 
     def get_powerup(self, game, power_up):
         heal = False
-        if power_up in self.PU_list:
-            print(self.PU_list[power_up])
+        pu_name = power_up.replace('_', ' ').upper()
 
+        if power_up in self.PU_list:
             if self.PU_list[power_up] < POWER_UPS[power_up][2]:
                 self.PU_list[power_up] += 1
                 game.sound.play_sfx('powerup_get')
+                game.level.spawn_message('popup', f'+{pu_name} PU', self.rect.center)
             else:
-                self.score += POWER_UPS[power_up][3]
+                self.get_score(game, POWER_UPS[power_up][3], True, self.rect.center)
                 game.sound.play_sfx('points')
                 game.sound.play_sfx('points_extra')
         else:
-            game.sound.play_sfx('powerup_get')
             self.PU_list[power_up] = 1
+            game.sound.play_sfx('powerup_get')
+            game.level.spawn_message('popup', f'+{pu_name} PU', self.rect.center)
 
             if power_up == 'space_shield':
                 heal = True
@@ -150,8 +153,8 @@ class Player(GameObject):
             self.shield_buff_hp += 2
             if self.shield_buff_hp > 5:
                 self.shield_buff_hp = 5
-                self.score += ITEMS[item][3] * (self.shield_buff_hp - 5)
                 game.sound.play_sfx('points')
+                self.get_score(game, ITEMS[item][3], True, self.rect.center)
 
             self.shield_buff.set_alpha(self.shield_buff_hp * 20)
         if item == 'healing_ufo':
@@ -171,11 +174,12 @@ class Player(GameObject):
             new_bot.spawn(self.rect.center, (0, 0), self)
             game.level.gadgets.append(new_bot)
 
-    def get_score(self, game, amount):
-        if not game.player_2:
-            self.score += int(amount)
-        else:
-            self.score += int(amount // 2)
+    def get_score(self, game, amount, has_popup=False, popup_rect=None):
+        new_amount = int(amount) if not game.player_2 else int(amount // 2)
+        self.score += new_amount
+
+        if has_popup and popup_rect:
+            game.level.spawn_message('popup', f'+{new_amount}', popup_rect)
 
     # Handle player behaviour depending on direction given
     # The self.last_key conditions allows the shield to not break on diagonal movement

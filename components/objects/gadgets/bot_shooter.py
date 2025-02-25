@@ -174,7 +174,8 @@ class BotShooter(GameObject):
         else:
             self.place(game)
 
-        self.health_indicator.set_text(str(self.health), self.rect.center)
+        self.health_indicator.set_text(str(self.health))
+        self.health_indicator.set_position(self.rect.center)
 
     def shoot(self, game):
         bullets_shot = 0

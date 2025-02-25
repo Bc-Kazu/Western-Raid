@@ -17,12 +17,12 @@ class Block(GameObject):
         if self.strength < 0:
             self.strength = 0
 
-        self.strength_indicator.set_text(str(self.strength), self.rect.center)
+        self.strength_indicator.set_text(str(self.strength))
 
         if change_color:
             self.set_color()
 
-    def set_color(self, custom=None):
+    def set_color(self, custom=None, custom_sprite=None):
         if self.strength == 0:
             self.color = colors.window_crimson
             if 'image_2' in self.config:
@@ -44,7 +44,7 @@ class Block(GameObject):
             else:
                 self.color = self.owner.color
 
-        super().set_color(custom)
+        super().set_color(custom, custom_sprite)
 
     def collide_check(self, bullet):
         # Checks if the bullet_sprites collides w ufo

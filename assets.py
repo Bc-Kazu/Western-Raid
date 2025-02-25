@@ -90,7 +90,6 @@ P2_TITLE_OFFSET = 15
 PLAYER1_IMAGE = pg.image.load(f'assets/player_sprites/1/body.png').convert_alpha()
 init_loading('loading assets', 3)
 
-# Base values for object classes
 PLAYER_CONFIG = {
     'name': 'player',
     'type': 'player',

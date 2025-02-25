@@ -118,7 +118,8 @@ class TurretShield(GameObject):
             self.rect.y += 50 * self.owner.last_direction[1]
 
             time_left = str(self.placing_time - self.lifetime)
-            self.place_timer.set_text(time_left, (self.owner.rect.centerx, self.owner.rect.y - 40))
+            self.place_timer.set_text(time_left)
+            self.place_timer.set_position(self.owner.rect.centerx, self.owner.rect.y - 40)
 
             new_y = self.rect.centery - self.size[1] - self.pointer_pos
             self.pointer.rect = (self.rect.centerx, new_y)
@@ -141,7 +142,8 @@ class TurretShield(GameObject):
                 self.can_place = True
                 self.place_timer.set_color(colors.white)
 
-        self.health_indicator.set_text(str(self.health), self.rect.center)
+        self.health_indicator.set_text(str(self.health))
+        self.health_indicator.set_position(self.rect.center)
 
     def damage(self, game, damage):
         if self.alive:

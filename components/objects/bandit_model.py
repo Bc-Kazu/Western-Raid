@@ -20,7 +20,7 @@ class BanditModel(GameObject):
         self.base_health = 1
         self.health = 1
         self.points_value = 20
-        self.base_drop_chances = {'power_up': 10, 'item': 25, 'brick': 50}
+        self.base_drop_chances = {'power_up': 10, 'item': 20, 'brick': 40}
         self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
 
