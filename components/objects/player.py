@@ -150,9 +150,9 @@ class Player(GameObject):
         game.sound.play_sfx('item_get')
 
         if item == 'shield':
-            self.shield_buff_hp += 2
-            if self.shield_buff_hp > 5:
-                self.shield_buff_hp = 5
+            self.shield_buff_hp += 1
+            if self.shield_buff_hp > 3:
+                self.shield_buff_hp = 3
                 game.sound.play_sfx('points')
                 self.get_score(game, ITEMS[item][3], True, self.rect.center)
 
@@ -275,10 +275,10 @@ class Player(GameObject):
                 power += self.PU_list['ghost_fury']
 
             if self.tick % int((self.shoot_cooldown / power)) == 0:
-                speed_x = (self.last_direction[0] * 2) * (2 + log(power + 1))
-                speed_y = (self.last_direction[1] * 2) * (2 + log(power + 1))
+                speed_x = self.last_direction[0] * log(power + 3)
+                speed_y = self.last_direction[1] * log(power + 3)
                 self.shoot(game, (speed_x, speed_y))
-                game.sound.play_sfx('player_shoot')
+                game.sound.play_sfx('bandit_shoot')
 
                 if 'extra_reflect' in self.PU_list:
                     chance = self.PU_list['extra_reflect'] * 18 > randint(1, 100)

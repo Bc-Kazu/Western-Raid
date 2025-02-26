@@ -120,7 +120,9 @@ class Rope:
             for gadget in game.level.gadgets:
                 for rect in self.hitbox_list:
                     if rect.colliderect(gadget.rect):
-                        self.enroll(game, gadget)
+                        if (not hasattr(gadget, "is_placed") or
+                                (hasattr(gadget, "is_placed") and gadget.is_placed)):
+                            self.enroll(game, gadget)
                         return
 
         elif self.enrolled_target:

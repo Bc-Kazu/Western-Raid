@@ -82,9 +82,11 @@ class Explosion:
                     continue
 
                 if self.rect.colliderect(gadget.rect):
-                    gadget.damage(game, 3)
-                    if gadget.alive:
-                        self.already_hit.append(gadget)
+                    if (not hasattr(gadget, "is_placed") or
+                            (hasattr(gadget, "is_placed") and gadget.is_placed)):
+                        gadget.damage(game, 3)
+                        if gadget.alive:
+                            self.already_hit.append(gadget)
 
             for terrain in game.level.map:
                 if terrain in self.already_hit:

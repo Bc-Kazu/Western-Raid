@@ -49,6 +49,11 @@ class TurretShield(GameObject):
         self.health_indicator = Text(str(self.health), (0, 0), TEXT_FONT, colors.pure_shadow)
         self.health_indicator.rect = (self.rect.centerx, self.rect.centery)
 
+    def kill(self):
+        super().kill()
+        if self.owner.holding == self:
+            self.owner.holding = None
+
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.health = self.base_health
         self.health += 1 * owner.PU_list.get('recovery', 0)

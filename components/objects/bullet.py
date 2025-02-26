@@ -60,7 +60,6 @@ class Bullet(GameObject):
             buff_color = colors.crimson
         if buff == 'lucky':
             buff_color = colors.lime
-            self.max_lifetime = 4
 
         self.set_color(buff_color)
 

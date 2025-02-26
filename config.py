@@ -222,7 +222,7 @@ MAX_BULLET_SPEED = 5
 POWER_UPS = {
     'shield_size': ['shield_size', 50, 3, 100],
     'bullet_size': ['bullet_size', 50, 3, 100],
-    'auto_shoot': ['auto_shoot', 50, 3, 100],
+    'auto_shoot': ['auto_shoot', 5000, 3, 100],
     'extra_block': ['extra_block', 50, 3, 100],
     'ghost_fury': ['ghost_fury', 50, 2, 100],
 
@@ -235,7 +235,7 @@ POWER_UPS = {
 
 ITEMS = {
     'bomb': ['bomb', 50, 0, 0],
-    'shield': ['shield', 40, 3, 30],
+    'shield': ['shield', 40, 3, 50],
     'turret_shooter': ['turret_shooter', 30, 5, 100],
     'turret_shield': ['turret_shield', 30, 5, 100],
     'bot_shooter': ['bot_shooter', 20, 5, 100],

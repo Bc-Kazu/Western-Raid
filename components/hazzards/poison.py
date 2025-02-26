@@ -27,6 +27,9 @@ class Poison:
         self.sprite.fill(self.color, special_flags=pg.BLEND_RGBA_MULT)
         self.sprite.set_alpha(alpha)
 
+        self.hit_list = []
+        self.hit_cooldown = 60
+
     def set_values(self, max_lifetime, spread_max, spread_time, size_add):
         self.max_lifetick = max_lifetime
         self.spread_max = spread_max
@@ -62,11 +65,42 @@ class Poison:
         if self.rect.colliderect(player.hitbox):
             player.damage(game)
 
+    def get_hit_cooldown(self, instance):
+        self.hit_list.append([instance, self.hit_cooldown])
+
     def collide_check(self, game):
         if self.alive:
             # Checking collision with many different modules
             if game.player_1: self.collide_player(game, game.player_1)
             if game.player_2: self.collide_player(game, game.player_2)
+
+            for hit in self.hit_list:
+                if not hit[0].alive:
+                    self.hit_list.remove(hit)
+
+            for gadget in game.level.gadgets:
+                already_in = False
+                can_hit = True
+
+                for hit in self.hit_list:
+                    if gadget == hit[0]:
+                        hit[1] += 1
+                        already_in = True
+
+                        if hit[1] < self.hit_cooldown:
+                            can_hit = False
+                        else:
+                            hit[1] = 0
+
+
+                if self.rect.colliderect(gadget.rect) and can_hit:
+                    if (not hasattr(gadget, "is_placed") or
+                            (hasattr(gadget, "is_placed") and gadget.is_placed)):
+                        gadget.damage(game, 1)
+
+                        if not already_in:
+                            self.get_hit_cooldown(gadget)
+
 
     def draw(self, game):
         if self.alive:

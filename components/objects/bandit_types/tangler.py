@@ -13,7 +13,7 @@ colors = Colors()
 class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
-        self.move_range = 600
+        self.move_range = 250
         self.base_drop_chances = {'power_up': 15, 'item': 4000, 'brick': 40}
         self.points_value = 30
         self.destined_velocity = 3
@@ -27,6 +27,7 @@ class Bandit(BanditModel):
 
         self.rope_enabled = True
         self.can_shoot_rope = False
+        self.rope_delay = 30
         self.rope_distance = 280
         self.rope_thickness = 12
         self.rope_tick = 0
@@ -42,6 +43,37 @@ class Bandit(BanditModel):
         self.can_shoot_rope = False
         self.rope_tick = 0
         self.rope_interval = randint(50, 100)
+        self.rope_delay = 30
+        self.rope_distance = 280
+
+    def get_buff(self, game, buff):
+        super().get_buff(game, buff)
+        if buff == 'evil':
+            self.rope_interval //= 2
+            self.rope_delay //= 2
+            self.rope_distance += 40
+
+    def get_random_destination(self, game):
+        if game.player_1:
+            random_target = game.player_1
+            if game.player_2 and randint(1, 2) == 2:
+                random_target = game.player_2
+
+            new_x = random_target.rect.centerx
+            new_y = random_target.rect.centery
+
+            if new_x < self.rect.centerx:
+                new_x += randint(50, 150)
+            elif new_x > self.rect.centerx:
+                new_x -= randint(50, 150)
+            if new_y < self.rect.centery:
+                new_y += randint(50, 150)
+            elif new_y > self.rect.centery:
+                new_y -= randint(50, 150)
+
+            self.set_destination(new_x, new_y)
+        else:
+            super().get_random_destination(game)
 
     def shoot_rope(self, game):
         new_size = (self.rope_length, self.rope_thickness)
@@ -66,6 +98,7 @@ class Bandit(BanditModel):
         direction_y = player.rect.centery - self.rect.centery
         magnitude = math.sqrt(direction_x ** 2 + direction_y ** 2) * 1.25
         return magnitude, (direction_x, direction_y), player
+
     def update(self, game):
         super().update(game)
         self.rope_rect.center = self.rect.center
@@ -85,7 +118,7 @@ class Bandit(BanditModel):
                 self.rope_length = distance
                 self.rope_tick = 0
 
-        if self.can_shoot_rope and self.rope_tick > 40:
+        if self.can_shoot_rope and self.rope_tick > self.rope_delay:
             self.can_move = True
             self.shoot_rope(game)
             self.rope_tick = 0

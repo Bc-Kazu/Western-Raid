@@ -60,6 +60,11 @@ class TurretShooter(GameObject):
         self.shoot_area.fill(colors.white)
         self.shoot_area.set_alpha(15)
 
+    def kill(self):
+        super().kill()
+        if self.owner.holding == self:
+            self.owner.holding = None
+
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.health = self.base_health
         self.health += 2 * owner.PU_list.get('recovery', 0)

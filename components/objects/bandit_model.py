@@ -139,16 +139,19 @@ class BanditModel(GameObject):
         if self.name == 'hitman' and game.player_1:
             possible_targets = [game.player_1, game.player_2 if game.player_2 else game.player_1]
             target = possible_targets[randint(0, 1)]
-        elif self.name == 'dicer' and len(game.level.bandits) > 0:
+        elif self.name == 'dicer':
             target = choice(game.level.bandits)
+            if target == self:
+                target = choice(game.ufo.blocks)
         else:
             target = choice(game.ufo.blocks)
 
-        if hasattr(target, 'rect'):
-            self.target = target
-        else:
-            raise ValueError(f'Invalid target: {target}, argument must be '
-                             f'any class containing a "rect" attribute.')
+        if target:
+            if hasattr(target, 'rect'):
+                self.target = target
+            else:
+                raise ValueError(f'Invalid target: {target}, argument must be '
+                                 f'any class containing a "rect" attribute.')
 
     def despawn(self, game):
         top_distance = [(0, -3), 0 + self.rect.y]
@@ -218,6 +221,8 @@ class BanditModel(GameObject):
             self.set_velocity(0, 0)
 
         super().update(game)
+        self.movement_rect.center = self.rect.center
+        self.protection_rect.center = self.rect.center
 
         if not self.is_moving:
             self.move_tick += 1
@@ -228,8 +233,9 @@ class BanditModel(GameObject):
         if self.lifetime <= 2 and self.spawn_grace and self.push_velocity == (0, 0):
             self.rect.x += (self.spawnpoint[0] - self.rect.x) * 0.05
             self.rect.y += (self.spawnpoint[1] - self.rect.y) * 0.05
-        else:
+        elif self.spawn_grace:
             self.spawn_grace = False
+            self.get_random_destination(game)
 
         # Randomly moving the bandit
         if self.move_tick >= self.move_interval and not self.spawn_grace:
@@ -240,9 +246,6 @@ class BanditModel(GameObject):
 
         if self.lifetime > self.despawn_time:
             self.despawn(game)
-
-        self.movement_rect.center = self.rect.center
-        self.protection_rect.center = self.rect.center
 
         # Updating shooting system
         if (self.shoot_tick >= self.shoot_interval and self.target
