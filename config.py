@@ -234,11 +234,11 @@ POWER_UPS = {
 }
 
 ITEMS = {
-    'bomb': ['bomb', 50, 0, 0],
-    'shield': ['shield', 40, 3, 50],
-    'turret_shooter': ['turret_shooter', 30, 5, 100],
-    'turret_shield': ['turret_shield', 30, 5, 100],
-    'bot_shooter': ['bot_shooter', 20, 5, 100],
+    'bomb': ['bomb', 60, 0, 0],
+    'shield': ['shield', 60, 3, 50],
+    'turret_shooter': ['turret_shooter', 300, 5, 80],
+    'turret_shield': ['turret_shield', 300, 5, 80],
+    'bot_shooter': ['bot_shooter', 200, 5, 80],
     'healing_ufo': ['healing_ufo', 20, 1, 100],
     'gift_bomb': ['gift_bomb', 0.3, 0, 0],
 }
@@ -275,8 +275,9 @@ LEVEL_CONFIG = [
         "background": (50, 30, 0),
         "spawn_types":
             [
-                ["basic", 80, False, -15],
+                ["basic", 2000, False, -15],
                 ["skilled", 20, False, 10],
+                ["bullseye", 2000, False, 10],
                 ["bomber", 18, True, 0],
                 ["hitman", 10, True, 0],
             ],

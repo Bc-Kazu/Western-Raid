@@ -20,7 +20,7 @@ class BanditModel(GameObject):
         self.base_health = 1
         self.health = 1
         self.points_value = 20
-        self.base_drop_chances = {'power_up': 10, 'item': 20, 'brick': 40}
+        self.base_drop_chances = {'power_up': 10, 'item': 2000, 'brick': 40}
         self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
 
@@ -33,6 +33,7 @@ class BanditModel(GameObject):
         self.last_side = [self.size[0], 0]
 
         self.despawn_time = 20
+        self.despawn_speed = 3
         self.despawning = False
         self.active = True
 
@@ -154,10 +155,10 @@ class BanditModel(GameObject):
                                  f'any class containing a "rect" attribute.')
 
     def despawn(self, game):
-        top_distance = [(0, -3), 0 + self.rect.y]
-        bottom_distance = [(0, 3), game.screen_height - self.rect.y]
-        left_distance = [(-3, 0), 0 + self.rect.x]
-        right_distance = [(3, 0), game.screen_width - self.rect.x]
+        top_distance = [(0, -self.despawn_speed), 0 + self.rect.y]
+        bottom_distance = [(0, self.despawn_speed), game.screen_height - self.rect.y]
+        left_distance = [(-self.despawn_speed, 0), 0 + self.rect.x]
+        right_distance = [(self.despawn_speed, 0), game.screen_width - self.rect.x]
         smallest_x = min(left_distance[1], right_distance[1])
         smallest_y = min(top_distance[1], bottom_distance[1])
 
@@ -205,12 +206,13 @@ class BanditModel(GameObject):
         shield_rect = player.shield_rect
 
         if self.rect.colliderect(shield_rect) and player.alive and self.can_push:
-            self.push(shield_rect)
-            game.sound.play_sfx('push')
-            game.data[f"p{player.id}_stats"]["bandits_pushed"] += 1
+            success_push = self.push(shield_rect)
+            if success_push:
+                game.sound.play_sfx('push')
+                game.data[f"p{player.id}_stats"]["bandits_pushed"] += 1
 
-            if self.lifetime < 2:
-                self.lifetime = 2
+                if self.lifetime < 2:
+                    self.lifetime = 2
 
     def update(self, game):
         self.get_target(game)

@@ -14,7 +14,7 @@ class Bandit(BanditModel):
         self.can_shoot = False
         self.move_range = 1000
         self.points_value = 25
-        self.move_interval_base = [60, 180]
+        self.move_interval_base = [0, 60]
         self.last_side = [self.size[0] - 20, 0]
         self.destined_velocity = 3
 
@@ -23,7 +23,7 @@ class Bandit(BanditModel):
         self.bottle = pg.transform.scale(self.bottle, (80, 80))
         self.bottle.fill(self.puddle_color, special_flags=pg.BLEND_RGBA_MULT)
         self.bottle_rect = self.bottle.get_rect()
-        self.random_drink_time = randint(4, 7)
+        self.random_drink_time = randint(3, 5)
         self.drink_anim = [False, 0 , 120, False,  0, 60, 0, 40, False]
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):

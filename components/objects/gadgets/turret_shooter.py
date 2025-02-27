@@ -21,6 +21,7 @@ class TurretShooter(GameObject):
         self.base_health = 10
         self.health = self.base_health
         self.aim_sprite_dict = {}
+        self.offscreen_limit = 0
 
         # Other sprites settings
         self.base_sprite = self.sprite.copy()
@@ -62,7 +63,7 @@ class TurretShooter(GameObject):
 
     def kill(self):
         super().kill()
-        if self.owner.holding == self:
+        if self.owner.type == 'player' and self.owner.holding == self:
             self.owner.holding = None
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
@@ -113,6 +114,10 @@ class TurretShooter(GameObject):
         if self.is_placed:
             self.shoot_tick += 1
             self.collide_check(game)
+            self.screen_limited = True
+
+            if self.stolen:
+                return
 
             # Updating shooting system
             lower_interval = 0
@@ -124,9 +129,15 @@ class TurretShooter(GameObject):
                     self.shoot_tick = 0
                     self.shoot(game)
         else:
+            self.screen_limited = False
+            if self.stolen:
+                return
+
             self.rect.center = self.owner.rect.center
             self.rect.x += 50 * self.owner.last_direction[0]
             self.rect.y += 50 * self.owner.last_direction[1]
+
+            self.rect.clamp_ip(game.screen_limit)
 
             time_left = str(self.placing_time - self.lifetime)
             self.place_timer.set_text(time_left)
@@ -149,6 +160,9 @@ class TurretShooter(GameObject):
 
         for bandit in game.level.bandits:
             if self.shoot_rect.colliderect(bandit.rect):
+                if bandit.name == 'bullseye':
+                    continue
+
                 bandit_x = bandit.rect.centerx
                 bandit_y = bandit.rect.centery
                 direction_x = bandit_x - self.rect.centerx

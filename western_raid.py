@@ -42,6 +42,7 @@ class Game:
         self.screen_width = 960
         self.screen_height = 620
         self.screen = pg.display.set_mode((self.screen_width, self.screen_height))
+        self.screen_limit = pg.Rect(0, 0, self.screen_width, self.screen_height)
         self.tick = 0
 
         # Key configuration

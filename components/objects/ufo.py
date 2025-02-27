@@ -1,7 +1,7 @@
 """
-Class responsible for drawing the UFO's
+Class responsible for creating the UFO object
 """
-from config import ITEMS, UFO_COLORS
+from config import UFO_COLORS
 from assets import NORMAL_FONT, UFO_CONFIG, UFO_BLOCK_CONFIG
 from utils.text import Text
 from math import log
@@ -36,6 +36,7 @@ class Ufo(GameObject):
     def __init__(self):
         super().__init__(UFO_CONFIG)
         self.alive = True
+        self.can_collide = False
 
         # Define the UFO grid as a list of lists
         self.block_size = (self.size[0] // 6.7, self.size[1] // 6.7)
@@ -68,7 +69,9 @@ class Ufo(GameObject):
 
         self.regenerate = False
         self.regen_safe = 0
-        self.regen_cd = 60
+        self.regen_cd = 90
+        self.regenerated_blocks = 0
+        self.max_blocks_regen = 15
         self.layers_filled = [False, False, False]
 
         self.got_inside = False
@@ -111,6 +114,9 @@ class Ufo(GameObject):
                     self.blocks.append(new_block)
 
     def collide_check(self, game, bullet):
+        if not self.can_collide:
+            return
+
         if (self.space_shield_rect.colliderect(bullet.rect) and bullet.owner.type == 'enemy'
                 and self.space_shield_hp > 0):
             self.space_shield_update(-1)
@@ -152,8 +158,7 @@ class Ufo(GameObject):
         game.data["blocks_destroyed"] += 1
 
         if self.regenerate and self.regen_safe >= 60:
-            self.regen_safe = 0
-            self.regenerate = False
+            self.set_regenerate(False)
 
     def heal(self, game, amount, player=None):
         # Check for any ufo blocks to heal, if not then give points to player
@@ -267,10 +272,14 @@ class Ufo(GameObject):
         self.space_shield.set_alpha(alpha)
 
     def set_regenerate(self, toggle, player=None, game=None):
-        if self.regenerate and player and game:
-            player.get_score(game, ITEMS['healing_ufo'][3])
+        if self.regenerate and toggle and player and game:
+            return False
         else:
             self.regenerate = toggle
+            self.regenerated_blocks = 0
+            self.regen_safe = 0
+            return True
+
     def update(self, game):
         super().update(game)
 
@@ -278,13 +287,16 @@ class Ufo(GameObject):
             self.space_shield_update(1)
 
         cd_multi = 1
-        if self.layers_filled[0]: cd_multi += 0.5
-        if self.layers_filled[1]: cd_multi += 0.5
+        if self.layers_filled[0]: cd_multi += 0.2
+        if self.layers_filled[1]: cd_multi += 0.1
 
         if self.regenerate:
             self.regen_safe += 1
             if self.tick % self.regen_cd * cd_multi == 0:
                 self.heal(game, 1)
+                self.regenerated_blocks += 1
+            if self.regenerated_blocks >= self.max_blocks_regen:
+                self.set_regenerate(False)
 
     def draw(self, game):
         super().draw(game)

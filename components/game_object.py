@@ -14,10 +14,10 @@ class GameObject:
         if config is None: config = {}
         self.id = obj_id
         self.config = config.copy()
-        self.type = config['type'] if 'type' in config else 'base_object'
-        self.name = config['name'] if 'name' in config else 'nil'
-        self.color = config['color'] if 'color' in config else (255, 255, 255)
-        self.base_size = config['size'] if 'size' in config else (50, 50)
+        self.type = config.get('type', 'base_object')
+        self.name = config.get('name', 'nil')
+        self.color = config.get('color', (255, 255, 255))
+        self.base_size = config.get('size', (50, 50))
         self.size = self.base_size
         self.spawnpoint = (0, 0)
 
@@ -26,7 +26,7 @@ class GameObject:
         self.spawner = None     # Spawner is the parent that first added it
 
         # Sprite and rect attributes
-        self.sprite = config['image'].copy() if 'image' in config else self.NIL_IMAGE.copy()
+        self.sprite = config.get('image', self.NIL_IMAGE).copy()
         self.sprite = pg.transform.scale(self.sprite, self.size)
         self.rect = self.sprite.get_rect()
 
@@ -41,6 +41,8 @@ class GameObject:
 
         self.is_moving = False
         self.stuck = None
+        self.targeted_to_steal = False
+        self.stolen = False
         self.always_on_top = False
 
         # Dealing with hazzards far from screen
@@ -73,6 +75,8 @@ class GameObject:
         # Push physics settings
         self.push_velocity = (0, 0)
         self.push_force = 15
+        self.push_tick = 0
+        self.push_interval = 5
         self.push_stops_movement = True
 
         ### ---// VISUAL ATTRIBUTES //
@@ -80,6 +84,9 @@ class GameObject:
         self.can_blink = False
         self.blink = False
         self.blink_interval = 15
+
+        ### ---// DEBUG ATTRIBUTES //
+        self.print_death = False
 
     # Handles multiple base functions in one to set the object
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
@@ -117,6 +124,9 @@ class GameObject:
 
     def kill(self):
         self.alive = False
+        if self.print_death:
+            print(f'Killed {self.name} {self.type} '
+                  f'[ID: {self.id}, Position: {self.rect.center}, Lifetime: {self.lifetime}]')
 
     def set_owner(self, owner):
         self.owner = owner
@@ -233,7 +243,7 @@ class GameObject:
 
     # Resets the sprite back to the original configuration image
     def reset_sprite(self):
-        self.sprite = self.config['image'].copy() if 'image' in self.config else self.NIL_IMAGE.copy()
+        self.sprite = self.config.get('image', self.NIL_IMAGE).copy()
         self.set_size(self.size)
 
     # Function for following any given rect, checks if velocity should be kept
@@ -261,6 +271,11 @@ class GameObject:
 
     # Initializes pushing object depending on object given
     def push(self, other_object):
+        if self.push_tick < self.push_interval:
+            return False
+        else:
+            self.push_tick = 0
+
         push_force = 15
         if not hasattr(other_object, 'rect') and not isinstance(other_object, pg.Rect):
             raise ValueError(f'Invalid object given: {other_object}. '
@@ -284,6 +299,7 @@ class GameObject:
 
         # Add pushing values
         self.push_velocity = (force_x, force_y)
+        return True
     
     def update(self, game):
         self.tick += 1
@@ -304,6 +320,8 @@ class GameObject:
             self.follow(self.destined_point, self.destined_velocity)
 
         # System for exponential pushing, ignored if push_velocity never changes
+        if self.can_push:
+            self.push_tick += 1
         if self.push_velocity != (0, 0):
             self.push_velocity = (self.push_velocity[0] * 0.9, self.push_velocity[1] * 0.9)
 
@@ -323,7 +341,7 @@ class GameObject:
 
         if self.stay_within_screen:
             # Making sure the object stays on screen
-            self.rect.clamp_ip(pg.Rect(0, 0, game.screen_width, game.screen_height))
+            self.rect.clamp_ip(game.screen_limit)
         
         if game.tick % game.FPS == 0:
             self.lifetime += 1
@@ -334,17 +352,17 @@ class GameObject:
         if self.can_blink and self.tick % self.blink_interval == 0:
             self.blink = not self.blink
         
-        if self.screen_limited:
-            screen_witdh = game.screen.get_width()
-            screen_height = game.screen.get_height()
-            
-            # Remove object if offscreen depending on 
-            if (self.rect.right < 0 - self.offscreen_limit or
-                    self.rect.left > screen_witdh + self.offscreen_limit or
-                    self.rect.bottom < 0 - self.offscreen_limit or
-                    self.rect.top > screen_height + self.offscreen_limit):
-                
-                self.kill()
+        if self.screen_limited and self.is_offscreen(game):
+            self.kill()
+
+    def is_offscreen(self, game):
+        screen_witdh = game.screen.get_width()
+        screen_height = game.screen.get_height()
+
+        return (self.rect.right < 0 - self.offscreen_limit or
+                self.rect.left > screen_witdh + self.offscreen_limit or
+                self.rect.bottom < 0 - self.offscreen_limit or
+                self.rect.top > screen_height + self.offscreen_limit)
         
     def draw(self, game):
         if self.visible and not self.blink:

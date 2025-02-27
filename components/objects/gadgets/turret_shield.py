@@ -11,6 +11,9 @@ colors = Colors()
 class TurretShield(GameObject):
     def __init__(self, config, turret_id=None):
         super().__init__(config, turret_id)
+        self.screen_limited = True
+        self.offscreen_limit = 0
+
         self.base_health = 5
         self.health = self.base_health
 
@@ -51,7 +54,7 @@ class TurretShield(GameObject):
 
     def kill(self):
         super().kill()
-        if self.owner.holding == self:
+        if self.owner.type == 'player' and self.owner.holding == self:
             self.owner.holding = None
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
@@ -115,12 +118,19 @@ class TurretShield(GameObject):
         if self.is_placed:
             self.collide_check(game)
 
+            if self.stolen:
+                return
             if self.tick % self.shield_interval == 0:
                 self.shield_update(1)
         else:
+            if self.stolen:
+                return
+
             self.rect.center = self.owner.rect.center
             self.rect.x += 50 * self.owner.last_direction[0]
             self.rect.y += 50 * self.owner.last_direction[1]
+
+            self.rect.clamp_ip(game.screen_limit)
 
             time_left = str(self.placing_time - self.lifetime)
             self.place_timer.set_text(time_left)
@@ -163,7 +173,7 @@ class TurretShield(GameObject):
             if not bullet.owner.type == 'enemy':
                 continue
 
-            if not self.stuck:
+            if not self.stuck and self.owner.type == 'player':
                 if self.shield_rect.colliderect(bullet.rect) and self.shield_health > 0:
                     self.shield_update(-1)
 

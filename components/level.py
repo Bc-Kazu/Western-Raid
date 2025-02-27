@@ -1,6 +1,10 @@
 from random import randint, choice, choices
+
+from components.objects.gadgets.bot_shooter import BotShooter
+from components.objects.gadgets.turret_shield import TurretShield
+from components.objects.gadgets.turret_shooter import TurretShooter
 from config import LEVEL_CONFIG, POWER_UPS, ITEMS, BRICKS
-from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG, SMALL_FONT, TEXT_FONT, NORMAL_FONT
+from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG, SMALL_FONT, TEXT_FONT, GADGET_CONFIG
 
 from components.objects.terrain import Terrain
 from components.objects.pickup import PickUp
@@ -130,6 +134,28 @@ class Level:
             new_pickup.set_size((70, 70))
 
         self.objects.append(new_pickup)
+
+    def spawn_gadget(self, game, name, player):
+        class_list = {'turret_shooter': TurretShooter,
+                      'turret_shield': TurretShield,
+                      'bot_shooter': BotShooter}
+
+        if name in class_list:
+            config = GADGET_CONFIG[name]
+            gadget_count = 0
+            for gadget in self.gadgets:
+                if gadget.name == name:
+                    gadget_count += 1
+
+            if gadget_count >= ITEMS[name][2]:
+                return False
+
+            new_gadget = class_list[name](config)
+            new_gadget.spawn(player.rect.center, (0, 0), player)
+            self.gadgets.append(new_gadget)
+
+            player.holding = new_gadget if config['can_hold'] else None
+            return True
 
     def spawn_bandit(self, game):
         # Determine spawn settings

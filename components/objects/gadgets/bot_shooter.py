@@ -19,6 +19,9 @@ def load_sprite(bot, name):
 class BotShooter(GameObject):
     def __init__(self, config, turret_id=None):
         super().__init__(config, turret_id)
+        self.screen_limited = True
+        self.offscreen_limit = 0
+
         self.base_health = 15
         self.health = self.base_health
         self.sprite_dict = {}
@@ -29,11 +32,11 @@ class BotShooter(GameObject):
         self.closed_eyes_sprite = load_sprite(self, 'bot_closed_eyes')
         self.sad_eyes_sprite = load_sprite(self, 'bot_sad_eyes')
         self.happy_eyes_sprite = load_sprite(self, 'bot_happy_eyes')
+        self.squint_eyes_sprite = load_sprite(self, 'bot_squint_eyes')
         self.current_eyes = self.base_eyes_sprite
 
         # Object state settings
         self.is_placed = False
-        self.stay_within_screen = True
 
         self.health_indicator = Text(str(self.health), (0, 0), TEXT_FONT, colors.pure_shadow)
         self.health_indicator.rect = (self.rect.centerx, self.rect.centery)
@@ -53,6 +56,13 @@ class BotShooter(GameObject):
         self.shoot_area.set_alpha(15)
 
         self.victory_offset = choice([-15, 15])
+        self.steal_index = 0
+        self.steal_offset_list = [
+            (-4, -4),
+            (0, 0),
+            (4, -4),
+            (0, 0),
+        ]
 
         # Movement settings
         self.move_range = 400
@@ -133,6 +143,13 @@ class BotShooter(GameObject):
         self.movement_rect.center = self.rect.center
 
         if self.is_placed:
+            self.collide_check(game)
+            if self.stolen:
+                self.stay_within_screen = False
+                return
+            else:
+                self.stay_within_screen = True
+
             if game.level.defeat:
                 self.set_velocity(0, 0)
                 return
@@ -148,7 +165,6 @@ class BotShooter(GameObject):
             self.shoot_tick += 1
             self.move_tick += 1
             self.find_tick += 1
-            self.collide_check(game)
 
             # Updating shooting system
             lower_interval = 0
@@ -182,6 +198,9 @@ class BotShooter(GameObject):
 
         for bandit in game.level.bandits:
             if self.shoot_rect.colliderect(bandit.rect):
+                if bandit.name == 'bullseye':
+                    continue
+
                 bandit_x = bandit.rect.centerx
                 bandit_y = bandit.rect.centery
                 direction_x = bandit_x - self.rect.centerx
@@ -253,6 +272,16 @@ class BotShooter(GameObject):
             if game.level.defeat:
                 offset_rect.center = self.rect.center
                 offset_rect.y += 2
+            elif self.stolen:
+                self.current_eyes = self.squint_eyes_sprite
+                if self.tick % 8 == 0:
+                    self.steal_index += 1
+                    if self.steal_index > len(self.steal_offset_list) - 1:
+                        self.steal_index = 0
+
+                offset_rect.center = self.rect.center
+                offset_rect.x += self.steal_offset_list[self.steal_index][0]
+                offset_rect.y += self.steal_offset_list[self.steal_index][1]
 
             game.screen.blit(self.current_eyes, offset_rect)
 

@@ -558,8 +558,8 @@ def render_round(game):
             game.defeat_transition[1] += 1
             game.ufo.can_blink = True
             if not game.level.defeat:
-                game.player_1.set_eyes('closed_eyes')
-                if game.player_2: game.player_2.set_eyes('closed_eyes')
+                game.player_1.set_eyes('shocked_eyes')
+                if game.player_2: game.player_2.set_eyes('shocked_eyes')
                 game.level.defeat = True
                 game.sound.play('none')
                 game.sound.play_sfx('ufo_destroy')

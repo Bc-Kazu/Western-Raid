@@ -21,6 +21,7 @@ class PickUp(GameObject):
         self.pointer = Text('v', (0, 0), TEXT_FONT, colors.light_yellow)
         self.pointer.rect = (self.rect.centerx, self.rect.centery - self.size[1])
 
+        self.stay_within_screen = True
         self.can_collect = True
         self.can_explode = False
         self.can_hold = ['turret_shooter', 'turret_shield']

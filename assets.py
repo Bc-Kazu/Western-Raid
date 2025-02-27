@@ -160,25 +160,13 @@ UFO_BLOCK_CONFIG = {
     'image_2': BLOCK_CACHE['broken'].copy()
 }
 
-TURRET_SHOOTER_CONFIG = {
-    'name': 'turret_shooter',
-    'type': 'gadget',
-    'size': (60, 60),
-    'image': GADGET_CACHE['turret_shooter'].copy(),
-}
-
-TURRET_SHIELD_CONFIG = {
-    'name': 'turret_shield',
-    'type': 'gadget',
-    'size': (60, 60),
-    'image': GADGET_CACHE['turret_shield'].copy(),
-}
-
-BOT_SHOOTER_CONFIG = {
-    'name': 'bot_shooter',
-    'type': 'gadget',
-    'size': (40, 40),
-    'image': GADGET_CACHE['bot_shooter'].copy(),
+GADGET_CONFIG = {
+    'turret_shooter': {'name': 'turret_shooter', 'type': 'gadget', 'size': (60, 60),
+        'image': GADGET_CACHE['turret_shooter'].copy(), 'can_hold': True},
+    'turret_shield': {'name': 'turret_shield', 'type': 'gadget', 'size': (60, 60),
+                       'image': GADGET_CACHE['turret_shield'].copy(), 'can_hold': True},
+    'bot_shooter': {'name': 'bot_shooter', 'type': 'gadget', 'size': (40, 40),
+                       'image': GADGET_CACHE['bot_shooter'].copy(), 'can_hold': False},
 }
 
 LUCK_STATUE = {'name': 'luck_statue', 'type': 'terrain', 'size': (75, 75),

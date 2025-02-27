@@ -5,11 +5,8 @@ with their own properties.
 from random import randint
 from math import log
 
-from components.objects.gadgets.bot_shooter import BotShooter
-from components.objects.gadgets.turret_shield import TurretShield
-from components.objects.gadgets.turret_shooter import TurretShooter
 from config import BASE_SHIELD_X, BASE_SHIELD_Y, BASE_PLAYER_SPEED, SHIELD_DISTANCE, POWER_UPS, ITEMS
-from assets import PLAYER_CONFIG, TURRET_SHOOTER_CONFIG, TURRET_SHIELD_CONFIG, BOT_SHOOTER_CONFIG
+from assets import PLAYER_CONFIG, GADGET_CONFIG
 from components.game_object import GameObject
 import pygame as pg
 
@@ -147,32 +144,24 @@ class Player(GameObject):
         game.ufo.space_shield_set(game, heal)
 
     def get_item(self, game, item):
-        game.sound.play_sfx('item_get')
-
+        item_got = False
         if item == 'shield':
             self.shield_buff_hp += 1
-            if self.shield_buff_hp > 3:
-                self.shield_buff_hp = 3
-                game.sound.play_sfx('points')
-                self.get_score(game, ITEMS[item][3], True, self.rect.center)
+            item_got = self.shield_buff_hp <= ITEMS[item][2]
+            if not item_got:
+                self.shield_buff_hp = ITEMS[item][2]
 
             self.shield_buff.set_alpha(self.shield_buff_hp * 20)
         if item == 'healing_ufo':
-            game.ufo.set_regenerate(True, self, game)
-        if item == 'turret_shooter':
-            new_turret = TurretShooter(TURRET_SHOOTER_CONFIG)
-            new_turret.spawn(self.rect.center, (0, 0), self)
-            game.level.gadgets.append(new_turret)
-            self.holding = new_turret
-        if item == 'turret_shield':
-            new_turret = TurretShield(TURRET_SHIELD_CONFIG)
-            new_turret.spawn(self.rect.center, (0, 0), self)
-            game.level.gadgets.append(new_turret)
-            self.holding = new_turret
-        if item == 'bot_shooter':
-            new_bot = BotShooter(BOT_SHOOTER_CONFIG)
-            new_bot.spawn(self.rect.center, (0, 0), self)
-            game.level.gadgets.append(new_bot)
+            item_got = game.ufo.set_regenerate(True, self, game)
+        if item in GADGET_CONFIG:
+            item_got = game.level.spawn_gadget(game, item, self)
+
+        if item_got:
+            game.sound.play_sfx('item_get')
+        else:
+            game.sound.play_sfx('points')
+            self.get_score(game, ITEMS[item][3], True, self.rect.center)
 
     def get_score(self, game, amount, has_popup=False, popup_rect=None):
         new_amount = int(amount) if not game.player_2 else int(amount // 2)
