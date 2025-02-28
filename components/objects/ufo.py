@@ -36,7 +36,6 @@ class Ufo(GameObject):
     def __init__(self):
         super().__init__(UFO_CONFIG)
         self.alive = True
-        self.can_collide = False
 
         # Define the UFO grid as a list of lists
         self.block_size = (self.size[0] // 6.7, self.size[1] // 6.7)

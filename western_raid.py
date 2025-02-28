@@ -16,7 +16,7 @@ from components import level
 from components import display
 
 from components.objects.bandit_types import (
-    basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, bullseye, tangler)
+    basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
 
 from assets import (TITLE_SPRITE, init_loading, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG, DYNAMITE_CONFIG)
 from config import DATA_FORMAT, PLAYER_COLORS
@@ -66,14 +66,14 @@ class Game:
         self.bandit_pool_dict = {
             "basic": Pool(basic.Bandit, BANDITS_CONFIG["basic"], 15),
             "skilled": Pool(skilled.Bandit, BANDITS_CONFIG["skilled"], 8),
-            "hitman": Pool(hitman.Bandit, BANDITS_CONFIG["hitman"], 3),
+            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 8),
             "bomber": Pool(bomber.Bandit, BANDITS_CONFIG["bomber"], 5),
-            "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 3),
-            "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 3),
-            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 3),
-            "boomstick": Pool(boomstick.Bandit, BANDITS_CONFIG["boomstick"], 3),
-            "bullseye": Pool(bullseye.Bandit, BANDITS_CONFIG["bullseye"], 3),
-            "tangler": Pool(tangler.Bandit, BANDITS_CONFIG["tangler"], 3),
+            "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 5),
+            "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 5),
+            "boomstick": Pool(boomstick.Bandit, BANDITS_CONFIG["boomstick"], 5),
+            "tangler": Pool(tangler.Bandit, BANDITS_CONFIG["tangler"], 5),
+            "hitman": Pool(hitman.Bandit, BANDITS_CONFIG["hitman"], 3),
+            "robber": Pool(robber.Bandit, BANDITS_CONFIG["robber"], 3),
         }
 
         init_loading('creating particles', 1, True)

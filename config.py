@@ -222,23 +222,24 @@ MAX_BULLET_SPEED = 5
 POWER_UPS = {
     'shield_size': ['shield_size', 50, 3, 100],
     'bullet_size': ['bullet_size', 50, 3, 100],
-    'auto_shoot': ['auto_shoot', 5000, 3, 100],
     'extra_block': ['extra_block', 50, 3, 100],
-    'ghost_fury': ['ghost_fury', 50, 2, 100],
+
+    'auto_shoot': ['auto_shoot', 40, 3, 100],
+    'ghost_fury': ['ghost_fury', 40, 2, 100],
 
     'magnet': ['magnet', 30, 2, 150],
     'recovery': ['recovery', 30, 3, 150],
+    'extra_reflect': ['extra_reflect', 30, 2, 150],
 
-    'extra_reflect': ['extra_reflect', 20, 2, 200],
-    'space_shield': ['space_shield', 10, 1, 300],
+    'space_shield': ['space_shield', 15, 1, 300],
 }
 
 ITEMS = {
     'bomb': ['bomb', 60, 0, 0],
     'shield': ['shield', 60, 3, 50],
-    'turret_shooter': ['turret_shooter', 300, 5, 80],
-    'turret_shield': ['turret_shield', 300, 5, 80],
-    'bot_shooter': ['bot_shooter', 200, 5, 80],
+    'turret_shooter': ['turret_shooter', 30, 5, 80],
+    'turret_shield': ['turret_shield', 30, 5, 80],
+    'bot_shooter': ['bot_shooter', 20, 5, 80],
     'healing_ufo': ['healing_ufo', 20, 1, 100],
     'gift_bomb': ['gift_bomb', 0.3, 0, 0],
 }
@@ -275,11 +276,11 @@ LEVEL_CONFIG = [
         "background": (50, 30, 0),
         "spawn_types":
             [
-                ["basic", 2000, False, -15],
+                ["basic", 80, False, -15],
                 ["skilled", 20, False, 10],
-                ["bullseye", 2000, False, 10],
                 ["bomber", 18, True, 0],
                 ["hitman", 10, True, 0],
+                ["robber", 5, True, 0],
             ],
         "terrain_noise": 10,
         "terrain_area_reduction": 1,
@@ -301,6 +302,7 @@ LEVEL_CONFIG = [
                 ["shielded", 15, False, 5],
                 ["hitman", 10, True, 0],
                 ["tipsy", 25, True, 0],
+                ["robber", 5, True, 0],
             ],
         "terrain_noise": 4,
         "terrain_area_reduction": 1.2,
@@ -324,6 +326,7 @@ LEVEL_CONFIG = [
                 ["bomber", 5, False, 25],
                 ["tangler", 5, False, 25],
                 ["hitman", 10, True, 0],
+                ["robber", 5, True, 0],
             ],
         "terrain_noise": 10,
         "terrain_area_reduction": 2,

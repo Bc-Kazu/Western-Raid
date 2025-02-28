@@ -189,8 +189,8 @@ BANDITS_CONFIG = {
                      'color': colors.white, 'image': BANDIT_CACHE['basic'].copy()},
     "boomstick": {'name': 'boomstick', 'type': 'enemy', 'size': (60, 60),
               'color': colors.white, 'image': BANDIT_CACHE['boomstick'].copy()},
-    "bullseye": {'name': 'bullseye', 'type': 'enemy', 'size': (60, 60),
-              'color': colors.white, 'image': BANDIT_CACHE['bullseye'].copy()},
+    "robber": {'name': 'robber', 'type': 'enemy', 'size': (60, 60),
+              'color': colors.white, 'image': BANDIT_CACHE['robber'].copy()},
     "tangler": {'name': 'tangler', 'type': 'enemy', 'size': (60, 60),
               'color': colors.white, 'image': BANDIT_CACHE['tangler'].copy()},
 }

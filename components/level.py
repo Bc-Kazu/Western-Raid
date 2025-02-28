@@ -179,7 +179,13 @@ class Level:
                 # Bandit selection logic
                 spawns = [bandit for bandit in self.spawn_types
                     if not bandit[2] or (bandit[2] and self.ambush_mode)]
-                chances = [bandit[1] + (bandit[3] if self.ambush_mode else 0) for bandit in spawns]
+
+                chances = []
+                for bandit in spawns:
+                    if bandit[0] == 'robber' and len(self.gadgets) < 1:
+                        spawns.remove(bandit)
+                        continue
+                    chances.append(bandit[1] + (bandit[3] if self.ambush_mode else 0))
 
                 chosen_bandit = choices(population=spawns, weights=chances)[0]
                 bandit = game.bandit_pool_dict[chosen_bandit[0]].get()

@@ -32,16 +32,29 @@ class SpawnParticle:
         self.direction =  [randint(1, 3), 0]
         self.max_lifetime = 5
         self.lifetime = 0
+        self.tick = 0
+        self.fps_interval = 1
         self.fade = [True, 1, 5]
         self.fade_check = False
         self.base_alpha = color[3]
         self.alive = True
 
-    def update(self):
-        self.rect.x += self.direction[0]
-        self.rect.y += self.direction[1]
+    def kill(self):
+        self.alive = False
 
-        if self.lifetime > self.max_lifetime: self.alive = False
+    def update(self, game):
+        self.tick += 1
+        delta = self.fps_interval if self.fps_interval > 0 else 1
+
+        if self.tick % self.fps_interval == 0:
+            self.rect.x += self.direction[0] * delta
+            self.rect.y += self.direction[1] * delta
+            self.surface.fill(self.color)
+
+        if self.tick % game.FPS == 0:
+            self.lifetime += 1
+            if self.lifetime > self.max_lifetime:
+                self.kill()
 
         if self.fade[0]:
             if not self.fade_check:
@@ -65,8 +78,6 @@ class SpawnParticle:
 
     def draw(self, game):
         if not self.sprite:
-            pg.draw.rect(self.surface, self.color, self.rect)
-            self.surface.fill(self.color)
             game.screen.blit(self.surface, self.rect)
         else:
             r, g, b, a = self.color
@@ -84,6 +95,7 @@ class ParticleEmitter:
         self.emitter_size = [0, 0]  # Size of the emitter rectangle, not the particle
         self.particles = []
         self.enabled = True
+        self.tick = 0
 
         # Size and direction uses min-max values for randomization [min, max]
         self.lifetime = [8, 16]
@@ -98,6 +110,7 @@ class ParticleEmitter:
 
         # Emission values for the particles
         self.rate = 5
+        self.fps_interval = 15
         self.spread = [0, 0]
         self.fading = [True, 1, 5]
         self.random_color = [False, False, 30]
@@ -160,20 +173,19 @@ class ParticleEmitter:
             if self.fading[0]: new_particle.fade = self.fading
             new_particle.direction = random_direction
             new_particle.max_lifetime = random_lifetime
+            new_particle.fps_interval = self.fps_interval
             self.particles.append(new_particle)
 
     def update(self, game):
         if not self.enabled: return
         time_frame = int(game.FPS / self.rate)
         time_frame = time_frame if time_frame >= 1 else 1
+        self.tick += 1
 
         if game.tick % time_frame == 0:
             self.emit()
 
         for particle in self.particles:
-            particle.update()
+            particle.update(game)
             particle.draw(game)
-
-            if game.tick % game.FPS == 0:
-                particle.lifetime += 1
             if not particle.alive: self.particles.remove(particle)

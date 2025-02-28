@@ -160,7 +160,7 @@ class TurretShooter(GameObject):
 
         for bandit in game.level.bandits:
             if self.shoot_rect.colliderect(bandit.rect):
-                if bandit.name == 'bullseye':
+                if bandit.name == 'robber':
                     continue
 
                 bandit_x = bandit.rect.centerx
