@@ -22,6 +22,7 @@ class Level:
         # Getting values from configuration dictionary
         self.spawn_types = config['spawn_types']
         self.background_color = config['background']
+        self.music = config['music']
         self.terrain_noise = config['terrain_noise']
         self.terrain_area_reduction = config['terrain_area_reduction']
 
@@ -82,7 +83,7 @@ class Level:
                 self.map.remove(terrain)
 
         game.state = 'round'
-        game.sound.play('sandwreck', -1)
+        game.sound.play(self.music, -1)
 
 
     # This function takes care of drawing the map randomly and automatically.

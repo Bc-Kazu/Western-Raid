@@ -255,6 +255,7 @@ BRICKS = {
 LEVEL_CONFIG = [
     {  # ===== LEVEL 0 ( TUTORIAL ) CONFIGURATIONS =====
         "background": (25, 20, 30),
+        "music": 'sandwreck',
         "spawn_types":
             [
                 # [0] = Name, [1] = Chance, [2] = Spawn only on Ambush, [3] = Ambush chance increment
@@ -274,6 +275,7 @@ LEVEL_CONFIG = [
     },
     { # ===== LEVEL 1 ( DESERT ) CONFIGURATIONS =====
         "background": (50, 30, 0),
+        "music": 'sandwreck',
         "spawn_types":
             [
                 ["basic", 80, False, -15],
@@ -295,6 +297,7 @@ LEVEL_CONFIG = [
     },
     { # ===== LEVEL 2 ( SALOON ) CONFIGURATIONS =====
         "background": (60, 40, 35),
+        "music": 'tabletoss_beta',
         "spawn_types":
             [
                 ["basic", 80, False, -15],
@@ -318,6 +321,7 @@ LEVEL_CONFIG = [
     },
     { # ===== LEVEL 3 ( BARREN ) CONFIGURATIONS =====
         "background": (30, 25, 20),
+        "music": 'sandwreck',
         "spawn_types":
             [
                 ["basic", 30, False, -20],
