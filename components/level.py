@@ -82,7 +82,7 @@ class Level:
             if not terrain.alive:
                 self.map.remove(terrain)
 
-        game.state = 'round'
+        game.set_scene('round')
         game.sound.play(self.music, -1)
 
 
@@ -269,3 +269,17 @@ class Level:
         self.update_instance(game, self.bandits)
         self.update_instance(game, self.bullets)
         self.update_instance(game, self.message_popups)
+
+        # Checking for scene conditions
+        if not self.ufo.alive and not self.defeat:
+            self.defeat = True
+            game.scene.set_state('defeat')
+
+        if self.time_elapsed >= self.round_time and not self.victory:
+            self.victory = True
+            game.scene.set_state('rebuild')
+
+        if (game.level.time_elapsed > game.level.ambush_time and not game.level.ambush_mode
+                and not game.level.victory and not game.level.defeat):
+            self.ambush_mode = True
+            game.scene.set_state('ambush')

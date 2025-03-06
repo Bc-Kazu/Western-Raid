@@ -20,8 +20,8 @@ class TextStorage:
         self.final_message2 = Text('THANKS FOR PLAYING! :]', (185, game.screen_height - 115),
                                  TEXT_FONT, (255, 255, 255))
         self.title_text = Text('< WESTERN RAID >', (game.screen_width / 2, 100), TITLE_FONT)
-        self.player1_text = Text('PLAYER 1 :', (game.screen_width / 2 - 100, 350), TEXT_FONT, (180, 255, 180))
-        self.player2_text = Text('PLAYER 2 :', (game.screen_width / 2 + 100, 350), TEXT_FONT, (255, 180, 255))
+        self.player1_text = Text('PLAYER 1 :', (game.screen_width / 2 - 100, 360), TEXT_FONT, (180, 255, 180))
+        self.player2_text = Text('PLAYER 2 :', (game.screen_width / 2 + 100, 360), TEXT_FONT, (255, 180, 255))
         self.select_text = Text('- CHOOSE PLAYER CONTROLS -',(game.screen_width / 2, 270), TEXT_FONT)
         self.volume_text = Text('0 = Mute     - & + keys = Change Music     '
                                 '[ & ] keys = Change SFX     Backspace = Remove Players',

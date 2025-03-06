@@ -206,18 +206,19 @@ class Ufo(GameObject):
                 text += 's' if amount > 1 else ''
                 game.level.spawn_message('popup', text, player.rect.center)
 
-    def victory_ufo(self, player1, player2):
+    def victory_check(self, game):
         check_1 = False
         check_2 = False
-        if player1:
-            player1.victory_tick += 1
-            if player1.victory_tick > player1.victory_cooldown:
-                check_1 = self.rect.colliderect(player1.hitbox)
+        if game.player_1:
+            game.player_1.victory_tick += 1
+            if game.player_1.victory_tick > game.player_1.victory_cooldown:
+                check_1 = self.rect.colliderect(game.player_1.hitbox)
         else: check_1 = True
-        if player2:
-            player2.victory_tick += 1
-            if player2.victory_tick > player2.victory_cooldown:
-                check_2 = self.rect.colliderect(player2.hitbox)
+
+        if game.player_2:
+            game.player_2.victory_tick += 1
+            if game.player_2.victory_tick > game.player_2.victory_cooldown:
+                check_2 = self.rect.colliderect(game.player_2.hitbox)
         else: check_2 = True
 
         if not self.got_inside:

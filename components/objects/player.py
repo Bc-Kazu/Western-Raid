@@ -330,7 +330,7 @@ class Player(GameObject):
 
         super().draw(game)
 
-        if game.state == 'defeat':
+        if game.scene.name == 'defeat':
             self.eyes_offset = [-2, 2] if self.id == 1 else [2, 2]
             self.alive = True
 
@@ -356,7 +356,7 @@ class Player(GameObject):
             self.sprite.set_alpha(128)
             self.outline.set_alpha(128)
 
-        if game.state == 'defeat':
+        if game.scene.name == 'defeat':
             self.rect.center = (game.screen_width / 2, game.screen_height - 160)
             if self.rect_offset:
                 self.rect.x += self.rect_offset[0]

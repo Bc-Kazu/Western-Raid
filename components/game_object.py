@@ -1,5 +1,5 @@
 """
-GameObject class is made to serve other classes that identify as hazzards,
+GameObject class is made to serve other classes that identify as objects,
 it holds many functions that a basic object would need specified for Western Raid
 """
 import pygame as pg

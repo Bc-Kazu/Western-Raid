@@ -110,7 +110,7 @@ class ParticleEmitter:
 
         # Emission values for the particles
         self.rate = 5
-        self.fps_interval = 15
+        self.fps_interval = 3
         self.spread = [0, 0]
         self.fading = [True, 1, 5]
         self.random_color = [False, False, 30]

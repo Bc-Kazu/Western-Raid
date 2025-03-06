@@ -3,7 +3,15 @@ Class that initializes the main logic of the components stores most game values
 """
 from random import randint
 from random import choice
+
+from components.scenes.defeat import Defeat
+from components.scenes.level_select import LevelSelect
+from components.scenes.loading import Loading
+from components.scenes.menu import Menu
+from components.scenes.victory import Victory
 from utils.particles import ParticleEmitter
+
+from components.scenes.round import Round
 
 from components.objects.bullet import Bullet
 from components.objects.player import Player
@@ -13,7 +21,6 @@ from components.sound import Sound
 from components.controls import handle_events
 from components.pool import Pool
 from components import level
-from components import display
 
 from components.objects.bandit_types import (
     basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
@@ -29,7 +36,7 @@ import zlib
 class Game:
     def __init__(self):
         self.data = {}
-        self.state = 'menu'
+        self.scene = None
         self.clock = pg.time.Clock()
         self.player_1 = None
         self.player_2 = None
@@ -55,6 +62,15 @@ class Game:
         self.sound = Sound()
         self.text = TextStorage(self)
         self.ufo = Ufo()
+
+        self.scene_dict = {
+            'menu': Menu,
+            'level_select': LevelSelect,
+            'loading': Loading,
+            'round': Round,
+            'victory': Victory,
+            'defeat': Defeat,
+        }
 
         # Getting pool classes for each object/dynamic class
         self.bullet_pool_dict = {
@@ -96,40 +112,16 @@ class Game:
         self.ambush_filter.fill((180, 80, 0, 50))
 
         # These lists are used for "animations" or effects
-        self.menu_loop = [35, False]
         self.start_animate = True
 
         self.esc_pressed = False
         self.escape_tick = 0
         self.escape_hold_time = 90
 
-        self.base_ambush_start = [False, 0, 5, 0, 60, False, 0, 300, False]
-        self.base_begin_start = [True, 0, 600]
-        self.begin_start = self.base_begin_start[:]
-        self.ambush_start = self.base_ambush_start[:]
         self.defeat = False
         self.victory = False
-
-        self.base_defeat_values = [
-            False,  # Transition enabled
-            0, 120,  # UFO blinking animation timer
-            0, 60,  # Screen transition timer
-            False,  # Screen clearing condition
-            False  # Final check for defeat
-        ]
-
-        self.base_victory_values = [
-            False,  # Transition enabled
-            False,  # Condition for getting the players inside
-            False,  # Condition for song to play
-            0, 400,  # Ufo flying back to space animation timer
-            0, 60,  # Screen transition timer
-            0, 60, # Black screen timer
-            False,  # Screen clearing condition
-            False  # Final check for victory
-        ]
-        self.victory_transition = self.base_victory_values[:]
-        self.defeat_transition = self.base_defeat_values[:]
+        self.player_bobbing = 10
+        self.player_menu_y = 460
 
         # Loading starter configurations
         self.base_level = 1
@@ -203,7 +195,11 @@ class Game:
         pg.display.set_caption('< WESTERN RAID > v0.62')
 
         self.load_data()
+        self.set_scene('menu')
         self.sound.play('menu', -1)
+
+    def set_scene(self, name):
+        self.scene = self.scene_dict[name](name, self.screen)
 
     def run(self):
         self.initialize()
@@ -229,13 +225,8 @@ class Game:
 
     def game_reset(self):
         self.sound.play('menu', -1)
-        self.state = 'menu'
+        self.set_scene('menu')
 
-        # self.ambush_fog.enabled = False
-        self.victory_transition = self.base_victory_values[:]
-        self.defeat_transition = self.base_defeat_values[:]
-        self.ambush_start = self.base_ambush_start[:]
-        self.begin_start = self.base_begin_start[:]
         self.text.begin_message.set_blink(False)
         self.ufo = Ufo()
         self.player_1 = None
@@ -262,7 +253,7 @@ class Game:
         if self.data[f'level{self.base_level}']['unlocked']:
             self.sound.play_sfx('start')
             self.base_config = self.base_level
-            self.state = 'loading_round'
+            self.set_scene('loading')
         else:
             self.sound.play_sfx('push')
 
@@ -314,30 +305,28 @@ class Game:
         elif score_type == 'defeat':
             self.data["defeats"] += 1
 
+    def set_hud(self, new_text):
+        self.sound.play_sfx('ui_select2')
+        self.text.HUD_text_list[0] = new_text
+        self.text.HUD_text_list[1] = 0
+        self.text.HUD_text_list[3] = True
+
+    def always_render(self):
+        if self.text.HUD_text_list[0] and self.text.HUD_text_list[3]:
+            self.text.HUD_text_list[1] += 1
+            self.text.HUD_text_list[0].draw(self)
+
+            if self.text.HUD_text_list[1] >= self.text.HUD_text_list[2]:
+                self.text.HUD_text_list[3] = False
+                self.text.HUD_text_list[1] = 0
+
     # Merged "draw" function with components state to make bullet_sprites possible
     def update_state(self):
-        if self.state == 'menu':
-            if not self.stars.enabled: self.stars.enabled = True
-            if self.win_stars.enabled: self.win_stars.enabled = False
+        stars_scene_list = ['menu', 'level_select', 'loading']
+        win_scene_list = ['victory']
+        self.stars.enabled = self.scene.name in stars_scene_list
+        self.win_stars.enabled = self.scene.name in win_scene_list
 
-            display.render_menu(self)
-        elif self.state == 'level_select':
-            display.render_level_select(self)
-        elif self.state == 'loading_round':
-            self.load_round()
-            display.render_loading(self)
-        elif self.state == 'round':
-            if self.stars.enabled: self.stars.enabled = False
-
-            self.level.run(self)
-            display.render_round(self)
-        elif self.state == 'victory':
-            if not self.win_stars.enabled: self.win_stars.enabled = True
-            if self.stars.enabled: self.stars.enabled = False
-
-            display.render_victory(self)
-        elif self.state == 'defeat':
-            display.render_defeat(self)
-
-        display.always_render(self)
+        self.scene.draw(self)
+        self.always_render()
         pg.display.flip()
