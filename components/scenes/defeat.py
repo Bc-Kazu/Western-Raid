@@ -27,8 +27,11 @@ class Defeat(GameScene):
             game.player_2.set_offset([50, 0], [2, 2])
             game.player_2.draw(game)
             game.player_1.draw(game)
-        else:
+            game.player_1.set_eyes('closed_eyes')
+            game.player_2.set_eyes('closed_eyes')
+        elif game.player_1:
             game.player_1.set_offset(None, [-2, 2])
             game.player_1.draw(game)
+            game.player_1.set_eyes('closed_eyes')
 
         game.screen.blit(DEFEAT_CAGE, DEFEAT_CAGE_RECT)

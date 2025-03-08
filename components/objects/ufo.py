@@ -224,8 +224,12 @@ class Ufo(GameObject):
         if not self.got_inside:
             if check_1 and check_2:
                 self.got_inside = True
+                self.can_get_in = False
+                self.always_on_top = True
                 return True
             else:
+                self.visible = True
+                self.can_get_in = True
                 return False
         else:
             self.rect.y -= 2
@@ -310,7 +314,8 @@ class Ufo(GameObject):
 
         if self.tick % self.pointer_cd == 0:
             self.pointer_pos = -self.pointer_pos
-            self.pointer.rect = (self.rect.centerx, self.rect.centery - 110 + self.pointer_pos)
+            new_y = self.size[1] // 2 + self.pointer_pos
+            self.pointer.rect = (self.rect.centerx, self.rect.centery - new_y)
 
         if self.visible and self.can_get_in:
-            self.pointer.draw()
+            self.pointer.draw(game)

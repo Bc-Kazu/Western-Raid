@@ -126,15 +126,6 @@ class Game:
         # Loading starter configurations
         self.base_level = 1
         self.base_config = 1
-        self.loading_tick = 0
-        self.loading_interval = randint(1, 2)
-        self.loading_tips = [
-            'Use + or - keys to change music volume!',
-            'Use [ or ] keys to change sound effect volume!',
-            'Press 0 to mute/unmute music!',
-            'Hold ESC in round to return to menu!',
-            'Press BACKSPACE on menu to remove players!',
-        ]
 
     def save_data(self):
         file_path = os.path.join('components', 'contentlib.wb')
@@ -211,18 +202,6 @@ class Game:
             self.clock.tick(self.FPS)
             self.tick += 1
 
-    def load_round(self):
-        if self.loading_tick == 0:
-            self.text.loading_tip.string = choice(self.loading_tips)
-        if self.loading_tick == 1:
-            self.level = level.Level(self.base_level, self.base_config, self)
-
-        self.loading_tick += 1
-
-        if self.loading_tick > self.loading_interval:
-            self.loading_interval = randint(30, 50)
-            self.loading_tick = 0
-
     def game_reset(self):
         self.sound.play('menu', -1)
         self.set_scene('menu')
@@ -250,12 +229,22 @@ class Game:
             self.sound.play_sfx('join')
 
     def start_round(self):
+        if self.level:
+            self.set_scene('round')
+            self.scene.reset()
+            self.scene.set_state('startup')
+            self.sound.play(self.level.music, -1)
+
+    def enter_level(self):
         if self.data[f'level{self.base_level}']['unlocked']:
             self.sound.play_sfx('start')
             self.base_config = self.base_level
             self.set_scene('loading')
         else:
             self.sound.play_sfx('push')
+
+    def load_level(self):
+        self.level = level.Level(self.base_level, self.base_config, self)
 
     def set_level(self, level_index, is_mouse=False):
         allowed_levels = [1, 2, 3]
@@ -266,7 +255,7 @@ class Game:
                 self.sound.play_sfx('ui_select')
                 self.base_level = level_index
             elif is_mouse:
-                self.start_round()
+                self.enter_level()
         else:
             self.sound.play_sfx('push')
 
@@ -326,6 +315,9 @@ class Game:
         win_scene_list = ['victory']
         self.stars.enabled = self.scene.name in stars_scene_list
         self.win_stars.enabled = self.scene.name in win_scene_list
+
+        if self.scene.name == 'round':
+            self.level.run(self)
 
         self.scene.draw(self)
         self.always_render()

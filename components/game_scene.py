@@ -8,15 +8,20 @@ class GameScene:
     BASE_STATE_DICT = {}
 
     def __init__(self, name, screen):
-        self.initialize = False
         self.name = name
         self.state = None
         self.screen = screen
         self.state_dict = self.BASE_STATE_DICT.copy()
 
+        self.initialize = False
+        self.finalize = False
+        self.tick = 0
+
     def reset(self):
         self.state = None
-        self.state_dict = self.BASE_STATE_DICT.copy()
+
+        for state in self.state_dict.keys():
+            self.state_dict[state] = self.BASE_STATE_DICT[state].copy()
 
     def set_state(self, name=None):
         if name:

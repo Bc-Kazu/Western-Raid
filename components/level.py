@@ -82,8 +82,7 @@ class Level:
             if not terrain.alive:
                 self.map.remove(terrain)
 
-        game.set_scene('round')
-        game.sound.play(self.music, -1)
+        self.update_instance(game, self.map)
 
 
     # This function takes care of drawing the map randomly and automatically.
@@ -228,11 +227,9 @@ class Level:
     # Main function to run the gameplay logic and physics.
     def run(self, game):
         # Clearing the map depending on certain conditions
-        if self.defeat or game.victory_transition[0]:
+        if self.defeat or (game.scene.state and game.scene.state['name'] == 'victory'):
             self.bandits = []
             self.bullets = []
-            self.objects = []
-            self.message_popups = []
             self.ufo.set_regenerate(False)
             self.can_spawn_bandits = False
 

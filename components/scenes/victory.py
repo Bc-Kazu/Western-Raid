@@ -13,10 +13,9 @@ class Victory(GameScene):
     def __init__(self, name, screen):
         super().__init__(name, screen)
         super().reset()
-        self.bobbing_interval = 15
+        self.bobbing_interval = 20
 
         self.player_offset = [0, 100, 300]
-        self.player_bobbing = 15
         self.score_rects = [(0, 0), (195, 300), (200, 350)]
 
         self.sprites_dict = {
@@ -77,6 +76,6 @@ class Victory(GameScene):
 
                 game.screen.blit(sprite[0], sprite[1])
 
-            text_list[player.id].set_text("PLAYER %d: {:05d}".format(player.id, player.score))
+            text_list[player.id].set_text("PLAYER {:d}: {:05d}".format(player.id, player.score))
             text_list[player.id].set_position(self.score_rects[player.id])
             text_list[player.id].draw(game)

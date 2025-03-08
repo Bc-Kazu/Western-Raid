@@ -321,7 +321,7 @@ class Player(GameObject):
         self.current_eyes = self.eyes_dict[name]
 
     def draw(self, game):
-        if game.victory_transition[2]:
+        if game.ufo.got_inside:
             return
 
         self.super_effect()
@@ -351,13 +351,14 @@ class Player(GameObject):
                 shield_offset = int(self.size[0] / 1.65)
                 game.screen.blit(self.shield_buff, (self.rect.centerx - shield_offset, 
                                                     self.rect.centery - shield_offset))
-        else:
+        elif game.scene.name == 'round':
             self.current_eyes.set_alpha(128)
             self.sprite.set_alpha(128)
             self.outline.set_alpha(128)
 
         if game.scene.name == 'defeat':
             self.rect.center = (game.screen_width / 2, game.screen_height - 160)
+            self.facing_up = False
             if self.rect_offset:
                 self.rect.x += self.rect_offset[0]
                 self.rect.y += self.rect_offset[1]

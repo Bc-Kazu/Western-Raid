@@ -93,12 +93,12 @@ def handle_events(game):
             else:
                 game.text.choose_text.toggle(True)
                 game.text.choose_text.set_color_blink(True)
-                game.set_hud(game, game.text.choose_text)
+                game.set_hud(game.text.choose_text)
                 game.sound.play_sfx('push')
 
         # Starting level if possible
         if game.scene.name == 'level_select' and game.player_1:
-            game.start_round()
+            game.enter_level()
         if game.scene.name == 'victory' or game.scene.name == 'defeat':
             game.sound.play_sfx('ui_select')
             game.game_reset()
@@ -146,26 +146,26 @@ def handle_events(game):
     if input_once(game, pg.K_F3):
         if game.debug: game.text.debug.set_text(f'DEBUG [ OFF ]')
         else: game.text.debug.set_text(f'DEBUG [ ON ]')
-        game.set_hud(game, game.text.debug)
+        game.set_hud(game.text.debug)
         game.debug = not game.debug
     elif input_once(game, pg.K_0):
         if game.sound.mute: game.text.muted.set_text(f'MUTE [ DISABLED ]')
         else: game.text.muted.set_text(f'MUTE [ ENABLED ]')
-        game.set_hud(game, game.text.muted)
+        game.set_hud(game.text.muted)
         game.sound.mute_music()
     elif input_once(game, pg.K_EQUALS) or input_once(game, pg.K_PLUS):
         game.sound.change_volume('increase')
         game.text.music_change_vol.set_text(f'+ Music: {int(10 * game.sound.volume_offset)}')
-        game.set_hud(game, game.text.music_change_vol)
+        game.set_hud(game.text.music_change_vol)
     elif input_once(game, pg.K_MINUS):
         game.sound.change_volume('decrease')
         game.text.music_change_vol.set_text(f'- Music: {int(10 * game.sound.volume_offset)}')
-        game.set_hud(game, game.text.music_change_vol)
+        game.set_hud(game.text.music_change_vol)
     elif input_once(game, pg.K_RIGHTBRACKET) or input_once(game, pg.K_RIGHTPAREN):
         game.sound.change_volume_sfx('increase')
         game.text.sfx_change_vol.set_text(f'+ SFX: {int(10 * game.sound.sfx_offset)}')
-        game.set_hud(game, game.text.sfx_change_vol)
+        game.set_hud(game.text.sfx_change_vol)
     elif input_once(game, pg.K_LEFTBRACKET) or input_once(game, pg.K_LEFTPAREN):
         game.sound.change_volume_sfx('decrease')
         game.text.sfx_change_vol.set_text(f'- SFX: {int(10 * game.sound.sfx_offset)}')
-        game.set_hud(game, game.text.sfx_change_vol)
+        game.set_hud(game.text.sfx_change_vol)

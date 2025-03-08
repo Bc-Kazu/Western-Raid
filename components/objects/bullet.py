@@ -15,7 +15,7 @@ class Bullet(GameObject):
     def __init__(self, bullet_config, bullet_id=None):
         super().__init__(bullet_config, bullet_id)
 
-        self.random_buff = None
+        self.buff = None
         self.wild_tick = [0, randint(15, 60)]
         self.times_reflected = 0
         self.sfx_interval = 0
@@ -38,7 +38,7 @@ class Bullet(GameObject):
 
     def reset(self):
         super().reset()
-        self.random_buff = None
+        self.buff = None
         self.times_reflected = 0
         self.wild_tick = [0, randint(15, 60)]
 
@@ -49,7 +49,7 @@ class Bullet(GameObject):
             self.set_color()
 
     def set_buff(self, buff):
-        self.random_buff = buff
+        self.buff = buff
         buff_color = self.color
 
         if buff == 'protection':
@@ -126,7 +126,8 @@ class Bullet(GameObject):
                     self.set_size(self.size[0] + boost, self.size[1] + boost)
 
             extra_count = player.PU_list.get('extra_reflect', 0)
-            if randint(0, 33 * extra_count) > randint(0, 100):
+            is_player = 100 if player else 250
+            if randint(0, 33 * extra_count) > randint(0, is_player):
                 BASE_SPREAD_ANGLE = 25
                 MAX_SPREAD = 90
 
@@ -193,9 +194,9 @@ class Bullet(GameObject):
             # Verify bullet collision with bandit
             if self.rect.colliderect(bandit.rect):
                 # Verify if bullet has a buff effect
-                if self.random_buff and self.spawner != bandit:
-                    bandit.get_buff(game, self.random_buff)
-                    game.sound.play_sfx('random_buff')
+                if self.buff and self.spawner != bandit:
+                    bandit.get_buff(game, self.buff)
+                    game.sound.play_sfx('buff')
                     self.kill()
                 # Damaging the bandit
                 elif self.owner.type == 'player':

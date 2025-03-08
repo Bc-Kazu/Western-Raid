@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from components.game_object import GameObject
 from assets import GADGET_CACHE, TEXT_FONT
@@ -160,7 +161,7 @@ class TurretShooter(GameObject):
 
         for bandit in game.level.bandits:
             if self.shoot_rect.colliderect(bandit.rect):
-                if bandit.name == 'robber':
+                if bandit.gadget_safe:
                     continue
 
                 bandit_x = bandit.rect.centerx
@@ -192,10 +193,9 @@ class TurretShooter(GameObject):
                     game.sound.play_sfx('turret_shoot')
                     bullets_shot += 1
 
-                    if 'extra_reflect' in self.owner.PU_list:
-                        if bullets_shot > self.owner.PU_list['extra_reflect']:
-                            break
-                    else:
+                    extra_count = self.owner.PU_list.get('extra_reflect', 0)
+                    max_reached = bullets_shot > extra_count > 0
+                    if randint(0, 10 * extra_count) < randint(0, 100) or max_reached:
                         break
 
     def damage(self, game, damage):

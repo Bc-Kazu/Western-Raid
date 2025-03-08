@@ -15,10 +15,10 @@ class Round(GameScene):
         'name': 'startup',
         'initialize': True,
         'tick': 0,
-        'text_blink_interval': 300,
+        'text_blink_interval': 240,
         'controls_show': True,
         'control_blink_interval': 420,
-        'end_interval': 600,
+        'end_interval': 500,
         'finalize': False
     }
 
@@ -54,7 +54,7 @@ class Round(GameScene):
         'initialize': False,
         'players_inside': False,
         'tick': 0,
-        'escape_interval': 400,
+        'escape_interval': 380,
         'blink': False,
         'blink_interval': 460,
         'end_interval': 520,
@@ -193,7 +193,7 @@ class Round(GameScene):
     def _show_controls(self, game, specific=None):
         if not specific:
             # Displaying player controls if player exists
-            for player, control in [game.player_1, game.player_2]:
+            for player in [game.player_1, game.player_2]:
                 player_control = self._get_controls(player)
                 if player and player_control:
                     rect = player.rect
@@ -220,7 +220,7 @@ class Round(GameScene):
         # Processing toggle of filter and text
         if self.state['tick'] > self.state['text_blink_interval']:
             game.text.begin_message.set_blink(True)
-        elif self.state['tick'] > self.state['control_blink_interval']:
+        if self.state['tick'] > self.state['control_blink_interval']:
             game.text.begin_message.toggle(False)
             game.text.defend_message.set_blink(True)
             if self.state['tick'] % 8 == 0:
@@ -242,9 +242,9 @@ class Round(GameScene):
             game.sound.play_sfx('ufo_destroy')
 
             game.ufo.set_blink(True)
-            game.player_1.set_eyes('shocked_eyes')
+            game.player_1.set_eyes('shock_eyes')
             if game.player_2:
-                game.player_2.set_eyes('shocked_eyes')
+                game.player_2.set_eyes('shock_eyes')
         else:
             self.state['tick'] += 1
 
@@ -269,9 +269,6 @@ class Round(GameScene):
     def _victory_process(self, game):
         # Initializing the process
         if not self.state['initialize']:
-            game.ufo.visible = True
-            game.ufo.can_get_in = True
-
             self.state['initialize'] = True
 
         # Waiting for players to get inside the UFO
@@ -282,9 +279,6 @@ class Round(GameScene):
             # Start animation for escaping
             if self.state['tick'] == 0:
                 game.sound.play('escape')
-                game.victory_transition[2] = True
-                game.ufo.can_get_in = False
-                game.ufo.always_on_top = True
 
             self.state['tick'] += 1
 
@@ -416,7 +410,8 @@ class Round(GameScene):
         # Conditions for ambush mode visuals
         if self._state_check('ambush'):
             self._ambush_process(game)
-
-        if game.level.ambush_mode:
-            if not self.state or (self.state and self.state['filter_show']):
+            if self.state and self.state.get('filter_show', False):
                 game.screen.blit(game.ambush_filter, (0, 0))
+
+        if game.level.ambush_mode and not self.state:
+            game.screen.blit(game.ambush_filter, (0, 0))

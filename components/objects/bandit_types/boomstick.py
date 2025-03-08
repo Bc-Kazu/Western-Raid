@@ -9,7 +9,7 @@ class Bandit(BanditModel):
         self.bullet_type = 'dynamite'
         self.base_shoot_interval = 200
         self.move_range = 350
-        self.base_drop_chances = {'power_up': 12, 'item': 70, 'brick': 10}
+        self.base_drop_chances = {'power_up': 20, 'item': 100, 'brick': 20}
         self.points_value = 40
         self.move_interval_base = [70, 240]
         self.bullet_speed = 3

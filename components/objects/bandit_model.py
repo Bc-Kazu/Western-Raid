@@ -24,6 +24,9 @@ class BanditModel(GameObject):
         self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
 
+        # Toggle if bandit should be detected by gadgets
+        self.gadget_safe = False
+
         # Movement settings
         self.move_range = 250
         self.move_interval = 120
@@ -45,6 +48,7 @@ class BanditModel(GameObject):
         self.shoot_tick = 0
         self.base_shoot_interval = randint(110, 130)
         self.shoot_interval = self.base_shoot_interval
+        self.last_bullet_buff = None
 
         # Special buff values
         self.shield_enabled = False
@@ -66,7 +70,7 @@ class BanditModel(GameObject):
         self.size = choice([lower_size, self.size, higher_size])
         self.move_interval_range = self.move_interval_base[:]
         self.health = self.base_health
-        self.drop_chances = self.base_drop_chances
+        self.drop_chances = self.base_drop_chances.copy()
         self.target = None
         self.despawning = False
         self.move_interval = randint(40, 120)
@@ -100,6 +104,16 @@ class BanditModel(GameObject):
         else:
             return None
 
+    # Multiplies the chance for every drop by a given value
+    def drop_odds_mult(self, multiplier):
+        for drop in self.drop_chances:
+            self.drop_chances[drop] = int(self.drop_chances[drop] * multiplier)
+
+    # Changes the odds for a single given drop type
+    def set_drop_odds(self, name, odds):
+        if name in self.drop_chances:
+            self.drop_chances[name] = int(odds)
+
     def get_random_destination(self, game):
         # Finding a random target position while remaining bandit inside screen.
         new_x = randint(self.movement_rect.left, self.movement_rect.right)
@@ -116,7 +130,7 @@ class BanditModel(GameObject):
         self.set_destination(new_x, new_y)
 
     def get_buff(self, game, buff):
-        if buff == 'shield':
+        if buff == 'protection':
             self.protection_hp += 1
             self.protection.set_alpha(self.protection_hp * 30)
         if buff == 'evil':
@@ -126,8 +140,7 @@ class BanditModel(GameObject):
             if self.shoot_interval < 30: self.shoot_interval = 30
             self.sprite.fill(colors.salmon, special_flags=pg.BLEND_RGBA_MULT)
         if buff == 'lucky':
-            for drop in self.drop_chances:
-                self.drop_chances[drop] *= 2
+            self.drop_odds_mult(2)
             self.sprite.fill(colors.lime, special_flags=pg.BLEND_RGBA_MULT)
         if buff == 'duplicate':
             bandit = game.bandit_pool_dict[self.name].get()
@@ -137,22 +150,8 @@ class BanditModel(GameObject):
             game.level.bandits.append(bandit)
 
     def get_target(self, game):
-        if self.name == 'hitman' and game.player_1:
-            possible_targets = [game.player_1, game.player_2 if game.player_2 else game.player_1]
-            target = possible_targets[randint(0, 1)]
-        elif self.name == 'dicer':
-            target = choice(game.level.bandits)
-            if target == self:
-                target = choice(game.ufo.blocks)
-        else:
-            target = choice(game.ufo.blocks)
-
-        if target:
-            if hasattr(target, 'rect'):
-                self.target = target
-            else:
-                raise ValueError(f'Invalid target: {target}, argument must be '
-                                 f'any class containing a "rect" attribute.')
+        target = choice(game.ufo.blocks)
+        self.target = target
 
     def despawn(self, game):
         top_distance = [(0, -self.despawn_speed), 0 + self.rect.y]
@@ -182,6 +181,7 @@ class BanditModel(GameObject):
             new_bullet = game.bullet_pool_dict[self.bullet_type].get()
             new_bullet.spawn(self.rect.center, direction, self)
             game.level.bullets.append(new_bullet)
+            self.last_bullet_buff = new_bullet.buff
 
             game.sound.play_sfx('bandit_shoot')
 
@@ -215,6 +215,15 @@ class BanditModel(GameObject):
                     self.lifetime = 2
 
     def update(self, game):
+        if self.tick == 0:
+            if game.level.ambush_mode:
+                level_nerf = {0: 1, 1: 0.8, 2: 0.5, 3: 0.3}
+
+                self.drop_odds_mult(level_nerf[game.level.index])
+
+                if game.level.index in (2, 3):
+                    self.set_drop_odds('brick', self.drop_chances['brick'] // 2)
+
         self.get_target(game)
         self.push_check(game, game.player_1)
         self.push_check(game, game.player_2)

@@ -14,7 +14,7 @@ class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
         self.move_range = 250
-        self.base_drop_chances = {'power_up': 15, 'item': 4000, 'brick': 40}
+        self.base_drop_chances = {'power_up': 20, 'item': 50, 'brick': 50}
         self.points_value = 30
         self.destined_velocity = 3
         self.move_interval_base = [40, 120]

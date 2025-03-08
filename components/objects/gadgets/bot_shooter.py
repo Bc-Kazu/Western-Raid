@@ -153,7 +153,7 @@ class BotShooter(GameObject):
             if game.level.defeat:
                 self.set_velocity(0, 0)
                 return
-            elif game.victory_transition[2]:
+            elif game.ufo.got_inside:
                 self.set_velocity(0, 0)
 
                 if game.tick % 15 == 0:
@@ -221,10 +221,9 @@ class BotShooter(GameObject):
                     game.sound.play_sfx('turret_shoot')
                     bullets_shot += 1
 
-                    if 'extra_reflect' in self.owner.PU_list:
-                        if bullets_shot > self.owner.PU_list['extra_reflect']:
-                            break
-                    else:
+                    extra_count = self.owner.PU_list.get('extra_reflect', 0)
+                    max_reached = bullets_shot > extra_count > 0
+                    if randint(0, 10 * extra_count) < randint(0, 100) or max_reached:
                         break
 
     def damage(self, game, damage):
@@ -255,7 +254,7 @@ class BotShooter(GameObject):
         if self.visible:
             game.screen.blit(self.sprite, self.rect)
 
-            if game.victory_transition[2]:
+            if game.ufo.got_inside:
                 self.current_eyes = self.happy_eyes_sprite
             elif game.level.defeat or self.stuck:
                 self.current_eyes = self.sad_eyes_sprite
