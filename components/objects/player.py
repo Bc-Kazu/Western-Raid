@@ -44,6 +44,8 @@ class Player(GameObject):
         self.happy_eyes = load_player_sprite(self, 'happy_eyes')
         self.closed_eyes = load_player_sprite(self, 'closed_eyes')
         self.shock_eyes = load_player_sprite(self, 'shock_eyes')
+        self.angry_eyes = load_player_sprite(self, 'angry_eyes')
+        self.squint_eyes = load_player_sprite(self, 'squint_eyes')
         self.current_eyes = self.base_eyes
         self.config['image'] = self.sprite.copy()
 
@@ -58,10 +60,10 @@ class Player(GameObject):
         self.hitbox = self.hitbox_area.get_rect()
 
         # Player's shield
-        self.shield_x = 0
-        self.shield_y = SHIELD_DISTANCE
-        self.shield_width = BASE_SHIELD_X
-        self.shield_height = BASE_SHIELD_Y
+        self.shield_x = SHIELD_DISTANCE if self.id == 2 else -SHIELD_DISTANCE
+        self.shield_y = 0
+        self.shield_width = BASE_SHIELD_Y
+        self.shield_height = BASE_SHIELD_X
         self.shield_rect = pg.Rect(0, 0, self.shield_width, self.shield_height)
         self.shield_rect.topleft = self.rect.topleft
 
@@ -86,6 +88,7 @@ class Player(GameObject):
         self.recovery_cd = 100
 
         self.alive = True
+        self.shield_visible = True
         self.stay_within_screen = True
         self.facing_up = False
         self.last_key = ''
@@ -232,16 +235,17 @@ class Player(GameObject):
 
     # Handle controls and changing sprites (shield, eyes, etc.)
     def update(self, game):
-        self.eyes_offset = [0, 0]
-        self.set_velocity(0, 0)
-
-        # Checking different keys depending on the current player controls
-        for direction, key in self.key_mapping.items():
-            if game.keys_pressed[key]:
-                self.change_direction(direction)
-
-        if self.stuck:
+        if game.level and game.level.started:
+            self.eyes_offset = [0, 0]
             self.set_velocity(0, 0)
+
+            # Checking different keys depending on the current player controls
+            for direction, key in self.key_mapping.items():
+                if game.keys_pressed[key]:
+                    self.change_direction(direction)
+
+            if self.stuck:
+                self.set_velocity(0, 0)
 
         super().update(game)
 
@@ -321,6 +325,10 @@ class Player(GameObject):
         self.current_eyes = self.eyes_dict[name]
 
     def draw(self, game):
+        if game.scene.state and game.scene.state['name'] == 'init_cutscene':
+            if game.scene.state['tick'] < game.scene.state['destroy_interval']:
+                return
+
         if game.ufo.got_inside:
             return
 
@@ -344,13 +352,14 @@ class Player(GameObject):
             self.sprite.set_alpha(255)
             self.outline.set_alpha(255)
 
-            if not game.level.defeat:
-                pg.draw.rect(game.screen, self.color, self.shield_rect)
+            if game.scene.name == 'round':
+                if not game.level.defeat and self.shield_visible:
+                    pg.draw.rect(game.screen, self.color, self.shield_rect)
 
-            if self.shield_buff_hp > 0:
-                shield_offset = int(self.size[0] / 1.65)
-                game.screen.blit(self.shield_buff, (self.rect.centerx - shield_offset, 
-                                                    self.rect.centery - shield_offset))
+                if self.shield_buff_hp > 0:
+                    shield_offset = int(self.size[0] / 1.65)
+                    game.screen.blit(self.shield_buff, (self.rect.centerx - shield_offset,
+                                                        self.rect.centery - shield_offset))
         elif game.scene.name == 'round':
             self.current_eyes.set_alpha(128)
             self.sprite.set_alpha(128)

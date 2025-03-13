@@ -2,6 +2,7 @@
 SceneObject class is made to serve other classes that identify as scenes for display,
 it holds basic functions for scenery processing specified for Western Raid
 """
+from copy import deepcopy
 
 class GameScene:
     # Directory that should contain every process with a corresponding state key
@@ -11,7 +12,7 @@ class GameScene:
         self.name = name
         self.state = None
         self.screen = screen
-        self.state_dict = self.BASE_STATE_DICT.copy()
+        self.state_dict = deepcopy(self.BASE_STATE_DICT)
 
         self.initialize = False
         self.finalize = False
@@ -21,7 +22,7 @@ class GameScene:
         self.state = None
 
         for state in self.state_dict.keys():
-            self.state_dict[state] = self.BASE_STATE_DICT[state].copy()
+            self.reset_state(state)
 
     def set_state(self, name=None):
         if name:
@@ -33,7 +34,7 @@ class GameScene:
             self.state = None
 
     def reset_state(self, name):
-        self.state_dict[name] = self.BASE_STATE_DICT[name].copy()
+        self.state_dict[name] = deepcopy(self.BASE_STATE_DICT[name])
 
     def _state_check(self, name):
         if self.state and not self.state['finalize']:

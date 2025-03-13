@@ -19,13 +19,7 @@ class Menu(GameScene):
         self.interval_toggle = False
 
         self.player_offset = [0, -100, 100]
-
-        self.sprites_dict = {
-            1: [[TITLE_SPRITE, TITLE_SPRITE_RECT], [TITLE_SPRITE_EYES, TITLE_SPRITE_EYES_RECT],
-                      [UFO_SPRITE, UFO_SPRITE_RECT]],
-            2: [[TITLE_SPRITE2, TITLE_SPRITE_RECT2], [TITLE_SPRITE_EYES2, TITLE_SPRITE_EYES_RECT2],
-                      [UFO_SPRITE2, UFO_SPRITE_RECT2]]
-        }
+        self.sprites_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
 
     def draw(self, game):
         game.screen.fill(colors.space_blue)
@@ -52,25 +46,7 @@ class Menu(GameScene):
         if game.tick % self.bobbing_interval == 0:
             game.player_bobbing = -game.player_bobbing
 
-        for player in [game.player_1, game.player_2]:
-            if not player:
-                continue
-
-            for sprite in self.sprites_dict[player.id]:
-                sprite[1].centerx = game.screen_width // 2 + self.player_offset[player.id]
-                sprite[1].centery = game.player_menu_y
-                if sprite == self.sprites_dict[player.id][2]:
-                    sprite[1].y -= 20
-
-                if player.id % 2 == 0:
-                    sprite[1].y -= game.player_bobbing
-                else:
-                    sprite[1].y += game.player_bobbing
-
-                if sprite == self.sprites_dict[player.id][1]:
-                    sprite[1].centerx -= 4
-
-                game.screen.blit(sprite[0], sprite[1])
+        game.players_animate(self.sprites_dict, self.player_offset)
 
         # Draw texts and controls on screen depending on players joined
         if game.player_1:

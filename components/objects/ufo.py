@@ -305,7 +305,7 @@ class Ufo(GameObject):
     def draw(self, game):
         super().draw(game)
 
-        if not self.blink and not self.got_inside and not self.visible:
+        if self.blink or (not self.got_inside and not self.visible):
             for block in self.blocks:
                 block.draw(game)
 

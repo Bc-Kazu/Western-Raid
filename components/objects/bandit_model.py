@@ -181,7 +181,6 @@ class BanditModel(GameObject):
             new_bullet = game.bullet_pool_dict[self.bullet_type].get()
             new_bullet.spawn(self.rect.center, direction, self)
             game.level.bullets.append(new_bullet)
-            self.last_bullet_buff = new_bullet.buff
 
             game.sound.play_sfx('bandit_shoot')
 

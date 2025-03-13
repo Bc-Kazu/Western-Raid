@@ -1,8 +1,6 @@
 """
 Class that initializes the main logic of the components stores most game values
 """
-from random import randint
-from random import choice
 
 from components.scenes.defeat import Defeat
 from components.scenes.level_select import LevelSelect
@@ -219,20 +217,18 @@ class Game:
             self.player_count = 1
             color = PLAYER_COLORS[0]
             self.player_1 = Player(controls, self.player_count, color)
-            self.player_1.rect.center = ((self.screen_width / 2) - 120, self.screen_height / 2)
             self.sound.play_sfx('join')
         elif not self.player_2 and self.player_1.controls != controls:
             self.player_count = 2
             color = PLAYER_COLORS[1]
             self.player_2 = Player(controls, self.player_count, color)
-            self.player_2.rect.center = ((self.screen_width / 2) + 120, self.screen_height / 2)
             self.sound.play_sfx('join')
 
     def start_round(self):
         if self.level:
             self.set_scene('round')
             self.scene.reset()
-            self.scene.set_state('startup')
+            self.scene.set_state('init_cutscene')
             self.sound.play(self.level.music, -1)
 
     def enter_level(self):
@@ -255,7 +251,7 @@ class Game:
                 self.sound.play_sfx('ui_select')
                 self.base_level = level_index
             elif is_mouse:
-                self.enter_level()
+                self.scene.set_state('start')
         else:
             self.sound.play_sfx('push')
 
@@ -308,6 +304,24 @@ class Game:
             if self.text.HUD_text_list[1] >= self.text.HUD_text_list[2]:
                 self.text.HUD_text_list[3] = False
                 self.text.HUD_text_list[1] = 0
+
+    def players_animate(self, ufo_dict, player_offset):
+        for player in [self.player_1, self.player_2]:
+            if not player:
+                continue
+
+            new_x = self.screen_width // 2 + player_offset[player.id]
+            new_y = self.player_menu_y
+            new_y -= self.player_bobbing if player.id % 2 == 0 else -self.player_bobbing
+
+            player.set_offset(None, [-4, 0])
+            player.set_position(new_x, new_y, True)
+            player.draw(self)
+
+            ufo = ufo_dict[player.id]
+            ufo[1].center = (new_x, new_y - 20)
+            self.screen.blit(ufo[0], ufo[1])
+
 
     # Merged "draw" function with components state to make bullet_sprites possible
     def update_state(self):

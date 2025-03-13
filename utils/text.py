@@ -27,6 +27,7 @@ class Text:
         self.base_color = base_color
         self.current_color = self.base_color
         self.blink_color = (255, 255, 240)
+        self.blink_color2 = self.base_color
         self.background_color = (0, 0, 0)
 
         self.icon = None
@@ -48,9 +49,10 @@ class Text:
         self.blink = blink
         if interval: self.blink_interval = interval
 
-    def set_color_blink(self, color_blink, color=None, interval=None):
+    def set_color_blink(self, color_blink, interval=None, color=None, color2=None):
         self.color_blink = color_blink
         if color: self.blink_color = color
+        if color2: self.blink_color2 = color2
         if interval: self.blink_interval = interval
 
     def set_background(self, enable, color=None):
@@ -106,7 +108,7 @@ class Text:
             if self.current_color != self.blink_color:
                 self.current_color = self.blink_color
             else:
-                self.current_color = self.base_color
+                self.current_color = self.blink_color2
 
     def update(self, game):
         self.tick += 1

@@ -37,14 +37,14 @@ class TextStorage:
 
         # MENU text configurations
         self.new_best_text.toggle(False)
-        self.new_best_text.set_color_blink(True, (150, 255, 100), 10)
+        self.new_best_text.set_color_blink(True, 10, (150, 255, 100))
         self.start_text.set_blink(True, 30)
         self.return_text.set_blink(True, 30)
         self.select_text.set_blink(True, 30)
         self.new_best_text.color_blink = True
-        self.survived_text.set_color_blink(True, (120, 255, 160), 30)
+        self.survived_text.set_color_blink(True, 30, (120, 255, 160))
 
-        self.choose_text.set_color_blink(False, (200, 100, 0), 8)
+        self.choose_text.set_color_blink(False, 8, (200, 100, 0))
         self.choose_text.toggle(False)
 
         # ===============================================================
@@ -60,7 +60,7 @@ class TextStorage:
         self.selected_level = Text('^ ^ ^',(150, 500), NORMAL_FONT)
 
         # LEVEL SELECT text configurations
-        self.level_select.set_color_blink(True, (180, 200, 255), 25)
+        self.level_select.set_color_blink(True, 25, (180, 200, 255))
 
         # ===============================================================
         # Creating IN-ROUND text/messages
@@ -74,7 +74,7 @@ class TextStorage:
         self.get_in = Text('- THE SPACESHIP HAS BEEN FIXED! GET IN!! -', (game.screen_width / 2, 80), TEXT_FONT)
 
         # IN-ROUND text configurations
-        self.timer_text.set_color_blink(False, (0, 255, 0), 30)
+        self.timer_text.set_color_blink(False, 30, (0, 255, 0))
         self.defend_message.set_blink(False, 10)
         self.begin_message.set_blink(False, 10)
         self.ambush_text.set_color(colors.red)

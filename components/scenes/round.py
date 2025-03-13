@@ -11,6 +11,26 @@ import pygame as pg
 
 class Round(GameScene):
     # Process for different types of scenes to play within the round
+    INIT_CUTSCENE_PROCESS = {
+        'name': 'init_cutscene',
+        'initialize': False,
+        'tick': 0,
+        'fall_interval': 120,
+        'fall_speed': 3,
+        'broken_ufo': False,
+        'destroy_interval': 180,
+        'player_velocity': [(0, 0), (-8, -8), (8, -8)],
+        'player_fall': [False, False, False],
+        'multX': 0.97,
+        'multY': 0.92,
+        'shield_show': False,
+        'timer': 0,
+        'timer_interval': 300,
+        'wait_interval': 360,
+        'end_interval': 420,
+        'finalize': False
+    }
+
     STARTUP_PROCESS = {
         'name': 'startup',
         'initialize': True,
@@ -67,11 +87,13 @@ class Round(GameScene):
         DEFEAT_PROCESS['name']: DEFEAT_PROCESS.copy(),
         REBUILD_PROCESS['name']: REBUILD_PROCESS.copy(),
         VICTORY_PROCESS['name']: VICTORY_PROCESS.copy(),
+        INIT_CUTSCENE_PROCESS['name']: INIT_CUTSCENE_PROCESS.copy(),
     }
 
     def __init__(self, name, screen):
         super().__init__(name, screen)
         super().reset()
+        self.ufo_goal_pos = None
 
     def _time_up_draw(self, game):
         # Drawing custom time up screen
@@ -202,6 +224,91 @@ class Round(GameScene):
             player_control = self._get_controls(specific)
             rect = specific.rect
             game.screen.blit(player_control, (rect.x - 2, rect.y - 50))
+
+    def _init_cutscene(self, game):
+        # Initializing the process
+        if not self.state['initialize']:
+            self.state['initialize'] = True
+            self.ufo_goal_pos = game.ufo.rect.y
+            game.ufo.set_position((game.ufo.rect.x, -game.ufo.size[1]))
+            game.ufo.visible = True
+            game.ufo.always_on_top = True
+
+            for player in [game.player_1, game.player_2]:
+                if player:
+                    player.shield_visible = False
+                    player.set_position((game.screen_width // 2, game.screen_height // 2), True)
+        else:
+            self.state['tick'] += 1
+
+        if game.ufo.rect.y < self.ufo_goal_pos:
+            if self.state['tick'] < self.state['fall_interval']:
+                self.state['fall_speed'] *= 1.03
+                game.ufo.set_position(game.ufo.rect.x, game.ufo.rect.y + self.state['fall_speed'])
+        elif not self.state['broken_ufo']:
+            game.ufo.set_position(game.ufo.rect.x, self.ufo_goal_pos)
+            self.state['broken_ufo'] = True
+            self.state['tick'] = self.state['fall_interval']
+            game.ufo.set_blink(True, 5)
+
+        if self.state['tick'] == self.state['destroy_interval']:
+            game.ufo.set_blink(False)
+            game.ufo.visible = False
+            game.ufo.always_on_top = False
+
+        if self.state['tick'] > self.state['destroy_interval']:
+            for player in [game.player_1, game.player_2]:
+                if not player:
+                    continue
+
+                velocity = self.state['player_velocity'][player.id]
+                player.set_velocity(velocity)
+
+                if player.id == 2:
+                    player.set_offset(None, [4, 0])
+
+                if velocity[1] > -1 and not self.state['player_fall'][player.id] :
+                    self.state['player_fall'][player.id] = True
+                    velocity = (velocity[0], 1)
+                elif self.state['player_fall'][player.id]:
+                    self.state['multY'] = 1.07
+                else:
+                    player.set_eyes('shock_eyes')
+
+                if player.rect.y > 300 and self.state['player_fall'][player.id] :
+                    player.set_position(player.rect.x, 300)
+                    self.state['multY'] = 0
+                    player.set_eyes('squint_eyes')
+
+                if self.state['tick'] > self.state['timer_interval']:
+                    player.set_eyes('base_eyes')
+                    if self.state['tick'] % 10 == 0:
+                        player.shield_visible = not player.shield_visible
+
+                new_velocity = (velocity[0] * self.state['multX'], velocity[1] * self.state['multY'])
+                self.state['player_velocity'][player.id] = new_velocity
+
+        if self.state['tick'] > self.state['timer_interval']:
+            self.state['timer'] += game.level.round_time // 60
+            if self.state['timer'] > game.level.round_time:
+                self.state['timer'] = game.level.round_time
+            seconds = self.state['timer'] % 60
+            minutes = int(self.state['timer'] / 60) % 60
+            game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
+        if self.state['tick'] > self.state['wait_interval']:
+            self.state['timer'] = game.level.round_time
+            game.text.timer_text.set_blink(True, 5)
+
+        # Finalizing the process
+        if self.state['tick'] > self.state['end_interval']:
+            self.state['finalize'] = True
+            game.text.timer_text.set_blink(False)
+            game.level.start()
+
+            for player in [game.player_1, game.player_2]:
+                if player: player.shield_visible = True
+
+            self.set_state('startup')
 
     def _startup_process(self, game):
         # Initializing the process
@@ -379,10 +486,11 @@ class Round(GameScene):
         for message in game.level.message_popups:
             message.draw(game)
 
-        time_left = game.level.round_time - game.level.time_elapsed
-        seconds = time_left % 60
-        minutes = int(time_left / 60) % 60
-        game.text.timer_text.string = f'{minutes:02}:{seconds:02}'
+        if not self.state or self.state['name'] != 'init_cutscene':
+            time_left = game.level.round_time - game.level.time_elapsed
+            seconds = time_left % 60
+            minutes = int(time_left / 60) % 60
+            game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
 
         if self._state_check('startup'):
             self._startup_process(game)
@@ -406,6 +514,8 @@ class Round(GameScene):
             self._rebuild_process(game)
         if self._state_check('victory'):
             self._victory_process(game)
+        if self._state_check('init_cutscene'):
+            self._init_cutscene(game)
 
         # Conditions for ambush mode visuals
         if self._state_check('ambush'):

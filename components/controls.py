@@ -98,7 +98,7 @@ def handle_events(game):
 
         # Starting level if possible
         if game.scene.name == 'level_select' and game.player_1:
-            game.enter_level()
+            game.scene.set_state('start')
         if game.scene.name == 'victory' or game.scene.name == 'defeat':
             game.sound.play_sfx('ui_select')
             game.game_reset()

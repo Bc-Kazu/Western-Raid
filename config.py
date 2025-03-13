@@ -296,8 +296,8 @@ LEVEL_CONFIG = [
         "spawn_start_time": 5,
     },
     { # ===== LEVEL 2 ( SALOON ) CONFIGURATIONS =====
-        "background": (60, 40, 35),
-        "music": 'tabletoss_beta',
+        "background": (80, 58, 40),
+        "music": 'tabletoss',
         "spawn_types":
             [
                 ["basic", 80, False, -15],

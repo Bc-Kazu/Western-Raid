@@ -38,6 +38,7 @@ class Level:
         self.max_increase_time = 50
 
         # Setting map and base values
+        self.started = False
         self.ambush_mode = False
         self.victory = False
         self.defeat = False
@@ -72,7 +73,7 @@ class Level:
         self.map = self.create_map(game)
 
         for terrain in self.map:
-            terrain.draw(game)
+            terrain.update(game)
             terrain.set_decoration()
 
         for terrain in self.map:
@@ -82,7 +83,8 @@ class Level:
             if not terrain.alive:
                 self.map.remove(terrain)
 
-        self.update_instance(game, self.map)
+    def start(self):
+        self.started = True
 
 
     # This function takes care of drawing the map randomly and automatically.
@@ -202,7 +204,7 @@ class Level:
             elif text[-2:] == 'PU':
                 message.set_font(TEXT_FONT)
                 message.preset('popup', (0, -5), 80)
-                message.set_color_blink(True, colors.light_pink, 8)
+                message.set_color_blink(True, 8, colors.light_pink)
 
         self.message_popups.append(message)
 
@@ -233,25 +235,27 @@ class Level:
             self.ufo.set_regenerate(False)
             self.can_spawn_bandits = False
 
-        if self.time_elapsed >= self.spawn_start_time and self.can_spawn_bandits:
-            self.spawn_bandit(game)
+        if self.started:
+            if self.time_elapsed >= self.spawn_start_time and self.can_spawn_bandits:
+                self.spawn_bandit(game)
 
-        # Counting every second of the round elapsed
-        if game.tick % game.FPS == 0 and not self.defeat:
-            self.time_elapsed += 1
-            self.difficulty_incremented = False
+            # Counting every second of the round elapsed
+            if game.tick % game.FPS == 0 and not self.defeat:
+                self.time_elapsed += 1
+                self.difficulty_incremented = False
 
-        # Increasing difficulty every difficulty_time interval
-        if (self.time_elapsed != 0 and self.time_elapsed % self.difficulty_time == 0
-                and not self.difficulty_incremented):
-            self.difficulty_incremented = True
-            self.bandit_spawnrate = max(60, self.bandit_spawnrate - 15)
+            # Increasing difficulty every difficulty_time interval
+            if (self.time_elapsed != 0 and self.time_elapsed % self.difficulty_time == 0
+                    and not self.difficulty_incremented):
+                self.difficulty_incremented = True
+                self.bandit_spawnrate = max(60, self.bandit_spawnrate - 15)
 
-            # Increasing max bandit count every max_increase_time interval
-            if self.time_elapsed % self.max_increase_time == 0:
-                self.max_bandits += 1
+                # Increasing max bandit count every max_increase_time interval
+                if self.time_elapsed % self.max_increase_time == 0:
+                    self.max_bandits += 1
 
-        self.bandit_count = 0
+            self.bandit_count = 0
+
         # Updating every game component class
         if not self.defeat:
             if game.player_1:

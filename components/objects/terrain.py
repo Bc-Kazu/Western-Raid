@@ -139,8 +139,8 @@ class Terrain(GameObject):
             elif randint(1, 4 + len(self.decorations)) >= randint(1, 4):
                 game.level.spawn_pickup('brick', self.rect.center)
 
-
-    def draw(self, game):
+    def update(self, game):
+        super().update(game)
         self.area_rect.center = self.rect.center
 
         if self.name == 'table':
@@ -148,6 +148,7 @@ class Terrain(GameObject):
         if self.name == 'large_table':
             self.area_rect.y += self.size[1] // 3
 
+    def draw(self, game):
         if game.debug:
             game.screen.blit(self.area_surface, self.area_rect)
 
