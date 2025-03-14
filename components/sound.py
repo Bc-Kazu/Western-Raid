@@ -4,7 +4,7 @@ class Sound:
     def __init__(self):
         pg.mixer.init()
         self.mute = False
-        self.volume_offset = 0.5
+        self.volume_offset = 0.8
         self.sfx_offset = 0.5
 
     def play(self, song, loop=0):
@@ -22,7 +22,7 @@ class Sound:
 
     def mute_music(self):
         self.mute = not self.mute
-        self.volume_offset = 0 if self.mute else 0.5
+        self.volume_offset = 0 if self.mute else 0.7
         self.sfx_offset = 0 if self.mute else 0.5
         pg.mixer.music.set_volume(self.volume_offset * 0.5)
 

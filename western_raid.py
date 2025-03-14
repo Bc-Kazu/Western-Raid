@@ -23,7 +23,7 @@ from components import level
 from components.objects.bandit_types import (
     basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
 
-from assets import (TITLE_SPRITE, init_loading, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG, DYNAMITE_CONFIG)
+from assets import (TITLE_SPRITE, init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG, DYNAMITE_CONFIG)
 from config import DATA_FORMAT, PLAYER_COLORS
 
 import pygame as pg
@@ -124,6 +124,13 @@ class Game:
         # Loading starter configurations
         self.base_level = 1
         self.base_config = 1
+        self.allowed_levels = [1]
+
+        for i in range(len(LEVEL_FRAMES)):
+            if not i + 1 in self.allowed_levels:
+                LEVEL_FRAMES[i].fill((255, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
+
+
 
     def save_data(self):
         file_path = os.path.join('components', 'contentlib.wb')
@@ -181,7 +188,7 @@ class Game:
     def initialize(self):
         # Setting up the display window customization
         pg.display.set_icon(TITLE_SPRITE)
-        pg.display.set_caption('< WESTERN RAID > v0.62')
+        pg.display.set_caption('< WESTERN RAID > v0.7.2')
 
         self.load_data()
         self.set_scene('menu')
@@ -229,11 +236,9 @@ class Game:
             self.set_scene('round')
             self.scene.reset()
             self.scene.set_state('init_cutscene')
-            self.sound.play(self.level.music, -1)
 
     def enter_level(self):
         if self.data[f'level{self.base_level}']['unlocked']:
-            self.sound.play_sfx('start')
             self.base_config = self.base_level
             self.set_scene('loading')
         else:
@@ -243,10 +248,8 @@ class Game:
         self.level = level.Level(self.base_level, self.base_config, self)
 
     def set_level(self, level_index, is_mouse=False):
-        allowed_levels = [1, 2, 3]
-
         # Only allow levels avaliable in list
-        if level_index in allowed_levels:
+        if level_index in self.allowed_levels:
             if self.base_level != level_index:
                 self.sound.play_sfx('ui_select')
                 self.base_level = level_index
@@ -274,7 +277,7 @@ class Game:
 
         all_levels_score = 0
 
-        for levels in range(1, 3):
+        for levels in self.allowed_levels:
             all_levels_score += self.data[f"level{levels}"]["best_score"]
 
         if self.data[f"total_score"] < all_levels_score:

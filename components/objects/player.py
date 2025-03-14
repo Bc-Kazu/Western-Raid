@@ -329,7 +329,7 @@ class Player(GameObject):
             if game.scene.state['tick'] < game.scene.state['destroy_interval']:
                 return
 
-        if game.ufo.got_inside:
+        if game.ufo.got_inside and not game.scene.name == 'victory':
             return
 
         self.super_effect()

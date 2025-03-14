@@ -39,10 +39,10 @@ class LevelSelect(GameScene):
 
         self.fall_index = [0, 0, 1]
         self.fall_offset_list = [
-            (0, -4),
-            (-2, 0),
-            (-4, -4),
-            (-2, 0),
+            (0, -6),
+            (-2, -2),
+            (-4, -6),
+            (-2, -2),
         ]
 
         self.ufo_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
@@ -53,7 +53,11 @@ class LevelSelect(GameScene):
             self.level_selected = game.base_level
             self.player_offset = [0, -100, 100]
             self.player_shake = 12
-            self.fall_speed = 0.7
+            self.fall_speed = 2
+
+            game.sound.play('none')
+            game.sound.play_sfx('start')
+            game.sound.play_sfx('ufo_break')
 
             lv_name = getattr(game.text, f"level{self.level_selected}_select")
             lv_name.set_color_blink(True, 8, colors.green, colors.white)
@@ -66,6 +70,8 @@ class LevelSelect(GameScene):
             if self.state['tick'] % self.shake_interval == 0:
                 self.player_shake /= 1.2
                 self.player_shake = -self.player_shake
+        elif self.state['tick'] == self.state['fall_interval']:
+            game.sound.play_sfx('fall_menu')
 
         for player in [game.player_1, game.player_2]:
             if not player:
@@ -90,7 +96,7 @@ class LevelSelect(GameScene):
             if not falling:
                 new_x += self.player_shake
                 player.set_offset(None, [-3, 0])
-                self.state['fall_offset'][player.id] -= self.fall_speed
+                self.state['fall_offset'][player.id] -= self.fall_speed / 3
             elif self.state['tick'] < self.state['end_interval']:
                 offset = self.fall_offset_list[self.fall_index[player.id]]
                 player.set_offset(None, offset)
@@ -130,11 +136,29 @@ class LevelSelect(GameScene):
             LEVEL_ICONS[i].set_alpha(100)
 
         # Set active level to highlighted state
-        if 1 <= game.base_level <= 3:
+        if game.base_level in game.allowed_levels:
             if not self.level_selected:
-                getattr(game.text, f"level{game.base_level}_select").set_color(colors.white)
+                level_names = [
+                    'LOCKED',
+                    'DESERT',
+                    'SALOON',
+                    'BARREN',
+                    'CARTEL',
+                    '???']
+
+                i = game.base_level
+                unlocked = game.data[f'level{i}']['unlocked']
+                lv_name = f'---< [ {level_names[i] if unlocked else level_names[0]} ] >---'
+                best_text = 'BEST SCORE: ' + str(game.data[f'level{i}']['best_score'])
+                getattr(game.text, f"level{i}_select").set_color(colors.white)
+                getattr(game.text, f"level{i}_name").set_text(lv_name)
+                getattr(game.text, f"level{i}_best").set_text(best_text)
+                getattr(game.text, f"level{i}_name").draw(game)
+                getattr(game.text, f"level{i}_best").draw(game)
+
             LEVEL_FRAMES[game.base_level - 1].set_alpha(255)
             LEVEL_ICONS[game.base_level - 1].set_alpha(255)
+
 
         for i in range(1, 6):
             getattr(game.text, f"level{i}_select").draw(game)
@@ -152,8 +176,10 @@ class LevelSelect(GameScene):
                 self.selected_blink = not self.selected_blink
 
             alpha = 0 if self.selected_blink else 255
+            alpha2 = 128 if self.selected_blink else 255
 
             LEVEL_FRAMES[lv].set_alpha(alpha)
+            LEVEL_ICONS[lv].set_alpha(alpha2)
 
         # Draw level frames, icons, and locks if locked
         for i in range(len(LEVEL_FRAMES)):

@@ -83,8 +83,9 @@ class Level:
             if not terrain.alive:
                 self.map.remove(terrain)
 
-    def start(self):
+    def start(self, game):
         self.started = True
+        game.sound.play(self.music, -1)
 
 
     # This function takes care of drawing the map randomly and automatically.
@@ -280,7 +281,7 @@ class Level:
             self.victory = True
             game.scene.set_state('rebuild')
 
-        if (game.level.time_elapsed > game.level.ambush_time and not game.level.ambush_mode
-                and not game.level.victory and not game.level.defeat):
+        if (self.time_elapsed > self.ambush_time and not self.ambush_mode
+                and not self.victory and not self.defeat and not game.scene.state):
             self.ambush_mode = True
             game.scene.set_state('ambush')

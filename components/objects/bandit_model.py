@@ -216,7 +216,7 @@ class BanditModel(GameObject):
     def update(self, game):
         if self.tick == 0:
             if game.level.ambush_mode:
-                level_nerf = {0: 1, 1: 0.8, 2: 0.5, 3: 0.3}
+                level_nerf = {0: 1, 1: 0.5, 2: 0.4, 3: 0.3}
 
                 self.drop_odds_mult(level_nerf[game.level.index])
 

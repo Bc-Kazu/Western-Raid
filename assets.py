@@ -343,8 +343,6 @@ LEVEL_FRAMES = [
     UI_FRAME.copy()
 ]
 
-LEVEL_FRAMES[3].fill((255, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
-LEVEL_FRAMES[4].fill((255, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
 init_loading('loading assets', 5)
 
 LEVEL_FRAMES_RECT = [

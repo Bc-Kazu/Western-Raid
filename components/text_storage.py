@@ -16,9 +16,9 @@ class TextStorage:
         self.lost_text = Text('~X CAPTURED X~', (game.screen_width / 2, 100), TITLE_FONT,
                             (255, 160, 50))
         self.final_message = Text('CONGRATULATIONS!', (190, game.screen_height - 150),
-                                TEXT_FONT, (255, 255, 255))
+                                TEXT_FONT, colors.white)
         self.final_message2 = Text('THANKS FOR PLAYING! :]', (185, game.screen_height - 115),
-                                 TEXT_FONT, (255, 255, 255))
+                                 TEXT_FONT, colors.white)
         self.title_text = Text('< WESTERN RAID >', (game.screen_width / 2, 100), TITLE_FONT)
         self.player1_text = Text('PLAYER 1 :', (game.screen_width / 2 - 100, 360), TEXT_FONT, (180, 255, 180))
         self.player2_text = Text('PLAYER 2 :', (game.screen_width / 2 + 100, 360), TEXT_FONT, (255, 180, 255))
@@ -52,11 +52,17 @@ class TextStorage:
         self.level_select = Text('= SELECT A LEVEL =', (game.screen_width / 2, 60), NORMAL_FONT)
         self.select_tip = Text('use A / D  or  LEFT / RIGHT',
                               (game.screen_width / 2, 100), TEXT_FONT, (120, 200, 255))
-        self.level1_select = Text('LEVEL 1',(150, 150), TEXT_FONT, (100, 100, 100))
-        self.level2_select = Text('LEVEL 2',(310, 150), TEXT_FONT, (100, 100, 100))
-        self.level3_select = Text('LEVEL 3',(480, 150), TEXT_FONT, (100, 100, 100))
-        self.level4_select = Text('LEVEL 4',(640, 150), TEXT_FONT, (100, 0, 0))
-        self.level5_select = Text('LEVEL 5',(800, 150), TEXT_FONT, (100, 0, 0))
+
+        for level in range(1, 6):
+            offset = 164
+            setattr(self, f'level{level}_name',
+                    Text(f'XXXXXX:',(game.screen_width // 2, 300), NORMAL_FONT, colors.white))
+            setattr(self, f'level{level}_best',
+                    Text(f'BEST:',(game.screen_width // 2, 340), TEXT_FONT, colors.white))
+            setattr(self, f'level{level}_select',
+                    Text(f'LEVEL {level}:', (150 + (offset * (level - 1)), 150),
+                         TEXT_FONT, colors.grey if level <= 3 else (100, 0, 0)))
+
         self.selected_level = Text('^ ^ ^',(150, 500), NORMAL_FONT)
 
         # LEVEL SELECT text configurations

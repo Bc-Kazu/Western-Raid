@@ -1,10 +1,8 @@
 ''' ============================================================= '''
-from assets import TITLE_SPRITE_RECT, UFO_SPRITE_RECT, WIN_SPRITE_EYES_RECT, TITLE_SPRITE_RECT2, UFO_SPRITE_RECT2, \
-    WIN_SPRITE_EYES_RECT2, TITLE_SPRITE, WIN_SPRITE_EYES, UFO_SPRITE, TITLE_SPRITE2, WIN_SPRITE_EYES2, UFO_SPRITE2
-
 ''' ========= HANDLING EVERYTHING IN THE VICTORY SCREEN ========= '''
 ''' ============================================================= '''
 
+from assets import UFO_SPRITE_RECT, UFO_SPRITE_RECT2, UFO_SPRITE, UFO_SPRITE2
 from components.game_scene import GameScene
 from utils.colors import Colors
 colors = Colors()
@@ -14,7 +12,6 @@ class Victory(GameScene):
         super().__init__(name, screen)
         super().reset()
         self.bobbing_interval = 20
-
         self.player_offset = [0, 100, 300]
         self.score_rects = [(0, 0), (195, 300), (200, 350)]
 
@@ -25,10 +22,12 @@ class Victory(GameScene):
             UFO_SPRITE_RECT.center = (game.screen_width / 2, 420)
             UFO_SPRITE_RECT2.center = (game.screen_width / 2, 420 + 15)
 
-            TITLE_SPRITE_RECT.center = (game.screen_width / 2, 440)
-            WIN_SPRITE_EYES_RECT.center = TITLE_SPRITE_RECT.center
-            TITLE_SPRITE_RECT2.center = (game.screen_width / 2, 440 + 15)
-            WIN_SPRITE_EYES_RECT2.center = TITLE_SPRITE_RECT2.center
+            for player in [game.player_1, game.player_2]:
+                if player:
+                    player.set_position((game.screen_width / 2, 440), True)
+                    player.set_eyes('happy_eyes')
+                    player.facing_up = False
+
             self.initialize = True
 
         game.screen.fill(colors.space_purple)

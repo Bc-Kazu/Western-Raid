@@ -20,7 +20,8 @@ class Round(GameScene):
         'broken_ufo': False,
         'destroy_interval': 180,
         'player_velocity': [(0, 0), (-8, -8), (8, -8)],
-        'player_fall': [False, False, False],
+        'start_fall': [False, False, False],
+        'fallen': [False, False, False],
         'multX': 0.97,
         'multY': 0.92,
         'shield_show': False,
@@ -233,6 +234,7 @@ class Round(GameScene):
             game.ufo.set_position((game.ufo.rect.x, -game.ufo.size[1]))
             game.ufo.visible = True
             game.ufo.always_on_top = True
+            game.sound.play_sfx('fall_round')
 
             for player in [game.player_1, game.player_2]:
                 if player:
@@ -250,6 +252,7 @@ class Round(GameScene):
             self.state['broken_ufo'] = True
             self.state['tick'] = self.state['fall_interval']
             game.ufo.set_blink(True, 5)
+            game.sound.play_sfx('ufo_destroy')
 
         if self.state['tick'] == self.state['destroy_interval']:
             game.ufo.set_blink(False)
@@ -267,18 +270,23 @@ class Round(GameScene):
                 if player.id == 2:
                     player.set_offset(None, [4, 0])
 
-                if velocity[1] > -1 and not self.state['player_fall'][player.id] :
-                    self.state['player_fall'][player.id] = True
+                if velocity[1] > -1 and not self.state['start_fall'][player.id] :
+                    self.state['start_fall'][player.id] = True
                     velocity = (velocity[0], 1)
-                elif self.state['player_fall'][player.id]:
+                elif self.state['start_fall'][player.id]:
                     self.state['multY'] = 1.07
                 else:
                     player.set_eyes('shock_eyes')
 
-                if player.rect.y > 300 and self.state['player_fall'][player.id] :
+                if player.rect.y > 300 and self.state['start_fall'][player.id] :
                     player.set_position(player.rect.x, 300)
                     self.state['multY'] = 0
                     player.set_eyes('squint_eyes')
+
+                    if not self.state['fallen'][player.id]:
+                        if player.id == 1:
+                            game.sound.play_sfx('block_break')
+                        self.state['fallen'][player.id] = True
 
                 if self.state['tick'] > self.state['timer_interval']:
                     player.set_eyes('base_eyes')
@@ -288,22 +296,33 @@ class Round(GameScene):
                 new_velocity = (velocity[0] * self.state['multX'], velocity[1] * self.state['multY'])
                 self.state['player_velocity'][player.id] = new_velocity
 
-        if self.state['tick'] > self.state['timer_interval']:
-            self.state['timer'] += game.level.round_time // 60
+        if self.state['tick'] == self.state['destroy_interval'] + 3:
+            game.sound.play_sfx('player_fling')
+        if self.state['tick'] == self.state['timer_interval']:
+            game.sound.play_sfx('block_break')
+        if self.state['tick'] == self.state['wait_interval']:
+            game.sound.play_sfx('buff')
+
+        if self.state['wait_interval'] >= self.state['tick'] > self.state['timer_interval']:
+            self.state['timer'] += game.level.round_time / 60
             if self.state['timer'] > game.level.round_time:
                 self.state['timer'] = game.level.round_time
-            seconds = self.state['timer'] % 60
+            seconds = int(self.state['timer'] % 60)
             minutes = int(self.state['timer'] / 60) % 60
             game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
+
+            if self.state['tick'] % 5 == 0:
+                game.sound.play_sfx('block_break_extra')
         if self.state['tick'] > self.state['wait_interval']:
             self.state['timer'] = game.level.round_time
-            game.text.timer_text.set_blink(True, 5)
+            game.text.timer_text.set_blink(True, 4)
 
         # Finalizing the process
         if self.state['tick'] > self.state['end_interval']:
             self.state['finalize'] = True
             game.text.timer_text.set_blink(False)
-            game.level.start()
+            game.text.timer_text.visible = True
+            game.level.start(game)
 
             for player in [game.player_1, game.player_2]:
                 if player: player.shield_visible = True
