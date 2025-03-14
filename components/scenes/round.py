@@ -310,12 +310,14 @@ class Round(GameScene):
             seconds = int(self.state['timer'] % 60)
             minutes = int(self.state['timer'] / 60) % 60
             game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
+            game.text.timer_text.draw(game)
 
             if self.state['tick'] % 5 == 0:
                 game.sound.play_sfx('block_break_extra')
         if self.state['tick'] > self.state['wait_interval']:
             self.state['timer'] = game.level.round_time
             game.text.timer_text.set_blink(True, 4)
+            game.text.timer_text.draw(game)
 
         # Finalizing the process
         if self.state['tick'] > self.state['end_interval']:
@@ -453,7 +455,6 @@ class Round(GameScene):
 
     def draw(self, game):
         game.screen.fill(game.level.background_color)
-        if game.stars.enabled: game.stars.enabled = False
 
         # Temporary list for hazzards to be prioritized by their Y position
         draw_queue = []
@@ -505,23 +506,22 @@ class Round(GameScene):
         for message in game.level.message_popups:
             message.draw(game)
 
-        if not self.state or self.state['name'] != 'init_cutscene':
-            time_left = game.level.round_time - game.level.time_elapsed
-            seconds = time_left % 60
-            minutes = int(time_left / 60) % 60
-            game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
-
-        if self._state_check('startup'):
-            self._startup_process(game)
-
         if game.debug:
             if game.player_1:
                 game.screen.blit(game.player_1.hitbox_area, game.player_1.hitbox)
             if game.player_2:
                 game.screen.blit(game.player_2.hitbox_area, game.player_2.hitbox)
 
-        if not self.state or not self.state['name'] == 'victory':
+        timer_blacklist = ['init_cutscene', 'victory', 'defeat']
+        if not self.state or not self.state['name'] in timer_blacklist:
+            time_left = game.level.round_time - game.level.time_elapsed
+            seconds = time_left % 60
+            minutes = int(time_left / 60) % 60
+            game.text.timer_text.set_text(f'{minutes:02}:{seconds:02}')
             game.text.timer_text.draw(game)
+
+        if self._state_check('startup'):
+            self._startup_process(game)
 
         if game.esc_pressed:
             game.text.escape_text.draw(game)

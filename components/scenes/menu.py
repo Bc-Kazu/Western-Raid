@@ -2,9 +2,7 @@
 ''' ========== HANDLING EVERYTHING IN THE MENU SCREEN =========== '''
 ''' ============================================================= '''
 
-from assets import TITLE_SPRITE_RECT, UFO_SPRITE_RECT, TITLE_SPRITE_RECT2, UFO_SPRITE_RECT2, \
-    TITLE_SPRITE, UFO_SPRITE, TITLE_SPRITE2, UFO_SPRITE2, \
-    TITLE_SPRITE_EYES, TITLE_SPRITE_EYES_RECT, TITLE_SPRITE_EYES2, TITLE_SPRITE_EYES_RECT2, WASD_CONTROLS_A, \
+from assets import UFO_SPRITE_RECT, UFO_SPRITE_RECT2, UFO_SPRITE, UFO_SPRITE2, WASD_CONTROLS_A, \
     WASD_RECT_A, ARROWS_CONTROLS_A, ARROWS_RECT_A
 
 from components.game_scene import GameScene
@@ -17,18 +15,54 @@ class Menu(GameScene):
         super().reset()
         self.bobbing_interval = 30
         self.interval_toggle = False
+        self.title_interval = 15
+        self.title_index = 0
+        self.title_anim = ['-']
 
         self.player_offset = [0, -100, 100]
         self.sprites_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
+    def set_title(self, game):
+        self.title_anim = [
+            f' - = -{game.title_name}- = - ',
+            f'- - = {game.title_name} = - -',
+            f' - - ={game.title_name}= - - ',
+            f'- - - {game.title_name} - - -',
+            f' - - -{game.title_name}- - - ',
+            f'= - - {game.title_name} - - =',
+            f' = - -{game.title_name}- - = ',
+            f'- = - {game.title_name} - = -',
+        ]
 
     def draw(self, game):
         game.screen.fill(colors.space_blue)
-        game.stars.update(game)
 
+        if game.title_name == '< WESTERN RAID >':
+            game.stars.update(game)
+            self.bobbing_interval = 30
+
+            for player in [game.player_1, game.player_2]:
+                if player:
+                    player.set_eyes('base_eyes')
+                    player.set_offset(None, [-4, 0])
+
+        else:
+            game.win_stars.update(game)
+            self.bobbing_interval = 20
+
+            for player in [game.player_1, game.player_2]:
+                if player:
+                    player.set_eyes('happy_eyes')
+
+        if game.tick % self.title_interval == 0:
+            self.title_index += 1
+            if self.title_index > len(self.title_anim) - 1:
+                self.title_index = 0
+
+        game.text.title_text.set_text(self.title_anim[self.title_index])
         game.text.title_text.draw(game)
         game.text.volume_text.draw(game)
         game.text.full_score_text.rect = (game.screen_width / 2, 180)
-        game.text.full_score_text.string = str("TOTAL SCORE: {:07d}".format(game.data["total_score"]))
+        game.text.full_score_text.string = str("TOTAL SCORE: {:08d}".format(game.data["total_score"]))
         game.text.full_score_text.draw(game)
         game.text.new_best_text.draw(game)
 

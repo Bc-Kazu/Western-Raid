@@ -122,9 +122,11 @@ class Game:
         self.player_menu_y = 460
 
         # Loading starter configurations
+        self.title_name = '< WESTERN RAID >'
+        self.music = 'menu'
         self.base_level = 1
         self.base_config = 1
-        self.allowed_levels = [1]
+        self.allowed_levels = [1, 2, 3]
 
         for i in range(len(LEVEL_FRAMES)):
             if not i + 1 in self.allowed_levels:
@@ -192,23 +194,35 @@ class Game:
 
         self.load_data()
         self.set_scene('menu')
-        self.sound.play('menu', -1)
+        self.sound.play(self.music, -1)
 
     def set_scene(self, name):
         self.scene = self.scene_dict[name](name, self.screen)
 
+        if self.scene.name == 'menu':
+            self.scene.set_title(self)
+
+    def set_music(self, name):
+        self.music = name
+        self.sound.play(name, -1)
+
     def run(self):
+        while self.tick < 200:
+            self.stars.update(self)
+            self.win_stars.update(self)
+            self.tick += 1
+
         self.initialize()
 
         while self.running:
             self.update_state()
             handle_events(self)
 
-            self.clock.tick(self.FPS)
             self.tick += 1
+            self.clock.tick(self.FPS)
 
     def game_reset(self):
-        self.sound.play('menu', -1)
+        self.sound.play(self.music, -1)
         self.set_scene('menu')
 
         self.text.begin_message.set_blink(False)
@@ -239,10 +253,13 @@ class Game:
 
     def enter_level(self):
         if self.data[f'level{self.base_level}']['unlocked']:
-            self.base_config = self.base_level
-            self.set_scene('loading')
+            self.scene.set_state('start')
         else:
             self.sound.play_sfx('push')
+
+    def start_loading(self):
+        self.base_config = self.base_level
+        self.set_scene('loading')
 
     def load_level(self):
         self.level = level.Level(self.base_level, self.base_config, self)
@@ -254,7 +271,7 @@ class Game:
                 self.sound.play_sfx('ui_select')
                 self.base_level = level_index
             elif is_mouse:
-                self.scene.set_state('start')
+                self.enter_level()
         else:
             self.sound.play_sfx('push')
 
@@ -288,7 +305,7 @@ class Game:
 
         if score_type == 'victory':
             self.data["victories"] += 1
-            if self.level.index + 1 <= 3:
+            if self.level.index + 1 in self.allowed_levels:
                 self.data[f"level{self.level.index + 1}"]["unlocked"] = True
         elif score_type == 'defeat':
             self.data["defeats"] += 1
@@ -328,11 +345,6 @@ class Game:
 
     # Merged "draw" function with components state to make bullet_sprites possible
     def update_state(self):
-        stars_scene_list = ['menu', 'level_select', 'loading']
-        win_scene_list = ['victory']
-        self.stars.enabled = self.scene.name in stars_scene_list
-        self.win_stars.enabled = self.scene.name in win_scene_list
-
         if self.scene.name == 'round':
             self.level.run(self)
 

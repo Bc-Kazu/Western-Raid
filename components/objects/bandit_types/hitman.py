@@ -6,7 +6,7 @@ colors = Colors()
 class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
-        self.base_shoot_interval = 240
+        self.base_shoot_interval = 180
         self.move_range = 500
         self.base_drop_chances = {'power_up': 40, 'item': 70, 'brick': 100}
         self.points_value = 80

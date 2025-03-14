@@ -27,7 +27,11 @@ class Loading(GameScene):
 
     def draw(self, game):
         game.screen.fill(colors.space_blue)
-        game.stars.update(game)
+
+        if game.title_name == '< WESTERN RAID >':
+            game.stars.update(game)
+        else:
+            game.win_stars.update(game)
 
         self.loading_tick += 1
         self.dots_tick += 1

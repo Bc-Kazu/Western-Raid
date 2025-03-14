@@ -39,7 +39,7 @@ class Victory(GameScene):
         final_score = game.player_1.score + (game.player_2.score if game.player_2 else 0)
 
         game.text.full_score_text.rect = (265, 250)
-        game.text.full_score_text.set_text("FINAL SCORE: {:07d}".format(final_score))
+        game.text.full_score_text.set_text("FINAL SCORE: {:06d}".format(final_score))
         game.text.full_score_text.draw(game)
         game.text.return_text.draw(game)
 
@@ -56,6 +56,6 @@ class Victory(GameScene):
             if not player:
                 continue
 
-            text_list[player.id].set_text("PLAYER {:d}: {:05d}".format(player.id, player.score))
+            text_list[player.id].set_text("PLAYER {:d}: {:06d}".format(player.id, player.score))
             text_list[player.id].set_position(self.score_rects[player.id])
             text_list[player.id].draw(game)

@@ -78,13 +78,13 @@ def handle_events(game):
         if keys[pg.K_UP] or keys[pg.K_LEFT] or keys[pg.K_DOWN] or keys[pg.K_RIGHT]:
             game.add_player('ARROWS')
 
-    if game.scene.name == 'level_select':
+    if game.scene.name == 'level_select' and not game.scene.state:
         if input_once(game, pg.K_RIGHT) or input_once(game, pg.K_d):
             game.set_level(game.base_level + 1)
         if input_once(game, pg.K_LEFT) or input_once(game, pg.K_a):
             game.set_level(game.base_level - 1)
 
-    if input_once(game, pg.K_RETURN):
+    if input_once(game, pg.K_RETURN) and not game.scene.state:
         if game.scene.name == 'menu':
             if game.player_1:
                 game.set_scene('level_select')
@@ -98,7 +98,7 @@ def handle_events(game):
 
         # Starting level if possible
         if game.scene.name == 'level_select' and game.player_1:
-            game.scene.set_state('start')
+            game.enter_level()
         if game.scene.name == 'victory' or game.scene.name == 'defeat':
             game.sound.play_sfx('ui_select')
             game.game_reset()
@@ -109,14 +109,25 @@ def handle_events(game):
             game.player_1 = None
             game.player_2 = None
 
+    if input_once(game, pg.K_r):
+        if game.scene.name == 'menu' and game.data['victories'] > 0:
+            if game.title_name == '< WESTERN RAID >':
+                game.title_name = '< WESTERN RAVE >'
+                game.scene.set_title(game)
+                game.set_music('martian_rave')
+            else:
+                game.title_name = '< WESTERN RAID >'
+                game.scene.set_title(game)
+                game.set_music('menu')
+
     if input_once(game, pg.K_F7):
-        if game.scene.name == 'round' and game.player_1 is not None:
+        if game.player_1 is not None:
             game.player_1.set_super()
     if input_once(game, pg.K_F8):
-        if game.scene.name == 'round' and game.player_2 is not None:
+        if game.player_2 is not None:
             game.player_2.set_super()
 
-    if input_once(game, pg.K_ESCAPE):
+    if input_once(game, pg.K_ESCAPE) and not game.scene.state:
         game.esc_pressed = True
 
         if game.scene.name == 'level_select':

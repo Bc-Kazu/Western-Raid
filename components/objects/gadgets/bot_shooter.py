@@ -22,7 +22,7 @@ class BotShooter(GameObject):
         self.screen_limited = True
         self.offscreen_limit = 0
 
-        self.base_health = 15
+        self.base_health = 10
         self.health = self.base_health
         self.sprite_dict = {}
 
@@ -84,7 +84,6 @@ class BotShooter(GameObject):
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.health = self.base_health
         self.health += 2 * owner.PU_list.get('recovery', 0)
-        self.health += 4 * owner.PU_list.get('space_shield', 0)
         self.shoot_tick = 0
         self.shoot_interval = self.base_shoot_interval - 30 * owner.PU_list.get('auto_shoot', 0)
         super().spawn(position, velocity, owner)
@@ -198,7 +197,7 @@ class BotShooter(GameObject):
 
         for bandit in game.level.bandits:
             if self.shoot_rect.colliderect(bandit.rect):
-                if bandit.name == 'robber':
+                if bandit.gadget_safe:
                     continue
 
                 bandit_x = bandit.rect.centerx

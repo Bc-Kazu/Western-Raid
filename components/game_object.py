@@ -74,6 +74,7 @@ class GameObject:
 
         # Push physics settings
         self.push_velocity = (0, 0)
+        self.push_weight = 1
         self.push_force = 15
         self.push_tick = 0
         self.push_interval = 5
@@ -294,8 +295,8 @@ class GameObject:
         # This function just normalizes the vector values in unit (-1 to 1)
         if offset_vector.length() != 0:
             offset_vector.normalize_ip()
-        force_x = offset_vector.x * push_force
-        force_y = offset_vector.y * push_force
+        force_x = (offset_vector.x * push_force) / self.push_weight
+        force_y = (offset_vector.y * push_force) / self.push_weight
 
         # Add pushing values
         self.push_velocity = (force_x, force_y)

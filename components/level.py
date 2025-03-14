@@ -281,7 +281,8 @@ class Level:
             self.victory = True
             game.scene.set_state('rebuild')
 
-        if (self.time_elapsed > self.ambush_time and not self.ambush_mode
-                and not self.victory and not self.defeat and not game.scene.state):
+        ambush_allowed = (not self.ambush_mode and not self.victory
+                          and not self.defeat and not game.scene.state)
+        if self.time_elapsed > self.ambush_time and ambush_allowed:
             self.ambush_mode = True
             game.scene.set_state('ambush')

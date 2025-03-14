@@ -287,7 +287,7 @@ class Player(GameObject):
             self.shield_tick += 1
             if self.shield_tick % self.shield_cooldown == 0:
                 self.alive = True
-                game.sound.play_sfx('ghost')
+                game.sound.play_sfx('recover')
         else:
             self.recovery_tick += 1
 

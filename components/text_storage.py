@@ -1,7 +1,7 @@
 """
 Class made to handle managing text and applying effects or changes
 """
-from assets import TITLE_FONT, TEXT_FONT, NORMAL_FONT, SMALL_FONT
+from assets import TITLE_FONT, NORMAL_FONT, TEXT_FONT, SMALL_FONT
 from utils.text import Text
 from utils.colors import Colors
 colors = Colors()
@@ -12,13 +12,6 @@ class TextStorage:
     def __init__(self, game):
         # ===============================================================
         # Creating MENU text/messages
-        self.survived_text = Text('-=[ YOU SURVIVED ]=-', (game.screen_width / 2, 100), TITLE_FONT)
-        self.lost_text = Text('~X CAPTURED X~', (game.screen_width / 2, 100), TITLE_FONT,
-                            (255, 160, 50))
-        self.final_message = Text('CONGRATULATIONS!', (190, game.screen_height - 150),
-                                TEXT_FONT, colors.white)
-        self.final_message2 = Text('THANKS FOR PLAYING! :]', (185, game.screen_height - 115),
-                                 TEXT_FONT, colors.white)
         self.title_text = Text('< WESTERN RAID >', (game.screen_width / 2, 100), TITLE_FONT)
         self.player1_text = Text('PLAYER 1 :', (game.screen_width / 2 - 100, 360), TEXT_FONT, (180, 255, 180))
         self.player2_text = Text('PLAYER 2 :', (game.screen_width / 2 + 100, 360), TEXT_FONT, (255, 180, 255))
@@ -26,10 +19,8 @@ class TextStorage:
         self.volume_text = Text('0 = Mute     - & + keys = Change Music     '
                                 '[ & ] keys = Change SFX     Backspace = Remove Players',
                               (game.screen_width / 2, 600), SMALL_FONT, (200, 200, 200))
-        self.start_text = Text('PRESS ENTER TO START',(game.screen_width / 2, 270), TEXT_FONT)
-        self.return_text = Text('PRESS ENTER TO GO BACK TO MENU',
-                              (game.screen_width / 2, game.screen_height - 40), TEXT_FONT)
-        self.full_score_text = Text('SCORE: 0000000', (game.screen_width / 2, 180), NORMAL_FONT)
+        self.start_text = Text('< PRESS ENTER TO START >',(game.screen_width / 2, 270), TEXT_FONT)
+        self.full_score_text = Text('TOTAL SCORE: 0000000', (game.screen_width / 2, 180), NORMAL_FONT)
         self.new_best_text = Text('NEW BEST!', (game.screen_width / 2, 220), TEXT_FONT)
 
         self.choose_text = Text('use WASD or ARROW keys to select your player',
@@ -39,10 +30,9 @@ class TextStorage:
         self.new_best_text.toggle(False)
         self.new_best_text.set_color_blink(True, 10, (150, 255, 100))
         self.start_text.set_blink(True, 30)
-        self.return_text.set_blink(True, 30)
+
         self.select_text.set_blink(True, 30)
         self.new_best_text.color_blink = True
-        self.survived_text.set_color_blink(True, 30, (120, 255, 160))
 
         self.choose_text.set_color_blink(False, 8, (200, 100, 0))
         self.choose_text.toggle(False)
@@ -92,6 +82,20 @@ class TextStorage:
         self.loading = Text('Loading...', (game.screen_width / 2, game.screen_height / 2), NORMAL_FONT)
         self.loading_tip = Text("This is a tip! Wait, no its not.",
                                   (game.screen_width / 2, game.screen_height // 1.05), TEXT_FONT, (120, 200, 255))
+
+
+        # ===============================================================
+        # Creating VICTORY/DEFEAT text/messages
+        self.survived_text = Text('-=[ YOU SURVIVED ]=-', (game.screen_width / 2, 100), TITLE_FONT)
+        self.lost_text = Text('~X CAPTURED X~', (game.screen_width / 2, 100), TITLE_FONT,
+                            (255, 160, 50))
+        self.final_message = Text('CONGRATULATIONS!', (190, game.screen_height - 150),
+                                TEXT_FONT, colors.white)
+        self.return_text = Text('PRESS ENTER TO GO BACK TO MENU',
+                              (game.screen_width / 2, game.screen_height - 40), TEXT_FONT)
+
+        self.survived_text.set_color_blink(True, 30, (120, 255, 160))
+        self.return_text.set_blink(True, 30)
 
         # ===============================================================
         # Creating UI text/messages

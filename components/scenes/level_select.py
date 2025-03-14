@@ -119,14 +119,32 @@ class LevelSelect(GameScene):
         if self.state['tick'] > self.state['end_interval']:
             self.state['finalize'] = True
             self.set_state()
-            game.enter_level()
+            game.start_loading()
 
             lv_name = getattr(game.text, f"level{self.level_selected}_select")
             lv_name.set_color_blink(False)
 
     def draw(self, game):
         game.screen.fill(colors.space_blue)
-        game.stars.update(game)
+
+        if game.title_name == '< WESTERN RAID >':
+            game.stars.update(game)
+            self.bobbing_interval = 30
+
+            for player in [game.player_1, game.player_2]:
+                if player and not self.level_selected:
+                    player.set_eyes('base_eyes')
+                    player.set_offset(None, [-4, 0])
+
+        else:
+            game.win_stars.update(game)
+            self.bobbing_interval = 20
+
+            for player in [game.player_1, game.player_2]:
+                if player and not self.level_selected:
+                    player.set_eyes('happy_eyes')
+
+
         self.tick += 1
 
         for i in range(len(LEVEL_FRAMES)):
@@ -149,7 +167,7 @@ class LevelSelect(GameScene):
                 i = game.base_level
                 unlocked = game.data[f'level{i}']['unlocked']
                 lv_name = f'---< [ {level_names[i] if unlocked else level_names[0]} ] >---'
-                best_text = 'BEST SCORE: ' + str(game.data[f'level{i}']['best_score'])
+                best_text = 'BEST SCORE: ' + "{:06d}".format(game.data[f'level{i}']['best_score'])
                 getattr(game.text, f"level{i}_select").set_color(colors.white)
                 getattr(game.text, f"level{i}_name").set_text(lv_name)
                 getattr(game.text, f"level{i}_best").set_text(best_text)

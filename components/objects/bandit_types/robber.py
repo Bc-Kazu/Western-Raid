@@ -9,6 +9,7 @@ colors = Colors()
 class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
+        self.gadget_safe = True
         self.can_shoot = True
         self.base_shoot_interval = 200
         self.base_drop_chances = {'power_up': 80, 'item': 80, 'brick': 80}
@@ -22,7 +23,8 @@ class Bandit(BanditModel):
         self.can_steal = False
         self.steal_tick = 0
         self.steal_interval = randint(40, 70)
-        self.push_interval = 25
+        self.push_interval = 30
+        self.push_weight = 1.7
 
     def kill(self):
         super().kill()
@@ -57,17 +59,13 @@ class Bandit(BanditModel):
             magnitude = math.sqrt(direction_x ** 2 + direction_y ** 2)
             return magnitude < 5
 
-    def push(self, other_object):
-        super().push(other_object)
-        self.push_velocity = (self.push_velocity[0] // 1.7, self.push_velocity[1] // 1.7)
-
     def check_target_steal(self, game):
         if self.is_close_enough():
             self.steal_tick += 1
 
             if self.steal_tick > self.steal_interval:
                 self.can_steal = True
-                game.sound.play_sfx('remove')
+                game.sound.play_sfx('steal')
 
     def update(self, game):
         super().update(game)

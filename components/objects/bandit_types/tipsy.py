@@ -12,6 +12,7 @@ class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
         self.can_shoot = False
+        self.gadget_safe = True
         self.move_range = 1000
         self.points_value = 25
         self.move_interval_base = [0, 60]
