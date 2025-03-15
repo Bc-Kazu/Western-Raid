@@ -1,7 +1,8 @@
 """
 Module that handles all input interactions with the game
 """
-from assets import WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES, LEVEL_FRAMES_RECT, UFO_SPRITE_RECT, UFO_SPRITE_RECT2
+from assets import (WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES,
+                    LEVEL_FRAMES_RECT, UFO_SPRITE_RECT, UFO_SPRITE_RECT2)
 
 import pygame as pg
 
@@ -64,12 +65,12 @@ def handle_events(game):
                 game.sound.play_sfx('remove')
 
     if mouse_input == 1 and game.scene.name == 'level_select':
-        for level in range(len(LEVEL_FRAMES)):
+        for level in LEVEL_FRAMES.keys():
             rect = LEVEL_FRAMES[level].get_rect()
             rect.topleft = LEVEL_FRAMES_RECT[level]
 
             if rect.collidepoint(mouse_pos):
-                game.set_level(level + 1, True)
+                game.set_level(level, True)
 
     # Detecting player joining the components
     if game.scene.name == 'menu' or game.scene.name == 'round':
@@ -110,7 +111,7 @@ def handle_events(game):
             game.player_2 = None
 
     if input_once(game, pg.K_r):
-        if game.scene.name == 'menu' and game.data['victories'] > 0:
+        if game.scene.name == 'menu' and game.data['level1']['wins'] > 0:
             if game.title_name == '< WESTERN RAID >':
                 game.title_name = '< WESTERN RAVE >'
                 game.scene.set_title(game)
@@ -119,6 +120,20 @@ def handle_events(game):
                 game.title_name = '< WESTERN RAID >'
                 game.scene.set_title(game)
                 game.set_music('menu')
+
+    if input_once(game, pg.K_k) and game.scene.name == 'menu':
+        if game.block_skin == 'happy_cat':
+            game.set_block()
+            game.sound.play_sfx('ui_select')
+            game.sound.play_sfx('swap')
+            game.text.muted.set_text(f'CAT NO :(')
+            game.set_hud(game.text.muted)
+        else:
+            game.set_block('happy_cat', 'sad_cat')
+            game.sound.play_sfx('ui_select')
+            game.sound.play_sfx('meow')
+            game.text.muted.set_text(f'CAT YES :)')
+            game.set_hud(game.text.muted)
 
     if input_once(game, pg.K_F7):
         if game.player_1 is not None:

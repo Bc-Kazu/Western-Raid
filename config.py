@@ -13,91 +13,37 @@ colors = Colors()
 DATA_FORMAT = {
     "total_score": 0,
     "accumulated_score": 0,
-    "victories": 0,
-    "defeats": 0,
 
     "terrain_destroyed": 0,
     "blocks_destroyed": 0,
     "blocks_restored": 0,
-
-    "p1_stats": {
-        "bullets_reflected": 0,
-        "bandits_killed": 0,
-        "bandits_pushed": 0,
-        "items_collected": 0,
-        "powerups_collected": 0,
-        "bandit_contacts": 0,
-        "bullets_shot": 0,
-        "damaged": 0,
-    },
-    "p2_stats": {
-        "bullets_reflected": 0,
-        "bandits_killed": 0,
-        "bandits_pushed": 0,
-        "items_collected": 0,
-        "powerups_collected": 0,
-        "bandit_contacts": 0,
-        "bullets_shot": 0,
-        "damaged": 0,
-    },
-
-    "level1": {
-        "unlocked": True,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0,
-    },
-    "level2": {
-        "unlocked": False,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0,
-    },
-    "level3": {
-        "unlocked": False,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0,
-    },
-    "level4": {
-        "unlocked": False,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0,
-    },
-    "level5": {
-        "unlocked": False,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0,
-    },
-
-    "achievements": {
-        "defeat_A": False,
-        "defeat_B": False,
-        "defeat_C": False,
-        "victory_A": False,
-        "victory_B": False,
-        "victory_C": False,
-        "bandits_killed_A": False,
-        "bandits_killed_C": False,
-        "bandits_killed_B": False,
-        "bandits_pushed": False,
-        "bricks_collected": False,
-        "terrain_destroyed": False,
-        "damaged_A": False,
-        "damaged_B": False,
-        "loot": False,
-        "boost": False,
-        "contact": False,
-        "score_A": False,
-        "score_B": False,
-        "score_C": False,
-        "finish_story": False,
-        "lucky_statue": False
-    }
+    "gadgets_placed": 0,
 }
 
+LEVEL_COUNT = [1]
+ALLOWED_LEVELS = [1, 2, 3]
+
+for level in LEVEL_COUNT:
+    DATA_FORMAT[f'level{level}'] = {
+        "unlocked": False,
+        "wins": 0,
+        "defeats": 0,
+        "best_score": 0,
+        "p1_score": 0,
+        "p2_score": 0,
+    }
+
+for player in range(1, 3):
+    DATA_FORMAT[f'p{player}_stats'] = {
+        "bullets_reflected": 0,
+        "bandits_killed": 0,
+        "bandits_pushed": 0,
+        "items_collected": 0,
+        "powerups_collected": 0,
+        "bandit_contacts": 0,
+        "bullets_shot": 0,
+        "damaged": 0,
+    }
 
 # Basic color configuration
 PLAYER_COLORS = [colors.bright_green, colors.bright_purple]
@@ -225,10 +171,10 @@ POWER_UPS = {
     'extra_block': ['extra_block', 50, 3, 100],
 
     'auto_shoot': ['auto_shoot', 40, 3, 100],
-    'ghost_fury': ['ghost_fury', 40, 2, 100],
+    'recovery': ['recovery', 40, 3, 150],
 
     'magnet': ['magnet', 30, 2, 150],
-    'recovery': ['recovery', 30, 3, 150],
+    'ghost_fury': ['ghost_fury', 30, 2, 100],
     'extra_reflect': ['extra_reflect', 30, 2, 150],
 
     'space_shield': ['space_shield', 15, 1, 300],
@@ -238,8 +184,8 @@ ITEMS = {
     'bomb': ['bomb', 60, 0, 0],
     'shield': ['shield', 60, 3, 50],
     'turret_shooter': ['turret_shooter', 30, 5, 80],
-    'turret_shield': ['turret_shield', 30, 5, 80],
     'bot_shooter': ['bot_shooter', 20, 5, 80],
+    'turret_shield': ['turret_shield', 20, 3, 80],
     'healing_ufo': ['healing_ufo', 20, 1, 100],
     'gift_bomb': ['gift_bomb', 0.3, 0, 0],
 }
@@ -280,7 +226,8 @@ LEVEL_CONFIG = [
             [
                 ["basic", 80, False, -15],
                 ["skilled", 20, False, 10],
-                ["bomber", 18, True, 0],
+                ["tangler", 20, True, 0],
+                ["bomber", 20, True, 0],
                 ["hitman", 10, True, 0],
                 ["robber", 5, True, 0],
             ],
@@ -427,12 +374,12 @@ ACHIEVEMENT_LIST = {
     "boost": [
         "Superpowered",
         "Get 25 of any power ups",
-        "Soon enough you might solo goku! (Lies, nobody solos goku)"
+        "Soon your hair might turn gold! Wait, you don't have hair..."
     ],
     "contact": [
         "Friendly Foe",
         "Touch 50 bandits, ghost form counts",
-        "Come on! Give them a high five! Wait you don't have hands... Oh......."
+        "Come on! Give them a high five! Wait, you don't have hands..."
     ],
     "score_A": [
         "Beginner",
@@ -462,6 +409,10 @@ ACHIEVEMENT_LIST = {
     "secret_boss": [
         "The Golden One",
         "This achievement is a secret...",
-        "Quite a surprise! I wonder if you figured this by youself!"
+        "And hasn't been made yet, i'm sure you wanted to find answers in the code, eh?"
     ],
 }
+
+DATA_FORMAT['achievements'] = {}
+for achievement in ACHIEVEMENT_LIST.keys():
+    DATA_FORMAT['achievements'][achievement] = False

@@ -15,6 +15,25 @@ class Bandit(BanditModel):
         self.can_push = False
         self.bullet_speed = 7
 
+    def get_random_destination(self, game):
+        target = [game.player_1, game.player_2 if game.player_2 else game.player_1][randint(0, 1)]
+        if target:
+            new_x = target.rect.centerx
+            new_y = target.rect.centery
+
+            if new_x < self.rect.centerx:
+                new_x += randint(50, 150)
+            elif new_x > self.rect.centerx:
+                new_x -= randint(50, 150)
+            if new_y < self.rect.centery:
+                new_y += randint(50, 150)
+            elif new_y > self.rect.centery:
+                new_y -= randint(50, 150)
+
+            self.set_destination(new_x, new_y)
+        else:
+            super().get_random_destination(game)
+
     def get_target(self, game):
         if game.player_1:
             possible_targets = [game.player_1, game.player_2 if game.player_2 else game.player_1]

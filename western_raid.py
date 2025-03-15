@@ -23,8 +23,9 @@ from components import level
 from components.objects.bandit_types import (
     basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
 
-from assets import (TITLE_SPRITE, init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG, DYNAMITE_CONFIG)
-from config import DATA_FORMAT, PLAYER_COLORS
+from assets import (TITLE_SPRITE, init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
+                    DYNAMITE_CONFIG, BLOCK_CACHE)
+from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS
 
 import pygame as pg
 import os
@@ -126,12 +127,14 @@ class Game:
         self.music = 'menu'
         self.base_level = 1
         self.base_config = 1
-        self.allowed_levels = [1, 2, 3]
+        self.block_skin = 'block'
+        self.broken_skin = 'broken'
+        self.ufo_block_config = {}
+        self.set_block()
 
-        for i in range(len(LEVEL_FRAMES)):
-            if not i + 1 in self.allowed_levels:
+        for i in LEVEL_FRAMES.keys():
+            if not i in ALLOWED_LEVELS:
                 LEVEL_FRAMES[i].fill((255, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
-
 
 
     def save_data(self):
@@ -166,6 +169,9 @@ class Game:
                 # Check and update missing keys
                 updated_data = self.sort_data(data, DATA_FORMAT)
                 self.data = updated_data
+                self.data[f"level1"]["unlocked"] = True
+                self.data[f"level2"]["unlocked"] = True
+                self.data[f"level3"]["unlocked"] = True
         except json.JSONDecodeError:
             print("Error reading player file, check for any problems in the file"
                   "\nor delete it so a new one can be created.")
@@ -205,6 +211,17 @@ class Game:
     def set_music(self, name):
         self.music = name
         self.sound.play(name, -1)
+
+    def set_block(self, block='block', broken='broken'):
+        self.block_skin = block
+        self.broken_skin = broken
+        self.ufo_block_config = {
+            'name': 'ufo_block',
+            'type': 'block',
+            'size': (25, 25),
+            'image': BLOCK_CACHE[block].copy(),
+            'broken_image': BLOCK_CACHE[broken].copy()
+        }
 
     def run(self):
         while self.tick < 200:
@@ -266,7 +283,7 @@ class Game:
 
     def set_level(self, level_index, is_mouse=False):
         # Only allow levels avaliable in list
-        if level_index in self.allowed_levels:
+        if level_index in ALLOWED_LEVELS:
             if self.base_level != level_index:
                 self.sound.play_sfx('ui_select')
                 self.base_level = level_index
@@ -276,39 +293,37 @@ class Game:
             self.sound.play_sfx('push')
 
     def set_final_score(self, score_type='nil'):
-        new_best = 0
-        if self.player_1:
-            new_best += self.player_1.score
-            if self.data[f"level{self.level.index}"]["p1_score"] < self.player_1.score:
-                self.data[f"level{self.level.index}"]["p1_score"] = self.player_1.score
+        level_score = 0
+        lv = self.level.index
 
-        if self.player_2:
-            new_best += self.player_2.score
-            if self.data[f"level{self.level.index}"]["p2_score"] < self.player_2.score:
-                self.data[f"level{self.level.index}"]["p2_score"] = self.player_2.score
+        for plr in [self.player_1, self.player_2]:
+            if not plr:
+                continue
 
-        self.data["accumulated_score"] += new_best
+            level_score += plr.score
+            if self.data[f"level{lv}"][f"p{plr.id}_score"] < plr.score:
+                self.data[f"level{lv}"][f"p{plr.id}_score"] = plr.score
 
-        if self.data[f"level{self.level.index}"]["best_score"] < new_best:
-            self.data[f"level{self.level.index}"]["best_score"] = new_best
+        self.data["accumulated_score"] += level_score
 
-        all_levels_score = 0
+        if self.data[f"level{lv}"]["best_score"] < level_score:
+            self.data[f"level{lv}"]["best_score"] = level_score
 
-        for levels in self.allowed_levels:
-            all_levels_score += self.data[f"level{levels}"]["best_score"]
+        full_score = 0
 
-        if self.data[f"total_score"] < all_levels_score:
-            self.data[f"total_score"] = all_levels_score
-            self.text.new_best_text.enabled = True
-        else:
-            self.text.new_best_text.enabled = False
+        for levels in ALLOWED_LEVELS:
+            full_score += self.data[f"level{levels}"]["best_score"]
+
+        new_best = self.data[f"total_score"] < full_score
+        self.text.new_best_text.enabled = new_best
+        self.data[f"total_score"] = full_score if new_best else self.data[f"total_score"]
 
         if score_type == 'victory':
-            self.data["victories"] += 1
-            if self.level.index + 1 in self.allowed_levels:
-                self.data[f"level{self.level.index + 1}"]["unlocked"] = True
+            self.data[f"level{lv}"]["wins"] += 1
+            if lv + 1 in ALLOWED_LEVELS:
+                self.data[f"level{lv + 1}"]["unlocked"] = True
         elif score_type == 'defeat':
-            self.data["defeats"] += 1
+            self.data[f"level{lv}"]["defeats"] += 1
 
     def set_hud(self, new_text):
         self.sound.play_sfx('ui_select2')

@@ -11,7 +11,7 @@ import os
 import inspect
 from utils.text import Text
 from utils.colors import Colors
-from config import POWER_UPS, ITEMS, BRICKS
+from config import POWER_UPS, ITEMS, BRICKS, LEVEL_COUNT
 colors = Colors()
 pg.init()
 
@@ -150,14 +150,6 @@ UFO_CONFIG = {
     'size': (180, 180),
     'color': colors.light_blue,
     'image': UFO_SPRITE.copy()
-}
-
-UFO_BLOCK_CONFIG = {
-    'name': 'ufo_block',
-    'type': 'block',
-    'size': (25, 25),
-    'image': BLOCK_CACHE['block'].copy(),
-    'image_2': BLOCK_CACHE['broken'].copy()
 }
 
 GADGET_CONFIG = {
@@ -325,7 +317,7 @@ WASD_CONTROLS_A = pg.image.load('assets/ui_sprites/WASD.png').convert_alpha()
 ARROWS_CONTROLS_A = pg.image.load('assets/ui_sprites/ARROWS.png').convert_alpha()
 WASD_RECT_A = WASD_CONTROLS_A.get_rect()
 ARROWS_RECT_A = WASD_CONTROLS_A.get_rect()
-init_loading('loading assets', 1)
+init_loading('loading assets', 2)
 
 WASD_CONTROLS_B = pg.image.load('assets/ui_sprites/WASD.png').convert_alpha()
 ARROWS_CONTROLS_B = pg.image.load('assets/ui_sprites/ARROWS.png').convert_alpha()
@@ -333,97 +325,37 @@ WASD_CONTROLS_B = pg.transform.scale(WASD_CONTROLS_B, (55, 36))
 ARROWS_CONTROLS_B = pg.transform.scale(ARROWS_CONTROLS_B, (55, 36))
 WASD_RECT_B = WASD_CONTROLS_B.get_rect()
 ARROWS_RECT_B = ARROWS_CONTROLS_B.get_rect()
-init_loading('loading assets', 2)
+init_loading('loading assets', 6)
 
-LEVEL_FRAMES = [
-    UI_FRAME.copy(),
-    UI_FRAME.copy(),
-    UI_FRAME.copy(),
-    UI_FRAME.copy(),
-    UI_FRAME.copy()
-]
-
-init_loading('loading assets', 5)
-
-LEVEL_FRAMES_RECT = [
-    UI_FRAME.get_rect(),
-    UI_FRAME.get_rect(),
-    UI_FRAME.get_rect(),
-    UI_FRAME.get_rect(),
-    UI_FRAME.get_rect()
-]
-
-LEVEL_FRAMES_RECT[0] = (100, 170)
-LEVEL_FRAMES_RECT[1] = (260, 170)
-LEVEL_FRAMES_RECT[2] = (430, 170)
-LEVEL_FRAMES_RECT[3] = (590, 170)
-LEVEL_FRAMES_RECT[4] = (750, 170)
-init_loading('loading assets', 5)
-
-LEVEL_ICONS = [
+# Creating level icons, frames and locks
+LEVEL_ICONS = [None,
     TERRAIN_CACHE['cactus1'].copy(),
     TERRAIN_CACHE['arcade_machine'].copy(),
     TERRAIN_CACHE['fossil2'].copy(),
     UI_CACHE['question'].copy(),
     UI_CACHE['question'].copy()
 ]
-
-LEVEL_ICONS[0] = pg.transform.scale(LEVEL_ICONS[0], (80, 80))
-LEVEL_ICONS[1] = pg.transform.scale(LEVEL_ICONS[1], (80, 80))
-LEVEL_ICONS[2] = pg.transform.scale(LEVEL_ICONS[2], (80, 80))
-LEVEL_ICONS[3] = pg.transform.scale(LEVEL_ICONS[3], (80, 80))
-LEVEL_ICONS[4] = pg.transform.scale(LEVEL_ICONS[4], (80, 80))
-
-LEVEL_ICONS[0].fill((60, 160, 90), special_flags=pg.BLEND_RGBA_MULT)
-LEVEL_ICONS[1].fill((155, 130, 80), special_flags=pg.BLEND_RGBA_MULT)
-LEVEL_ICONS[2].fill((150, 150, 150), special_flags=pg.BLEND_RGBA_MULT)
-LEVEL_ICONS[3].fill((100, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
-LEVEL_ICONS[4].fill((100, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
 init_loading('loading assets', 5)
 
-LEVEL_ICONS_RECT = [
-    LEVEL_ICONS[0].get_rect(),
-    LEVEL_ICONS[1].get_rect(),
-    LEVEL_ICONS[2].get_rect(),
-    LEVEL_ICONS[3].get_rect(),
-    LEVEL_ICONS[4].get_rect()
-]
+ICON_COLORS = [None, (60, 160, 90), (155, 130, 80), (150, 150, 150), (100, 0, 0), (100, 0, 0)]
+LEVEL_FRAMES = {}
+LEVEL_FRAMES_RECT = {}
+LEVEL_ICONS_RECT = {}
+LEVEL_LOCKS = {}
+LEVEL_LOCKS_RECT = {}
 
-LEVEL_ICONS_RECT[0] = (110, 180)
-LEVEL_ICONS_RECT[1] = (270, 175)
-LEVEL_ICONS_RECT[2] = (440, 180)
-LEVEL_ICONS_RECT[3] = (600, 180)
-LEVEL_ICONS_RECT[4] = (760, 180)
-init_loading('loading assets', 5)
+for level in LEVEL_COUNT:
+    base_rect = (110, 180)
+    offset = 160 * (level - 1)
+    LEVEL_ICONS[level] = pg.transform.scale(LEVEL_ICONS[level], (80, 80))
+    LEVEL_ICONS[level].fill(ICON_COLORS[level], special_flags=pg.BLEND_RGBA_MULT)
+    LEVEL_ICONS_RECT[level] = (base_rect[0] + offset, base_rect[1])
 
-LOCKED_IMAGE = pg.image.load('assets/ui_sprites/locked.png').convert_alpha()
+    LEVEL_FRAMES[level] = UI_FRAME.copy()
+    LEVEL_FRAMES_RECT[level] = (base_rect[0] - 10 + offset, base_rect[1] - 10)
 
-LEVEL_LOCKS = [
-    LOCKED_IMAGE.copy(),
-    LOCKED_IMAGE.copy(),
-    LOCKED_IMAGE.copy(),
-    LOCKED_IMAGE.copy(),
-    LOCKED_IMAGE.copy()
-]
+    LEVEL_LOCKS[level] = pg.transform.scale(UI_CACHE['locked'].copy(), (80, 80))
+    LEVEL_LOCKS_RECT[level] = (base_rect[0] + offset, base_rect[1])
+    init_loading('loading assets', 3)
 
-LEVEL_LOCKS[0] = pg.transform.scale(LEVEL_LOCKS[0], (80, 80))
-LEVEL_LOCKS[1] = pg.transform.scale(LEVEL_LOCKS[1], (80, 80))
-LEVEL_LOCKS[2] = pg.transform.scale(LEVEL_LOCKS[2], (80, 80))
-LEVEL_LOCKS[3] = pg.transform.scale(LEVEL_LOCKS[3], (80, 80))
-LEVEL_LOCKS[4] = pg.transform.scale(LEVEL_LOCKS[4], (80, 80))
-init_loading('loading assets', 5)
-
-LEVEL_LOCKS_RECT = [
-    LEVEL_LOCKS[0].get_rect(),
-    LEVEL_LOCKS[1].get_rect(),
-    LEVEL_LOCKS[2].get_rect(),
-    LEVEL_LOCKS[3].get_rect(),
-    LEVEL_LOCKS[4].get_rect()
-]
-
-LEVEL_LOCKS_RECT[0] = (110, 180)
-LEVEL_LOCKS_RECT[1] = (270, 180)
-LEVEL_LOCKS_RECT[2] = (440, 180)
-LEVEL_LOCKS_RECT[3] = (600, 180)
-LEVEL_LOCKS_RECT[4] = (760, 180)
-init_loading('loading assets', 5, True)
+init_loading('loading assets', 10, True)

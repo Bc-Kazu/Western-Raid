@@ -25,8 +25,8 @@ class Block(GameObject):
     def set_color(self, custom=None, custom_sprite=None):
         if self.strength == 0:
             self.color = colors.window_crimson
-            if 'image_2' in self.config:
-                self.sprite = self.config['image_2'].copy()
+            if 'broken_image' in self.config:
+                self.sprite = self.config['broken_image'].copy()
                 self.set_size(self.size)
         else:
             if self.strength == 1 and 'image' in self.config:

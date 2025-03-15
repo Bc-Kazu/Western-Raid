@@ -77,7 +77,9 @@ class Player(GameObject):
         self.holding = None
 
         self.super_color_list = [colors.yellow, colors.cyan]
+        self.set_color(colors.black, self.outline)
         self.super_color_shift = False
+        self.super_color_tick = 0
         self.super_color_interval = 5
         self.super_color_index = 0
 
@@ -109,7 +111,7 @@ class Player(GameObject):
         self.shield_buff_hp = 0
 
     def super_effect(self):
-        if self.super_color_shift and self.tick % self.super_color_interval == 0:
+        if self.super_color_shift and self.super_color_tick % self.super_color_interval == 0:
             self.super_color_index += 1
             if self.super_color_index > len(self.super_color_list) - 1:
                 self.super_color_index = 0
@@ -249,7 +251,6 @@ class Player(GameObject):
 
         super().update(game)
 
-        self.outline_rect.center = self.rect.center
         # Update the shield rotation and position
         self.shield_rect.width = self.shield_width
         self.shield_rect.height = self.shield_height
@@ -332,8 +333,10 @@ class Player(GameObject):
         if game.ufo.got_inside and not game.scene.name == 'victory':
             return
 
-        self.super_effect()
+        # self.super_effect()
         if self.super_color_shift:
+            self.super_color_tick += 1
+            self.outline_rect.center = self.rect.center
             game.screen.blit(self.outline, self.outline_rect)
 
         super().draw(game)

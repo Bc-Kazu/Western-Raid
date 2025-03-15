@@ -2,7 +2,7 @@
 Class responsible for creating the UFO object
 """
 from config import UFO_COLORS
-from assets import NORMAL_FONT, UFO_CONFIG, UFO_BLOCK_CONFIG
+from assets import NORMAL_FONT, UFO_CONFIG
 from utils.text import Text
 from math import log
 from components.game_object import GameObject
@@ -83,7 +83,7 @@ class Ufo(GameObject):
             for block in self.blocks:
                 block.set_strength(0)
 
-    def spawn_blocks(self, shape=None, block_colors=None, block_size=None):
+    def spawn_blocks(self, game, shape=None, block_colors=None, block_size=None):
         self.blocks = []
         self.shape = shape if shape else self.shape
         self.block_colors = block_colors if block_colors else self.block_colors
@@ -106,7 +106,7 @@ class Ufo(GameObject):
                 size = (self.block_size[0] - 3, self.block_size[1] - 3)
 
                 if strength >= 0:
-                    new_block = UfoBlock(UFO_BLOCK_CONFIG, index, row_index, col_index)
+                    new_block = UfoBlock(game.ufo_block_config, index, row_index, col_index)
                     new_block.set_size(size, True)
                     new_block.spawn(pos, None, self)
                     new_block.set_strength(strength)

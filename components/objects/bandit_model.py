@@ -23,6 +23,7 @@ class BanditModel(GameObject):
         self.base_drop_chances = {'power_up': 10, 'item': 20, 'brick': 40}
         self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
+        self.player_touched = False
 
         # Toggle if bandit should be detected by gadgets
         self.gadget_safe = False
@@ -78,6 +79,7 @@ class BanditModel(GameObject):
         self.shoot_tick = 0
         self.shoot_interval = self.base_shoot_interval
         self.spawn_grace = True
+        self.player_touched = False
 
         self.movement_surface = pg.Surface((self.move_range, self.move_range), pg.SRCALPHA)
         self.movement_surface.fill(colors.purple)
@@ -197,7 +199,7 @@ class BanditModel(GameObject):
                     self.kill()
                     game.level.spawn_pickup(self.get_drop(), self.rect.center)
 
-    def push_check(self, game, player):
+    def collide_check(self, game, player):
         if not player:
             return
 
@@ -213,6 +215,12 @@ class BanditModel(GameObject):
                 if self.lifetime < 2:
                     self.lifetime = 2
 
+        # Detect player collision
+        if self.rect.colliderect(player.hitbox) and not self.player_touched:
+            game.data[f"p{player.id}_stats"]["bandit_contacts"] += 1
+            self.player_touched = True
+            print(game.data[f"p{player.id}_stats"]["bandit_contacts"])
+
     def update(self, game):
         if self.tick == 0:
             if game.level.ambush_mode:
@@ -224,8 +232,8 @@ class BanditModel(GameObject):
                     self.set_drop_odds('brick', self.drop_chances['brick'] // 2)
 
         self.get_target(game)
-        self.push_check(game, game.player_1)
-        self.push_check(game, game.player_2)
+        self.collide_check(game, game.player_1)
+        self.collide_check(game, game.player_2)
 
         if self.stuck and self.push_velocity == (0, 0):
             self.set_velocity(0, 0)

@@ -21,6 +21,7 @@ class Menu(GameScene):
 
         self.player_offset = [0, -100, 100]
         self.sprites_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
+
     def set_title(self, game):
         self.title_anim = [
             f' - = -{game.title_name}- = - ',
@@ -39,6 +40,7 @@ class Menu(GameScene):
         if game.title_name == '< WESTERN RAID >':
             game.stars.update(game)
             self.bobbing_interval = 30
+            self.title_interval = 15
 
             for player in [game.player_1, game.player_2]:
                 if player:
@@ -48,6 +50,7 @@ class Menu(GameScene):
         else:
             game.win_stars.update(game)
             self.bobbing_interval = 20
+            self.title_interval = 5
 
             for player in [game.player_1, game.player_2]:
                 if player:

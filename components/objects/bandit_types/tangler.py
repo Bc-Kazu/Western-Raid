@@ -14,7 +14,7 @@ class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
         self.move_range = 250
-        self.base_drop_chances = {'power_up': 20, 'item': 50, 'brick': 50}
+        self.base_drop_chances = {'power_up': 15, 'item': 30, 'brick': 40}
         self.points_value = 30
         self.destined_velocity = 3
         self.move_interval_base = [40, 120]
@@ -54,13 +54,10 @@ class Bandit(BanditModel):
             self.rope_distance += 40
 
     def get_random_destination(self, game):
-        if game.player_1:
-            random_target = game.player_1
-            if game.player_2 and randint(1, 2) == 2:
-                random_target = game.player_2
-
-            new_x = random_target.rect.centerx
-            new_y = random_target.rect.centery
+        target = [game.player_1, game.player_2 if game.player_2 else game.player_1][randint(0, 1)]
+        if target:
+            new_x = target.rect.centerx
+            new_y = target.rect.centery
 
             if new_x < self.rect.centerx:
                 new_x += randint(50, 150)

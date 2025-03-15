@@ -44,7 +44,7 @@ class TurretShield(GameObject):
         self.shield_base_max = 5
         self.shield_max_health = self.shield_base_max
         self.shield_health = self.shield_max_health
-        self.shield_interval = 300
+        self.shield_interval = 360
 
         self.place_timer = Text(str(self.placing_time), (0, 0), TEXT_FONT, colors.window_white)
         self.place_timer.rect = (self.rect.centerx, self.rect.centery)
@@ -61,7 +61,7 @@ class TurretShield(GameObject):
         self.health = self.base_health
         self.health += 1 * owner.PU_list.get('recovery', 0)
         self.shield_max_health = self.shield_base_max
-        self.shield_max_health += 3 * owner.PU_list.get('space_shield', 0)
+        self.shield_max_health += 2 * owner.PU_list.get('space_shield', 0)
         
         super().spawn(position, velocity, owner)
 
@@ -72,7 +72,7 @@ class TurretShield(GameObject):
         size_y += 25 * owner.PU_list.get('shield_size', 0)
 
         self.shield_health = self.shield_max_health
-        self.shield_interval = 300 - 30 * owner.PU_list.get('recovery', 0)
+        self.shield_interval = 360 - 30 * owner.PU_list.get('recovery', 0)
 
         self.shield = pg.Surface((size_x, size_y), pg.SRCALPHA)
         self.shield.fill(colors.white)

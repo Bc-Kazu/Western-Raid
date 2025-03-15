@@ -53,7 +53,7 @@ class TurretShooter(GameObject):
         self.bullet_type = 'bullet'
         self.bullet_speed = 4
         self.shoot_tick = 0
-        self.base_shoot_interval = 120
+        self.base_shoot_interval = 150
         self.shoot_interval = self.base_shoot_interval
 
         self.shoot_range = 300
@@ -69,10 +69,10 @@ class TurretShooter(GameObject):
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.health = self.base_health
-        self.health += 2 * owner.PU_list.get('recovery', 0)
-        self.health += 4 * owner.PU_list.get('space_shield', 0)
+        self.health += owner.PU_list.get('recovery', 0)
+        self.health += 2 * owner.PU_list.get('space_shield', 0)
         self.shoot_tick = 0
-        self.shoot_interval = self.base_shoot_interval - 10 * owner.PU_list.get('auto_shoot', 0)
+        self.shoot_interval = self.base_shoot_interval - 15 * owner.PU_list.get('auto_shoot', 0)
         super().spawn(position, velocity, owner)
 
         # Recoloring all the aiming sprites
@@ -87,7 +87,7 @@ class TurretShooter(GameObject):
         # Setting sprite back to base image
         self.sprite = self.base_sprite.copy()
 
-        self.shoot_range = 300 + 80 * owner.PU_list.get('magnet', 0)
+        self.shoot_range = 300 + 60 * owner.PU_list.get('magnet', 0)
         self.shoot_rect = pg.Rect(self.rect.center, (self.shoot_range, self.shoot_range))
         self.shoot_area = pg.Surface((self.shoot_range, self.shoot_range), pg.SRCALPHA)
         self.shoot_area.fill(colors.white)

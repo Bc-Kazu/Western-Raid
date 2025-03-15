@@ -58,17 +58,17 @@ class Level:
         self.ufo = game.ufo
         self.ufo_pos = (game.screen_width // 2, game.screen_height // 2 - 30)
         self.ufo.set_position(self.ufo_pos, True)
-        self.ufo.spawn_blocks()
+        self.ufo.spawn_blocks(game)
 
         # Breakout style settings
         """self.ufo_pos = (game.screen_width // 2, game.screen_height // 6)
         game.ufo.set_position(self.ufo_pos, True)
 
         breakout_size = ((game.screen_width - 220) // len(BREAKOUT_SHAPE[0]), 16)
-        game.ufo.spawn_blocks(BREAKOUT_SHAPE, BREAKOUT_COLORS, breakout_size)"""
+        game.ufo.spawn_blocks(game, BREAKOUT_SHAPE, BREAKOUT_COLORS, breakout_size)"""
 
         # Tower style settings
-        # game.ufo.spawn_blocks(TOWER_SHAPE, TOWER_COLORS)
+        # game.ufo.spawn_blocks(game, TOWER_SHAPE, TOWER_COLORS)
 
         self.map = self.create_map(game)
 

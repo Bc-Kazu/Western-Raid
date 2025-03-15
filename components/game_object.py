@@ -198,7 +198,7 @@ class GameObject:
         else:
             new_color = self.color
 
-        width, height = self.sprite.get_size()
+        width, height = self.sprite.get_size() if not custom_sprite else custom_sprite.get_size()
         r, g, b = new_color[:3]
         color_alpha = new_color[3] if len(new_color) > 3 else 255
 
