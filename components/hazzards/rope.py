@@ -55,6 +55,8 @@ class Rope:
         if self.alive:
             game.sound.play_sfx('push')
             self.health = max(0, self.health - damage)
+            new_alpha = self.health * 15 if self.health * 15 < 255 else 255
+            self.wrapped_rope.set_alpha(new_alpha)
             if self.health < 1:
                 game.sound.play_sfx('remove')
                 self.kill()

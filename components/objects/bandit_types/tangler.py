@@ -54,7 +54,14 @@ class Bandit(BanditModel):
             self.rope_distance += 40
 
     def get_random_destination(self, game):
-        target = [game.player_1, game.player_2 if game.player_2 else game.player_1][randint(0, 1)]
+        target = None
+        for player in [game.player_1, game.player_2]:
+            if player:
+                if not target:
+                    target = player
+                elif self.check_rope(target)[0] > self.check_rope(player)[0]:
+                    target = player
+
         if target:
             new_x = target.rect.centerx
             new_y = target.rect.centery
@@ -106,7 +113,7 @@ class Bandit(BanditModel):
 
         if self.rope_enabled and not self.can_shoot_rope and self.rope_tick > self.rope_interval:
             distance, direction, target = self.check_rope(game.player_1)
-            if game.player_2 and self.check_rope(game.player_2)[0] > distance:
+            if game.player_2 and self.check_rope(game.player_2)[0] < distance:
                 distance, direction, target = self.check_rope(game.player_2)
 
             if self.rope_distance >= distance > 0 and not target.stuck:

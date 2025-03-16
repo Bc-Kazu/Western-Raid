@@ -26,7 +26,7 @@ from components.objects.bandit_types import (
 
 from assets import (init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
                     DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE)
-from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT
+from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
 
 import pygame as pg
 import os
@@ -46,8 +46,8 @@ class Game:
         # Screen and game loop configuration
         self.running = True
         self.FPS = 60
-        self.screen_width = 960
-        self.screen_height = 620
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
         self.screen = pg.display.set_mode((self.screen_width, self.screen_height))
         self.screen_limit = pg.Rect(0, 0, self.screen_width, self.screen_height)
         self.tick = 0

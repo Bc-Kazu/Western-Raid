@@ -11,13 +11,11 @@ import os
 import inspect
 from utils.text import Text
 from utils.colors import Colors
-from config import POWER_UPS, ITEMS, BRICKS, LEVEL_COUNT
+from config import POWER_UPS, ITEMS, BRICKS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
 colors = Colors()
 pg.init()
 
 # Temporary scren values, do not use these in other files
-SCREEN_WIDTH = 960
-SCREEN_HEIGHT = 620
 SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 def get_line_number():
@@ -30,20 +28,67 @@ TEXT_FONT = pg.font.Font("assets/retro_font.ttf", 24)
 NORMAL_FONT = pg.font.Font("assets/retro_font.ttf", 40)
 TITLE_FONT = pg.font.Font("assets/retro_font.ttf", 72)
 
-INIT_LOADING_TEXT = Text('LOADING GAME...', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), NORMAL_FONT, (150, 158, 170))
-INIT_LOADING_DESC = Text('', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.75), TEXT_FONT, colors.dark_grey)
+PYGAME_IMAGE = pg.image.load(f'assets/pygame.png').convert_alpha()
+PYGAME_IMAGE = pg.transform.scale(PYGAME_IMAGE, (150, 150))
+PYGAME_IMAGE_RECT = PYGAME_IMAGE.get_rect()
+PYGAME_IMAGE_RECT.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+PYGAME_HAPPY_IMAGE = pg.image.load(f'assets/pygame_happy.png').convert_alpha()
+PYGAME_HAPPY_IMAGE = pg.transform.scale(PYGAME_HAPPY_IMAGE, (150, 150))
+
+POWERED_BY_TEXT = Text('POWERED BY', (SCREEN_WIDTH // 2, PYGAME_IMAGE_RECT.top - 10),
+                         TEXT_FONT, colors.pale_yellow)
+PYGAME_TEXT = Text('PYGAME', (SCREEN_WIDTH // 2,PYGAME_IMAGE_RECT.bottom),
+                         NORMAL_FONT, colors.light_yellow)
+PYGAME_TEXT.set_background(True)
+INIT_LOADING_TEXT = Text('LOADING GAME...', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.3),
+                         TEXT_FONT, colors.grey)
+INIT_LOADING_DESC = Text('', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.75), TEXT_FONT, colors.charcoal)
+BLACK_SCREEN = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SRCALPHA)
+BLACK_SCREEN.fill(colors.black)
 
 loading_progress = 0
+def sfx(name):
+    sound = pg.mixer.Sound(f'assets/SFX/{name}.wav')
+    sound.set_volume(0.3)
+    sound.play()
+
 def init_loading(string, progress=None, reset_progress=False):
-    global INIT_LOADING_TEXT, INIT_LOADING_DESC, loading_progress
+    global loading_progress
     pg.event.pump()
     loading_progress += progress if progress else 0
-    string = f'{string} ({loading_progress})' if progress else f'{string}'
+    # string = f'{string} ({loading_progress})' if progress else f'{string}'
+
+    if loading_progress < 100:
+        new_alpha = BLACK_SCREEN.get_alpha() - 5
+        if new_alpha < 0:
+            new_alpha = 0
+        BLACK_SCREEN.set_alpha(new_alpha)
+    elif loading_progress < 120:
+        BLACK_SCREEN.set_alpha(0)
+
+    if loading_progress > 240:
+        new_alpha = BLACK_SCREEN.get_alpha() + 3
+        if new_alpha > 255:
+            new_alpha = 255
+        BLACK_SCREEN.set_alpha(new_alpha)
 
     SCREEN.fill((0, 0, 0))
-    INIT_LOADING_DESC.set_text(string)
-    INIT_LOADING_DESC.draw(None, SCREEN)
+    if loading_progress == 220:
+        sfx('points_extra')
+        INIT_LOADING_TEXT.set_text('LOADED!')
+    if loading_progress < 220:
+        SCREEN.blit(PYGAME_IMAGE, PYGAME_IMAGE_RECT)
+    else:
+        SCREEN.blit(PYGAME_HAPPY_IMAGE, PYGAME_IMAGE_RECT)
+
+    # INIT_LOADING_DESC.set_text(string)
+    # INIT_LOADING_DESC.draw(None, SCREEN)
+
     INIT_LOADING_TEXT.draw(None, SCREEN)
+    POWERED_BY_TEXT.draw(None, SCREEN)
+    PYGAME_TEXT.draw(None, SCREEN)
+    SCREEN.blit(BLACK_SCREEN, (0, 0))
     pg.display.flip()
 
     for event in pg.event.get():
@@ -52,8 +97,8 @@ def init_loading(string, progress=None, reset_progress=False):
             pg.quit()
             sys.exit()
 
-    if reset_progress:
-        loading_progress = 0
+    # if reset_progress:
+        # loading_progress = 0
 
 supported_formats = ["bmp", "png", "jpg", "jpeg", "gif", "tga", "webp"]
 def load_cache(folder_path):

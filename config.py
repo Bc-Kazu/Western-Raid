@@ -9,7 +9,11 @@ It also stores the data and achievements format.
 from utils.colors import Colors
 colors = Colors()
 
-# Template for player data,
+# Screen configuration
+SCREEN_WIDTH = 960
+SCREEN_HEIGHT = 620
+
+# Configuration for player data template
 DATA_FORMAT = {
     "total_score": 0,
     "accumulated_score": 0,

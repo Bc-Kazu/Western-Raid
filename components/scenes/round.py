@@ -95,6 +95,8 @@ class Round(GameScene):
         super().__init__(name, screen)
         super().reset()
 
+        self.control_blink = False
+
     def _time_up_draw(self, game):
         # Drawing custom time up screen
         game.text.timer_text.current_color = (100, 255, 100)
@@ -483,8 +485,11 @@ class Round(GameScene):
         for _, obj in draw_queue:
             obj.draw(game)
 
+        if game.tick % 5 == 0:
+            self.control_blink = not self.control_blink
+
         if game.player_1:
-            if game.player_1.stuck:
+            if game.player_1.stuck and self.control_blink:
                 self._show_controls(game, game.player_1)
 
             game.text.p1_points_text.string = str("{:05d}".format(game.player_1.score))
@@ -492,7 +497,7 @@ class Round(GameScene):
             game.text.p1_points_text.draw(game)
 
         if game.player_2:
-            if game.player_1.stuck:
+            if game.player_2.stuck and self.control_blink:
                 self._show_controls(game, game.player_2)
 
             game.text.p2_points_text.string = str("{:05d}".format(game.player_2.score))
