@@ -9,14 +9,55 @@ import sys
 import pygame as pg
 import os
 import inspect
+from random import choice
 from utils.text import Text
 from utils.colors import Colors
-from config import POWER_UPS, ITEMS, BRICKS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
+
+from datetime import datetime
+
+# Get the current local date and time
+local_datetime = datetime.now()
 colors = Colors()
 pg.init()
 
 # Temporary scren values, do not use these in other files
 SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+PYGAME_IMAGE = pg.image.load(f'assets/pygame.png').convert_alpha()
+PYGAME_IMAGE = pg.transform.scale(PYGAME_IMAGE, (150, 150))
+PYGAME_IMAGE_RECT = PYGAME_IMAGE.get_rect()
+PYGAME_IMAGE_RECT.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+if local_datetime.hour < 12:
+    day_message = 'Morning'
+elif local_datetime.hour < 19:
+    day_message = 'Afternoon'
+else:
+    day_message = 'Evening'
+
+RANDOM_INIT_CAPTION = [
+    'Making the sky a little brighter',
+    'Preparing for another galaxy trip',
+    'His name is Alt, and hers is Zia!',
+    "It's time to Western the Raid",
+    'Preparing absolute Cinema',
+    'Loading chiptune bangers',
+    'Avoiding school like a GAMER',
+    'Going to school like a GAMER',
+    'Remember to drink water!',
+    'Remember to eat water!',
+    'Remember to water the drink!',
+    'Inspired by Breakout!',
+    'Inspired by Pizza Tower, too!',
+    'Still waiting for a good caption',
+    'Forgetting what to write',
+    f'Good {day_message}, {os.getlogin()} :)',
+]
+
+pg.display.set_caption(choice(RANDOM_INIT_CAPTION))
+pg.display.set_icon(PYGAME_IMAGE)
 
 def get_line_number():
     """Returns the current line number in the script."""
@@ -28,11 +69,6 @@ TEXT_FONT = pg.font.Font("assets/retro_font.ttf", 24)
 NORMAL_FONT = pg.font.Font("assets/retro_font.ttf", 40)
 TITLE_FONT = pg.font.Font("assets/retro_font.ttf", 72)
 
-PYGAME_IMAGE = pg.image.load(f'assets/pygame.png').convert_alpha()
-PYGAME_IMAGE = pg.transform.scale(PYGAME_IMAGE, (150, 150))
-PYGAME_IMAGE_RECT = PYGAME_IMAGE.get_rect()
-PYGAME_IMAGE_RECT.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-
 PYGAME_HAPPY_IMAGE = pg.image.load(f'assets/pygame_happy.png').convert_alpha()
 PYGAME_HAPPY_IMAGE = pg.transform.scale(PYGAME_HAPPY_IMAGE, (150, 150))
 
@@ -42,8 +78,9 @@ PYGAME_TEXT = Text('PYGAME', (SCREEN_WIDTH // 2,PYGAME_IMAGE_RECT.bottom),
                          NORMAL_FONT, colors.light_yellow)
 PYGAME_TEXT.set_background(True)
 INIT_LOADING_TEXT = Text('LOADING GAME...', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.3),
-                         TEXT_FONT, colors.grey)
-INIT_LOADING_DESC = Text('', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.75), TEXT_FONT, colors.charcoal)
+                         TEXT_FONT, colors.light_grey)
+INIT_LOADING_DESC = Text('This game automatically saves your data!',
+                         (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.05), TEXT_FONT, colors.grey)
 BLACK_SCREEN = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SRCALPHA)
 BLACK_SCREEN.fill(colors.black)
 
@@ -77,14 +114,15 @@ def init_loading(string, progress=None, reset_progress=False):
     if loading_progress == 220:
         sfx('points_extra')
         INIT_LOADING_TEXT.set_text('LOADED!')
+        pg.display.set_icon(PYGAME_HAPPY_IMAGE)
     if loading_progress < 220:
         SCREEN.blit(PYGAME_IMAGE, PYGAME_IMAGE_RECT)
     else:
         SCREEN.blit(PYGAME_HAPPY_IMAGE, PYGAME_IMAGE_RECT)
 
     # INIT_LOADING_DESC.set_text(string)
-    # INIT_LOADING_DESC.draw(None, SCREEN)
 
+    INIT_LOADING_DESC.draw(None, SCREEN)
     INIT_LOADING_TEXT.draw(None, SCREEN)
     POWERED_BY_TEXT.draw(None, SCREEN)
     PYGAME_TEXT.draw(None, SCREEN)

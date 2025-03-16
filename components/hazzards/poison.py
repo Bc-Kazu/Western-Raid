@@ -1,5 +1,5 @@
 import pygame as pg
-from random import randint, choice
+from random import choice
 from assets import BULLET_CACHE
 
 class Poison:

@@ -106,3 +106,6 @@ class Menu(GameScene):
             else:
                 ARROWS_RECT_A.center = (game.screen_width / 2 + self.player_offset[2], 460)
                 game.screen.blit(ARROWS_CONTROLS_A, ARROWS_RECT_A)
+
+        if game.esc_pressed:
+            game.text.quit_text.draw(game)

@@ -103,8 +103,9 @@ class TextStorage:
         self.music_change_vol = Text('> Music: 5', (game.screen_width / 2, 15), SMALL_FONT, colors.white)
         self.sfx_change_vol = Text('> SFX: 5', (game.screen_width / 2, 15), SMALL_FONT, colors.white)
         self.muted = Text('MUTE [ENABLED]', (game.screen_width / 2, 15), SMALL_FONT, colors.white)
-        self.escape_text = Text('<  HOLD ESC - BACK TO MENU  >', (game.screen_width / 2, game.screen_height - 100),
-                               TEXT_FONT)
+        self.escape_text = Text('<  RETURNING TO MENU...  >', (game.screen_width / 2, game.screen_height - 100),
+                               TEXT_FONT, colors.transparent)
+        self.quit_text = Text('QUITTING...', (80, 20), TEXT_FONT, colors.transparent)
 
         # UI text configurations
         self.HUD_text_list = [None, 0, 180, False]

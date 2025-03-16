@@ -26,7 +26,8 @@ from components.objects.bandit_types import (
 
 from assets import (init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
                     DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE)
-from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from configurations.data_config import DATA_FORMAT
 
 import pygame as pg
 import os
@@ -112,19 +113,18 @@ class Game:
         self.ambush_filter.fill((180, 80, 0, 50))
 
         # These lists are used for "animations" or effects
-        self.start_animate = True
+        self.joined_late = []
 
         self.esc_pressed = False
         self.escape_tick = 0
         self.escape_hold_time = 90
 
-        self.defeat = False
-        self.victory = False
         self.player_bobbing = 10
         self.player_menu_y = 460
 
         # Loading starter configurations
         self.title_name = '< WESTERN RAID >'
+        self.title_ver = 'v1.9.3'
         self.music = 'menu'
         self.base_level = 1
         self.base_config = 1
@@ -152,6 +152,15 @@ class Game:
         for i in LEVEL_FRAMES.keys():
             if not i in ALLOWED_LEVELS:
                 LEVEL_FRAMES[i].fill((255, 0, 0), special_flags=pg.BLEND_RGBA_MULT)
+
+    def initialize(self):
+        # Setting up the display window customization
+        pg.display.set_icon(PLAYER1_IMAGE)
+        pg.display.set_caption(f'{self.title_name} {self.title_ver}')
+
+        self.load_data()
+        self.set_scene('menu')
+        self.sound.play(self.music, -1)
 
 
     def save_data(self):
@@ -187,8 +196,6 @@ class Game:
                 updated_data = self.sort_data(data, DATA_FORMAT)
                 self.data = updated_data
                 self.data[f"level1"]["unlocked"] = True
-                self.data[f"level2"]["unlocked"] = True
-                self.data[f"level3"]["unlocked"] = True
         except json.JSONDecodeError:
             print("Error reading player file, check for any problems in the file"
                   "\nor delete it so a new one can be created.")
@@ -209,15 +216,6 @@ class Game:
                 data[key] = self.sort_data(data.get(key, {}), value)
 
         return data
-
-    def initialize(self):
-        # Setting up the display window customization
-        pg.display.set_icon(PLAYER1_IMAGE)
-        pg.display.set_caption('< WESTERN RAID > v0.7.2')
-
-        self.load_data()
-        self.set_scene('menu')
-        self.sound.play(self.music, -1)
 
     def set_scene(self, name):
         self.scene = self.scene_dict[name](name, self.screen)
@@ -271,18 +269,33 @@ class Game:
         self.player_count = 0
 
         self.save_data()
+
+    def set_title(self, new_title='< WESTERN RAID >'):
+        self.title_name = new_title if new_title else self.title_name
+        pg.display.set_caption(f'{self.title_name} {self.title_ver}')
     
     def add_player(self, controls):
+        if self.scene.state and self.scene.state['name'] == 'init_cutscene':
+            return
+
         if not self.player_1:
             self.player_count = 1
             color = PLAYER_COLORS[0]
             self.player_1 = Player(controls, self.player_count, color)
-            self.sound.play_sfx('join')
+
+            if self.scene.name != 'round':
+                self.sound.play_sfx('join')
+            else:
+                self.joined_late.append(self.player_1)
         elif not self.player_2 and self.player_1.controls != controls:
             self.player_count = 2
             color = PLAYER_COLORS[1]
             self.player_2 = Player(controls, self.player_count, color)
-            self.sound.play_sfx('join')
+
+            if self.scene.name != 'round':
+                self.sound.play_sfx('join')
+            else:
+                self.joined_late.append(self.player_2)
 
     def start_round(self):
         if self.level:

@@ -128,9 +128,9 @@ class Text:
             else:
                 render_text = self.font.render(self.string, True, self.current_color)
 
-            if len(self.base_color) > 3:
+            if len(self.current_color) > 3:
                 render_text.convert_alpha()
-                render_text.set_alpha(self.base_color[3])
+                render_text.set_alpha(self.current_color[3])
 
             if self.icon:
                 icon_rect = (self.rect[0] - self.icon_size + self.icon_offset[0],

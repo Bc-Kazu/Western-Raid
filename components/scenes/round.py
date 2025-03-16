@@ -19,11 +19,6 @@ class Round(GameScene):
         'fall_speed': 3,
         'broken_ufo': False,
         'destroy_interval': 180,
-        'player_velocity': [(0, 0), (-8, -8), (8, -8)],
-        'start_fall': [False, False, False],
-        'fallen': [False, False, False],
-        'multX': 0.97,
-        'multY': 0.92,
         'shield_show': False,
         'timer': 0,
         'timer_interval': 300,
@@ -31,6 +26,19 @@ class Round(GameScene):
         'end_interval': 420,
         'finalize': False
     }
+
+    for player in range(1, 3):
+        INIT_CUTSCENE_PROCESS[f'p{player}_process'] = {
+            'initialize': False,
+            'tick': 0,
+            'player_velocity': [(0, 0), (-8, -8), (8, -8)],
+            'start_fall': False,
+            'fallen': False,
+            'multX': 0.97,
+            'multY': 0.92,
+            'fall_interval': 120,
+            'finalize': False
+        }
 
     STARTUP_PROCESS = {
         'name': 'startup',
@@ -227,6 +235,51 @@ class Round(GameScene):
             rect = specific.rect
             game.screen.blit(player_control, (rect.x - 2, rect.y - 50))
 
+    def launch_player(self, game, player):
+        process = self.state_dict['init_cutscene'][f'p{player.id}_process']
+        can_play_sfx = not self.state or self.state['name'] != 'init_cutscene' or player.id == 1
+        if process['finalize']:
+            return
+        elif not process['initialize']:
+            player.shield_visible = False
+            player.set_position((game.screen_width // 2, game.screen_height // 2), True)
+            process['initialize'] = True
+
+            if not self.state or can_play_sfx:
+                game.sound.play_sfx('player_fling')
+
+        process['tick'] += 1
+        velocity = process['player_velocity'][player.id]
+        player.set_velocity(velocity)
+        player.set_offset(None, [4 if velocity[0] > 0 else -4, 0])
+
+        if velocity[1] > -1 and not process['start_fall']:
+            process['start_fall'] = True
+            velocity = (velocity[0], 1)
+        elif process['start_fall']:
+            process['multY'] = 1.07
+        else:
+            player.set_eyes('shock_eyes')
+
+        if player.rect.y > 300 and process['start_fall']:
+            player.set_position(player.rect.x, 300)
+            process['multY'] = 0
+            player.set_eyes('squint_eyes')
+
+            if not process['fallen']:
+                if can_play_sfx:
+                    game.sound.play_sfx('block_break')
+                process['fallen'] = True
+
+        new_velocity = (velocity[0] * process['multX'], velocity[1] * process['multY'])
+        process['player_velocity'][player.id] = new_velocity
+
+        if process['tick'] > process['fall_interval']:
+            process['finalize'] = True
+            if not self.state or self.state['name'] != 'init_cutscene':
+                player.set_eyes('base_eyes')
+                player.shield_visible = True
+
     def _init_cutscene(self, game):
         # Initializing the process
         if not self.state['initialize']:
@@ -265,42 +318,13 @@ class Round(GameScene):
                 if not player:
                     continue
 
-                velocity = self.state['player_velocity'][player.id]
-                player.set_velocity(velocity)
-
-                if player.id == 2:
-                    player.set_offset(None, [4, 0])
-
-                if velocity[1] > -1 and not self.state['start_fall'][player.id] :
-                    self.state['start_fall'][player.id] = True
-                    velocity = (velocity[0], 1)
-                elif self.state['start_fall'][player.id]:
-                    self.state['multY'] = 1.07
-                else:
-                    player.set_eyes('shock_eyes')
-
-                if player.rect.y > 300 and self.state['start_fall'][player.id] :
-                    player.set_position(player.rect.x, 300)
-                    self.state['multY'] = 0
-                    player.set_eyes('squint_eyes')
-
-                    if not self.state['fallen'][player.id]:
-                        if player.id == 1:
-                            game.sound.play_sfx('block_break')
-                        self.state['fallen'][player.id] = True
+                self.launch_player(game, player)
 
                 if self.state['tick'] > self.state['timer_interval']:
                     player.set_eyes('base_eyes')
                     if self.state['tick'] % 10 == 0:
                         player.shield_visible = not player.shield_visible
 
-                new_velocity = (velocity[0] * self.state['multX'], velocity[1] * self.state['multY'])
-                self.state['player_velocity'][player.id] = new_velocity
-
-        if self.state['tick'] == self.state['destroy_interval'] + 3:
-            game.sound.play_sfx('player_fling')
-        if self.state['tick'] == self.state['timer_interval']:
-            game.sound.play_sfx('block_break')
         if self.state['tick'] == self.state['wait_interval']:
             game.sound.play_sfx('buff')
 
@@ -456,6 +480,14 @@ class Round(GameScene):
 
     def draw(self, game):
         game.screen.fill(game.level.background_color)
+
+        # Checking if it needs to animate players that join late
+        for player in game.joined_late:
+            process = self.state_dict['init_cutscene'][f'p{player.id}_process']
+            if not process['finalize']:
+                self.launch_player(game, player)
+            else:
+                game.joined_late.remove(player)
 
         # Temporary list for hazzards to be prioritized by their Y position
         draw_queue = []

@@ -104,6 +104,7 @@ class Colors:
         self.sad_orange = (50, 15, 0)
 
         # Shadow colors
+        self.transparent = (255, 255, 255, 0)
         self.weak_shadow = (0, 0, 0, 30)
         self.light_shadow = (0, 0, 0, 76)
         self.shadow = (0, 0, 0, 128)

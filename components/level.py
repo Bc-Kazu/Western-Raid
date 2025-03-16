@@ -3,8 +3,9 @@ from random import randint, choice, choices
 from components.objects.gadgets.bot_shooter import BotShooter
 from components.objects.gadgets.turret_shield import TurretShield
 from components.objects.gadgets.turret_shooter import TurretShooter
-from config import LEVEL_CONFIG, POWER_UPS, ITEMS, BRICKS
+from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
 from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG, SMALL_FONT, TEXT_FONT, GADGET_CONFIG
+from configurations.level_config import LEVEL_CONFIG
 
 from components.objects.terrain import Terrain
 from components.objects.pickup import PickUp

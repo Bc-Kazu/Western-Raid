@@ -5,7 +5,8 @@ with their own properties.
 from random import randint
 from math import log
 
-from config import BASE_SHIELD_X, BASE_SHIELD_Y, BASE_PLAYER_SPEED, SHIELD_DISTANCE, POWER_UPS, ITEMS
+from constants import BASE_SHIELD_X, BASE_SHIELD_Y, BASE_PLAYER_SPEED, SHIELD_DISTANCE
+from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
 from assets import PLAYER_CONFIG, GADGET_CONFIG
 from components.game_object import GameObject
 import pygame as pg
@@ -237,7 +238,12 @@ class Player(GameObject):
 
     # Handle controls and changing sprites (shield, eyes, etc.)
     def update(self, game):
-        if game.level and game.level.started:
+        joining = False
+        for player in game.joined_late:
+            if player == self:
+                joining = True
+
+        if game.level and game.level.started and not joining:
             self.eyes_offset = [0, 0]
             self.set_velocity(0, 0)
 

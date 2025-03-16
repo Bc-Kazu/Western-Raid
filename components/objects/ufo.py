@@ -1,7 +1,7 @@
 """
 Class responsible for creating the UFO object
 """
-from config import UFO_COLORS
+from constants import UFO_COLORS
 from assets import NORMAL_FONT, UFO_CONFIG
 from utils.text import Text
 from math import log

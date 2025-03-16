@@ -2,7 +2,7 @@
 ''' ========== HANDLING EVERYTHING THAT SHOWS IN LEVEL SELECT  ========== '''
 ''' ===================================================================== '''
 
-from config import LEVEL_COUNT, ALLOWED_LEVELS
+from constants import LEVEL_COUNT, ALLOWED_LEVELS
 from assets import LEVEL_FRAMES, LEVEL_ICONS, LEVEL_FRAMES_RECT, LEVEL_ICONS_RECT, LEVEL_LOCKS, LEVEL_LOCKS_RECT
 
 from components.game_scene import GameScene

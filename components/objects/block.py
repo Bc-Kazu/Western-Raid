@@ -60,4 +60,5 @@ class Block(GameObject):
         super().draw(game)
 
         if game.debug:
+            self.strength_indicator.set_position(self.rect.center)
             self.strength_indicator.draw(game)

@@ -2,6 +2,8 @@
 Module that handles all input interactions with the game
 """
 from assets import WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES, LEVEL_FRAMES_RECT
+from utils.colors import Colors
+colors = Colors()
 
 import pygame as pg
 
@@ -33,7 +35,8 @@ def handle_events(game):
 
             if event.key == pg.K_ESCAPE:
                 game.escape_tick = 0
-                game.text.escape_text.set_color((255, 255, 255))
+                game.text.escape_text.set_color()
+                game.text.quit_text.set_color()
 
 
     # ========== UI Button interactions ========== #
@@ -107,11 +110,11 @@ def handle_events(game):
     if input_once(game, pg.K_r):
         if game.scene.name == 'menu' and game.data['level1']['wins'] > 0:
             if game.title_name == '< WESTERN RAID >':
-                game.title_name = '< WESTERN RAVE >'
+                game.set_title('< WESTERN RAVE >')
                 game.scene.set_title(game)
                 game.set_music('martian_rave')
             else:
-                game.title_name = '< WESTERN RAID >'
+                game.set_title()
                 game.scene.set_title(game)
                 game.set_music('menu')
 
@@ -138,30 +141,32 @@ def handle_events(game):
         if game.player_2 is not None:
             game.player_2.set_super()
 
-    if input_once(game, pg.K_ESCAPE) and not game.scene.state:
-        game.esc_pressed = True
 
-        if game.scene.name == 'level_select':
-            game.sound.play_sfx('ui_select')
-            game.set_scene('menu')
-
-    # Checking for quitting round
+    # Checking for quitting scene or game
     if keys[pg.K_ESCAPE]:
         game.esc_pressed = True
+
+        if game.scene.name == 'menu':
+            if game.escape_tick > game.escape_hold_time:
+                game.running = False
+            else:
+                game.escape_tick += 1
+                new_color = (255, 255, 255, min(0 + game.escape_tick * 3, 255))
+                game.text.quit_text.set_color(new_color)
+
+        if game.scene.name == 'level_select' and not game.scene.state:
+            game.sound.play_sfx('ui_select')
+            game.set_scene('menu')
 
         if game.scene.name == 'round':
             if game.escape_tick > game.escape_hold_time:
                 game.escape_tick = 0
                 game.set_scene('menu')
                 game.game_reset()
-                game.text.escape_text.current_color = (255, 255, 255)
             else:
                 game.escape_tick += 1
-                game.text.escape_text.current_color = (
-                    255,
-                    max(255 - game.escape_tick, 0),
-                    max(255 - game.escape_tick * 3, 0)
-                )
+                new_color = (255, 255, 255, min(0 + game.escape_tick * 3, 255))
+                game.text.escape_text.set_color(new_color)
     else:
         game.esc_pressed = False
 
@@ -177,11 +182,11 @@ def handle_events(game):
         game.sound.mute_music()
     elif input_once(game, pg.K_EQUALS) or input_once(game, pg.K_PLUS):
         game.sound.change_volume('increase')
-        game.text.music_change_vol.set_text(f'+ Music: {int(10 * game.sound.volume_offset)}')
+        game.text.music_change_vol.set_text(f'+ Music: {int(10 * game.sound.music_offset)}')
         game.set_hud(game.text.music_change_vol)
     elif input_once(game, pg.K_MINUS):
         game.sound.change_volume('decrease')
-        game.text.music_change_vol.set_text(f'- Music: {int(10 * game.sound.volume_offset)}')
+        game.text.music_change_vol.set_text(f'- Music: {int(10 * game.sound.music_offset)}')
         game.set_hud(game.text.music_change_vol)
     elif input_once(game, pg.K_RIGHTBRACKET) or input_once(game, pg.K_RIGHTPAREN):
         game.sound.change_volume_sfx('increase')
