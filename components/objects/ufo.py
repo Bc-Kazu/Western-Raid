@@ -112,6 +112,26 @@ class Ufo(GameObject):
                     new_block.set_strength(strength)
                     self.blocks.append(new_block)
 
+    def position_blocks(self):
+        if len(self.blocks) <= 0:
+            return
+
+        index = 0
+        for row_index, strengths in enumerate(self.shape):
+            row_width = len(strengths) * self.block_size[0]
+
+            # Calculate the starting x position for the current row
+            x = (self.rect.centerx * 2 - row_width) // 2 + 1
+
+            # Add blocks for the current row
+            for col_index, strength in enumerate(strengths):
+                col_width = len(self.shape) * self.block_size[1]
+                y = (self.rect.centery * 2 - col_width) // 2 + 25
+
+                pos = (x + col_index * self.block_size[0], y + row_index * self.block_size[1])
+                self.blocks[index].set_position(pos)
+                index += 1
+
     def collide_check(self, game, bullet):
         if not self.can_collide:
             return
@@ -283,6 +303,10 @@ class Ufo(GameObject):
             self.regenerated_blocks = 0
             self.regen_safe = 0
             return True
+
+    def set_position(self, *args):
+        super().set_position(*args)
+        self.position_blocks()
 
     def update(self, game):
         super().update(game)

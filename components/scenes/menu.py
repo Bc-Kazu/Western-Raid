@@ -2,8 +2,7 @@
 ''' ========== HANDLING EVERYTHING IN THE MENU SCREEN =========== '''
 ''' ============================================================= '''
 
-from assets import UFO_SPRITE_RECT, UFO_SPRITE_RECT2, UFO_SPRITE, UFO_SPRITE2, WASD_CONTROLS_A, \
-    WASD_RECT_A, ARROWS_CONTROLS_A, ARROWS_RECT_A
+from assets import WASD_CONTROLS_A, WASD_RECT_A, ARROWS_CONTROLS_A, ARROWS_RECT_A
 
 from components.game_scene import GameScene
 from utils.colors import Colors
@@ -20,7 +19,6 @@ class Menu(GameScene):
         self.title_anim = ['-']
 
         self.player_offset = [0, -100, 100]
-        self.sprites_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
 
     def set_title(self, game):
         self.title_anim = [
@@ -83,7 +81,7 @@ class Menu(GameScene):
         if game.tick % self.bobbing_interval == 0:
             game.player_bobbing = -game.player_bobbing
 
-        game.players_animate(self.sprites_dict, self.player_offset)
+        game.players_animate(self.player_offset)
 
         # Draw texts and controls on screen depending on players joined
         if game.player_1:

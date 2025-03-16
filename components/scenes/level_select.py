@@ -3,8 +3,7 @@
 ''' ===================================================================== '''
 
 from config import LEVEL_COUNT, ALLOWED_LEVELS
-from assets import UFO_SPRITE_RECT, UFO_SPRITE_RECT2, UFO_SPRITE, UFO_SPRITE2, LEVEL_FRAMES, LEVEL_ICONS, \
-    LEVEL_FRAMES_RECT, LEVEL_ICONS_RECT, LEVEL_LOCKS, LEVEL_LOCKS_RECT
+from assets import LEVEL_FRAMES, LEVEL_ICONS, LEVEL_FRAMES_RECT, LEVEL_ICONS_RECT, LEVEL_LOCKS, LEVEL_LOCKS_RECT
 
 from components.game_scene import GameScene
 from utils.colors import Colors
@@ -46,8 +45,6 @@ class LevelSelect(GameScene):
             (-4, -6),
             (-2, -2),
         ]
-
-        self.ufo_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
 
     def _start_process(self, game):
         # Initializing the process
@@ -112,10 +109,9 @@ class LevelSelect(GameScene):
             player.set_position(new_x, new_y, True)
             player.draw(game)
 
-            ufo = self.ufo_dict[player.id]
-            ufo[1].centerx = new_x
-            ufo[1].centery = new_y - (20 if not falling else 16)
-            game.screen.blit(ufo[0], ufo[1])
+            ufo = game.ufo_skins[player.id]
+            ufo.set_position(new_x, new_y - (20 if not falling else 16), True)
+            ufo.draw(game)
 
         # Finalizing the process
         if self.state['tick'] > self.state['end_interval']:
@@ -210,4 +206,4 @@ class LevelSelect(GameScene):
         if self._state_check('start'):
             self._start_process(game)
         else:
-            game.players_animate(self.ufo_dict, self.player_offset)
+            game.players_animate(self.player_offset)

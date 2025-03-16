@@ -11,6 +11,7 @@ from utils.particles import ParticleEmitter
 
 from components.scenes.round import Round
 
+from components.game_object import GameObject
 from components.objects.bullet import Bullet
 from components.objects.player import Player
 from components.objects.ufo import Ufo
@@ -23,9 +24,9 @@ from components import level
 from components.objects.bandit_types import (
     basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
 
-from assets import (TITLE_SPRITE, init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
-                    DYNAMITE_CONFIG, BLOCK_CACHE)
-from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS
+from assets import (init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
+                    DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE)
+from config import DATA_FORMAT, PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT
 
 import pygame as pg
 import os
@@ -127,9 +128,25 @@ class Game:
         self.music = 'menu'
         self.base_level = 1
         self.base_config = 1
+        self.ufo_skins = {1: None, 2: None}
         self.block_skin = 'block'
         self.broken_skin = 'broken'
         self.ufo_block_config = {}
+
+        self.ufo_skin_dict = {}
+        for name, item in UFO_CACHE.items():
+            UFO_SKIN_CONFIG = {
+                'name': name,
+                'type': 'skin',
+                'size': (150, 150),
+                'image': item.copy()
+            }
+
+            self.ufo_skin_dict[name] = GameObject(UFO_SKIN_CONFIG)
+
+        self.ufo_skins[1] = self.ufo_skin_dict['ufo1']
+        self.ufo_skins[2] = self.ufo_skin_dict['ufo2']
+        self.set_skin()
         self.set_block()
 
         for i in LEVEL_FRAMES.keys():
@@ -195,7 +212,7 @@ class Game:
 
     def initialize(self):
         # Setting up the display window customization
-        pg.display.set_icon(TITLE_SPRITE)
+        pg.display.set_icon(PLAYER1_IMAGE)
         pg.display.set_caption('< WESTERN RAID > v0.7.2')
 
         self.load_data()
@@ -211,6 +228,11 @@ class Game:
     def set_music(self, name):
         self.music = name
         self.sound.play(name, -1)
+
+    def set_skin(self, name='ufo'):
+        self.ufo_skins[1] = self.ufo_skin_dict.get(name + '1', self.ufo_skins[1])
+        self.ufo_skins[2] = self.ufo_skin_dict.get(name + '2', self.ufo_skins[2])
+        self.ufo.set_sprite(UFO_CACHE[name + '1'].copy())
 
     def set_block(self, block='block', broken='broken'):
         self.block_skin = block
@@ -281,12 +303,12 @@ class Game:
     def load_level(self):
         self.level = level.Level(self.base_level, self.base_config, self)
 
-    def set_level(self, level_index, is_mouse=False):
+    def set_level(self, lv, is_mouse=False):
         # Only allow levels avaliable in list
-        if level_index in ALLOWED_LEVELS:
-            if self.base_level != level_index:
+        if lv in LEVEL_COUNT and lv in ALLOWED_LEVELS:
+            if self.base_level != lv:
                 self.sound.play_sfx('ui_select')
-                self.base_level = level_index
+                self.base_level = lv
             elif is_mouse:
                 self.enter_level()
         else:
@@ -340,7 +362,7 @@ class Game:
                 self.text.HUD_text_list[3] = False
                 self.text.HUD_text_list[1] = 0
 
-    def players_animate(self, ufo_dict, player_offset):
+    def players_animate(self, player_offset):
         for player in [self.player_1, self.player_2]:
             if not player:
                 continue
@@ -353,9 +375,9 @@ class Game:
             player.set_position(new_x, new_y, True)
             player.draw(self)
 
-            ufo = ufo_dict[player.id]
-            ufo[1].center = (new_x, new_y - 20)
-            self.screen.blit(ufo[0], ufo[1])
+            ufo = self.ufo_skins[player.id]
+            ufo.set_position((new_x, new_y - 20), True)
+            ufo.draw(self)
 
 
     # Merged "draw" function with components state to make bullet_sprites possible

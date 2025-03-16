@@ -56,8 +56,8 @@ class Level:
 
         # Default style settings
         self.ufo = game.ufo
-        self.ufo_pos = (game.screen_width // 2, game.screen_height // 2 - 30)
-        self.ufo.set_position(self.ufo_pos, True)
+        self.base_ufo_pos = (game.screen_width // 2, game.screen_height // 2 - 30)
+        self.ufo.set_position(self.base_ufo_pos[0], -self.ufo.size[1], True)
         self.ufo.spawn_blocks(game)
 
         # Breakout style settings

@@ -2,7 +2,6 @@
 ''' ========= HANDLING EVERYTHING IN THE VICTORY SCREEN ========= '''
 ''' ============================================================= '''
 
-from assets import UFO_SPRITE_RECT, UFO_SPRITE_RECT2, UFO_SPRITE, UFO_SPRITE2
 from components.game_scene import GameScene
 from utils.colors import Colors
 colors = Colors()
@@ -15,15 +14,13 @@ class Victory(GameScene):
         self.player_offset = [0, 100, 300]
         self.score_rects = [(0, 0), (195, 300), (200, 350)]
 
-        self.sprites_dict = {1: [UFO_SPRITE, UFO_SPRITE_RECT], 2: [UFO_SPRITE2, UFO_SPRITE_RECT2]}
-
     def draw(self, game):
         if not self.initialize:
-            UFO_SPRITE_RECT.center = (game.screen_width / 2, 420)
-            UFO_SPRITE_RECT2.center = (game.screen_width / 2, 420 + 15)
 
             for player in [game.player_1, game.player_2]:
                 if player:
+                    game.ufo_skins[player.id].rect.center = (game.screen_width / 2, 420)
+
                     player.set_position((game.screen_width / 2, 440), True)
                     player.set_eyes('happy_eyes')
                     player.facing_up = False
@@ -50,7 +47,7 @@ class Victory(GameScene):
             game.player_bobbing = -game.player_bobbing
 
         # Draw victory stats and players
-        game.players_animate(self.sprites_dict, self.player_offset)
+        game.players_animate(self.player_offset)
 
         for player in [game.player_1, game.player_2]:
             if not player:

@@ -1,8 +1,7 @@
 """
 Module that handles all input interactions with the game
 """
-from assets import (WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES,
-                    LEVEL_FRAMES_RECT, UFO_SPRITE_RECT, UFO_SPRITE_RECT2)
+from assets import WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES, LEVEL_FRAMES_RECT
 
 import pygame as pg
 
@@ -42,27 +41,22 @@ def handle_events(game):
 
     if game.scene.name == 'menu':
         if mouse_input == mouse_states['left']:
-            if UFO_SPRITE_RECT.collidepoint(mouse_pos) and game.player_1:
-                game.set_scene('level_select')
-                game.sound.play_sfx('ui_select')
-            if UFO_SPRITE_RECT2.collidepoint(mouse_pos) and game.player_2:
-                game.set_scene('level_select')
-                game.sound.play_sfx('ui_select')
+            for player in [game.player_1, game.player_2]:
+                if player and game.ufo_skins[player.id].rect.collidepoint(mouse_pos):
+                    game.set_scene('level_select')
+                    game.sound.play_sfx('ui_select')
 
             if WASD_RECT_A.collidepoint(mouse_pos):
                 game.add_player('WASD')
             if ARROWS_RECT_A.collidepoint(mouse_pos):
                 game.add_player('ARROWS')
         elif mouse_input == mouse_states['right']:
-            if UFO_SPRITE_RECT.collidepoint(mouse_pos) and game.player_1:
-                game.player_1 = None
-                game.player_2 = None
-                game.player_count = 0
-                game.sound.play_sfx('remove')
-            if UFO_SPRITE_RECT2.collidepoint(mouse_pos) and game.player_2:
-                game.player_2 = None
-                game.player_count = 1
-                game.sound.play_sfx('remove')
+            for player in [game.player_1, game.player_2]:
+                if player and game.ufo_skins[player.id].rect.collidepoint(mouse_pos):
+                    game.player_1 = None if player.id == 1 else game.player_1
+                    game.player_2 = None
+                    game.player_count = 2 - player.id
+                    game.sound.play_sfx('remove')
 
     if mouse_input == 1 and game.scene.name == 'level_select':
         for level in LEVEL_FRAMES.keys():
@@ -123,12 +117,14 @@ def handle_events(game):
 
     if input_once(game, pg.K_k) and game.scene.name == 'menu':
         if game.block_skin == 'happy_cat':
+            game.set_skin()
             game.set_block()
             game.sound.play_sfx('ui_select')
             game.sound.play_sfx('swap')
             game.text.muted.set_text(f'CAT NO :(')
             game.set_hud(game.text.muted)
         else:
+            game.set_skin('cat_ufo')
             game.set_block('happy_cat', 'sad_cat')
             game.sound.play_sfx('ui_select')
             game.sound.play_sfx('meow')

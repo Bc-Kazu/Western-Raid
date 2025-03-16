@@ -56,32 +56,26 @@ def init_loading(string, progress=None, reset_progress=False):
         loading_progress = 0
 
 supported_formats = ["bmp", "png", "jpg", "jpeg", "gif", "tga", "webp"]
-def load_images_from_folder(folder_path, image_cache):
+def load_cache(folder_path):
     """Loads all images from a folder into the image cache dictionary."""
+    cache = {}
     for filename in os.listdir(folder_path):
         if "." in filename and filename.rsplit(".", 1)[1] in supported_formats:
             image_name = filename.rsplit(".", 1)[0]
-            image_cache[image_name] = pg.image.load(os.path.join(folder_path, filename)).convert_alpha()
+            cache[image_name] = pg.image.load(os.path.join(folder_path, filename)).convert_alpha()
             init_loading('loading assets', 1)
+    return cache
 
 # Preloading all images that are added/removed through the game
-BANDIT_CACHE = {}
-BULLET_CACHE = {}
-DECORATION_CACHE = {}
-ITEM_CACHE = {}
-TERRAIN_CACHE = {}
-UI_CACHE = {}
-BLOCK_CACHE = {}
-GADGET_CACHE = {}
-
-load_images_from_folder("assets/bandit_sprites", BANDIT_CACHE)
-load_images_from_folder("assets/bullet_sprites", BULLET_CACHE)
-load_images_from_folder("assets/decoration_sprites", DECORATION_CACHE)
-load_images_from_folder("assets/item_sprites", ITEM_CACHE)
-load_images_from_folder("assets/terrain_sprites", TERRAIN_CACHE)
-load_images_from_folder("assets/ui_sprites", UI_CACHE)
-load_images_from_folder("assets/block_sprites", BLOCK_CACHE)
-load_images_from_folder("assets/gadget_sprites", GADGET_CACHE)
+BANDIT_CACHE = load_cache("assets/bandit_sprites")
+BULLET_CACHE = load_cache("assets/bullet_sprites")
+DECORATION_CACHE = load_cache("assets/decoration_sprites")
+ITEM_CACHE = load_cache("assets/item_sprites")
+TERRAIN_CACHE = load_cache("assets/terrain_sprites")
+UI_CACHE = load_cache("assets/ui_sprites")
+BLOCK_CACHE = load_cache("assets/block_sprites")
+GADGET_CACHE = load_cache("assets/gadget_sprites")
+UFO_CACHE = load_cache("assets/ufo_sprites")
 EMPTY_IMAGE = pg.image.load('assets/nil.png')
 
 BASE_PLAYER_SIZE = (50, 50)
@@ -138,10 +132,6 @@ POISON_CONFIG = {
     'image': BULLET_CACHE['poison']
 }
 
-UFO_SPRITE = pg.image.load('assets/ui_sprites/UFO.png').convert_alpha()
-UFO_SPRITE = pg.transform.scale(UFO_SPRITE, (150, 150))
-UFO_SPRITE_RECT = UFO_SPRITE.get_rect()
-UFO_SPRITE_RECT.center = (SCREEN_WIDTH / 2, 420)
 init_loading('loading assets', 5)
 
 UFO_CONFIG = {
@@ -149,7 +139,7 @@ UFO_CONFIG = {
     'type': 'ufo',
     'size': (180, 180),
     'color': colors.light_blue,
-    'image': UFO_SPRITE.copy()
+    'image': UFO_CACHE['ufo1'].copy()
 }
 
 GADGET_CONFIG = {
@@ -261,48 +251,6 @@ LEVELS_ENVIROMENT = {
 init_loading('loading assets', 30)
 
 # Image configuration
-TITLE_SPRITE = pg.image.load('assets/player_sprites/1/body.png').convert_alpha()
-TITLE_SPRITE = pg.transform.scale(TITLE_SPRITE, BASE_PLAYER_SIZE)
-TITLE_SPRITE_RECT = TITLE_SPRITE.get_rect()
-TITLE_SPRITE_RECT.center = (SCREEN_WIDTH // 2, 440)
-init_loading('loading assets', 1)
-
-TITLE_SPRITE2 = pg.image.load('assets/player_sprites/2/body.png').convert_alpha()
-TITLE_SPRITE2 = pg.transform.scale(TITLE_SPRITE2, BASE_PLAYER_SIZE)
-TITLE_SPRITE_RECT2 = TITLE_SPRITE2.get_rect()
-TITLE_SPRITE_RECT2.center = (SCREEN_WIDTH // 2, 440 + P2_TITLE_OFFSET)
-init_loading('loading assets', 1)
-
-TITLE_SPRITE_EYES = pg.image.load('assets/player_sprites/1/base_eyes.png').convert_alpha()
-TITLE_SPRITE_EYES = pg.transform.scale(TITLE_SPRITE_EYES, BASE_PLAYER_SIZE)
-TITLE_SPRITE_EYES_RECT = TITLE_SPRITE_EYES.get_rect()
-TITLE_SPRITE_EYES_RECT.center = ((SCREEN_WIDTH // 2) - 4, 440)
-init_loading('loading assets', 1)
-
-TITLE_SPRITE_EYES2 = pg.image.load('assets/player_sprites/1/base_eyes.png').convert_alpha()
-TITLE_SPRITE_EYES2 = pg.transform.scale(TITLE_SPRITE_EYES2, BASE_PLAYER_SIZE)
-TITLE_SPRITE_EYES_RECT2 = TITLE_SPRITE_EYES2.get_rect()
-TITLE_SPRITE_EYES_RECT2.center = ((SCREEN_WIDTH // 2) - 4, 440 + P2_TITLE_OFFSET)
-init_loading('loading assets', 1)
-
-WIN_SPRITE_EYES = pg.image.load('assets/player_sprites/1/happy_eyes.png').convert_alpha()
-WIN_SPRITE_EYES = pg.transform.scale(WIN_SPRITE_EYES, BASE_PLAYER_SIZE)
-WIN_SPRITE_EYES_RECT = WIN_SPRITE_EYES.get_rect()
-WIN_SPRITE_EYES_RECT.center = ((SCREEN_WIDTH // 2) - 4, 440)
-init_loading('loading assets', 1)
-
-WIN_SPRITE_EYES2 = pg.image.load('assets/player_sprites/1/happy_eyes.png').convert_alpha()
-WIN_SPRITE_EYES2 = pg.transform.scale(WIN_SPRITE_EYES2, BASE_PLAYER_SIZE)
-WIN_SPRITE_EYES_RECT2 = WIN_SPRITE_EYES2.get_rect()
-WIN_SPRITE_EYES_RECT2.center = ((SCREEN_WIDTH // 2) - 4, 440 + P2_TITLE_OFFSET)
-init_loading('loading assets', 1)
-
-UFO_SPRITE2 = pg.image.load('assets/ui_sprites/UFO2.png').convert_alpha()
-UFO_SPRITE2 = pg.transform.scale(UFO_SPRITE2, (150, 150))
-UFO_SPRITE_RECT2 = UFO_SPRITE2.get_rect()
-UFO_SPRITE_RECT2.center = (SCREEN_WIDTH / 2, 420 + P2_TITLE_OFFSET)
-init_loading('loading assets', 1)
-
 DEFEAT_CAGE = pg.image.load('assets/ui_sprites/defeat_cage.png').convert_alpha()
 DEFEAT_CAGE = pg.transform.scale(DEFEAT_CAGE, (int(110 * 5), int(30 * 5)))
 DEFEAT_CAGE_RECT = DEFEAT_CAGE.get_rect()

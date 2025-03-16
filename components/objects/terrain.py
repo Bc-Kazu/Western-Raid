@@ -110,10 +110,6 @@ class Terrain(GameObject):
         if self.name == 'luck_statue':
             return
 
-        if self.area_rect.colliderect(level.ufo.rect):
-            self.kill()
-            return
-
         # Check if there are any terrain too close to the hitbox, and remove it
         for terrain in level.map:
             if terrain == self or not terrain.alive:
@@ -128,11 +124,17 @@ class Terrain(GameObject):
                     if decoration.rect.colliderect(terrain.area_rect):
                         self.decorations.remove(decoration)
 
-    def destroy(self, game):
+    def ufo_hit_check(self, game):
+        if self.area_rect.colliderect(game.ufo.rect):
+            self.destroy(game, False)
+
+    def destroy(self, game, player=True):
         if self.alive:
             self.kill()
-            game.sound.play_sfx('remove')
-            game.data["terrain_destroyed"] += 1
+
+            if player:
+                game.sound.play_sfx('remove')
+                game.data["terrain_destroyed"] += 1
 
             if self.name == 'luck_statue':
                 game.level.spawn_pickup('power_up', self.rect.center)

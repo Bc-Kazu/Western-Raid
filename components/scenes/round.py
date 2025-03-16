@@ -94,7 +94,6 @@ class Round(GameScene):
     def __init__(self, name, screen):
         super().__init__(name, screen)
         super().reset()
-        self.ufo_goal_pos = None
 
     def _time_up_draw(self, game):
         # Drawing custom time up screen
@@ -230,8 +229,6 @@ class Round(GameScene):
         # Initializing the process
         if not self.state['initialize']:
             self.state['initialize'] = True
-            self.ufo_goal_pos = game.ufo.rect.y
-            game.ufo.set_position((game.ufo.rect.x, -game.ufo.size[1]))
             game.ufo.visible = True
             game.ufo.always_on_top = True
             game.sound.play_sfx('fall_round')
@@ -243,16 +240,18 @@ class Round(GameScene):
         else:
             self.state['tick'] += 1
 
-        if game.ufo.rect.y < self.ufo_goal_pos:
+        if game.ufo.rect.centery < game.level.base_ufo_pos[1]:
             if self.state['tick'] < self.state['fall_interval']:
                 self.state['fall_speed'] *= 1.03
                 game.ufo.set_position(game.ufo.rect.x, game.ufo.rect.y + self.state['fall_speed'])
         elif not self.state['broken_ufo']:
-            game.ufo.set_position(game.ufo.rect.x, self.ufo_goal_pos)
+            game.ufo.set_position(game.level.base_ufo_pos, True)
             self.state['broken_ufo'] = True
             self.state['tick'] = self.state['fall_interval']
             game.ufo.set_blink(True, 5)
             game.sound.play_sfx('ufo_destroy')
+            for terrain in game.level.map:
+                terrain.ufo_hit_check(game)
 
         if self.state['tick'] == self.state['destroy_interval']:
             game.ufo.set_blink(False)
