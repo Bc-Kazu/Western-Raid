@@ -26,13 +26,13 @@ from components.objects.bandit_types import (
 
 from assets import (init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
                     DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE)
-from constants import PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT, FPS, MENU_MUSIC, VERSION, \
+    BASE_TITLE, DATA_PATH
 from configurations.data_config import DATA_FORMAT
 
 import pygame as pg
 import os
 import json
-import zlib
 
 class Game:
     def __init__(self):
@@ -46,7 +46,7 @@ class Game:
 
         # Screen and game loop configuration
         self.running = True
-        self.FPS = 60
+        self.FPS = FPS
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
         self.screen = pg.display.set_mode((self.screen_width, self.screen_height))
@@ -76,21 +76,21 @@ class Game:
         # Getting pool classes for each object/dynamic class
         self.bullet_pool_dict = {
             "bullet": Pool(Bullet, BULLET_CONFIG, 50),
-            "card": Pool(Bullet, CARD_CONFIG, 30),
-            "dynamite": Pool(Bullet, DYNAMITE_CONFIG, 30),
+            "card": Pool(Bullet, CARD_CONFIG, 5),
+            "dynamite": Pool(Bullet, DYNAMITE_CONFIG, 5),
         }
 
         self.bandit_pool_dict = {
             "basic": Pool(basic.Bandit, BANDITS_CONFIG["basic"], 15),
             "skilled": Pool(skilled.Bandit, BANDITS_CONFIG["skilled"], 8),
-            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 8),
-            "bomber": Pool(bomber.Bandit, BANDITS_CONFIG["bomber"], 5),
-            "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 5),
-            "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 5),
-            "boomstick": Pool(boomstick.Bandit, BANDITS_CONFIG["boomstick"], 5),
+            "bomber": Pool(bomber.Bandit, BANDITS_CONFIG["bomber"], 8),
             "tangler": Pool(tangler.Bandit, BANDITS_CONFIG["tangler"], 5),
-            "hitman": Pool(hitman.Bandit, BANDITS_CONFIG["hitman"], 3),
+            "hitman": Pool(hitman.Bandit, BANDITS_CONFIG["hitman"], 5),
             "robber": Pool(robber.Bandit, BANDITS_CONFIG["robber"], 3),
+            "tipsy": Pool(tipsy.Bandit, BANDITS_CONFIG["tipsy"], 1),
+            "shielded": Pool(shielded.Bandit, BANDITS_CONFIG["shielded"], 1),
+            "dicer": Pool(dicer.Bandit, BANDITS_CONFIG["dicer"], 1),
+            "boomstick": Pool(boomstick.Bandit, BANDITS_CONFIG["boomstick"], 1),
         }
 
         init_loading('creating particles', 1, True)
@@ -123,11 +123,11 @@ class Game:
         self.player_menu_y = 460
 
         # Loading starter configurations
-        self.title_name = '< WESTERN RAID >'
-        self.title_ver = 'v1.9.3'
-        self.music = 'menu'
-        self.base_level = 1
-        self.base_config = 1
+        self.title_name = BASE_TITLE
+        self.title_ver = VERSION
+        self.music = MENU_MUSIC
+        self.base_level = LEVEL_COUNT[0]
+        self.base_config = LEVEL_COUNT[0]
         self.ufo_skins = {1: None, 2: None}
         self.block_skin = 'block'
         self.broken_skin = 'broken'
@@ -162,42 +162,31 @@ class Game:
         self.set_scene('menu')
         self.sound.play(self.music, -1)
 
-
     def save_data(self):
-        file_path = os.path.join('components', 'contentlib.wb')
-
-        if not os.path.exists(file_path):
+        if not os.path.exists(DATA_PATH):
             self.data = DATA_FORMAT.copy()
 
-        dados_json = json.dumps(self.data)
-        dados_comprimidos = zlib.compress(dados_json.encode())
-
-        with open(file_path, "wb") as f:
-            print(f'> Saving user data for Western Raid.')
-            f.write(dados_comprimidos)
+        with open(DATA_PATH, 'w') as file:
+            json.dump(self.data, file, indent=4)
+        print(f"> Saving user data for Western Raid")
 
     def load_data(self):
-        file_path = os.path.join('components', f'contentlib.wb')
-        print(f'> Loading user data for Western Raid.')
-
         # Check if filepath doesn't exist and create new file
-        if not os.path.exists(file_path):
+        if not os.path.exists(DATA_PATH):
             print(f'> No existing data found, creating new save file.')
             self.save_data()
 
         # Try to load existing data without errors
         try:
-            with open(file_path, "rb") as file:
-                data_fetched = file.read()
-                decompiled_data = zlib.decompress(data_fetched).decode()
-                data = json.loads(decompiled_data)
+            with open(DATA_PATH, 'r') as file:
+                data = json.load(file)
 
                 # Check and update missing keys
                 updated_data = self.sort_data(data, DATA_FORMAT)
                 self.data = updated_data
-                self.data[f"level1"]["unlocked"] = True
+                print(f"> Loading user data for Western Raid.")
         except json.JSONDecodeError:
-            print("Error reading player file, check for any problems in the file"
+            print(f'Error reading player file, check for any problems at "{DATA_PATH}"'
                   "\nor delete it so a new one can be created.")
             self.data = DATA_FORMAT.copy()
 
@@ -209,7 +198,7 @@ class Game:
 
         for key, value in template.items():
             if key not in data:
-                print(f"> Adding missing key: {key}")
+                # print(f"> Adding missing key: {key}")
                 data[key] = value
             elif isinstance(value, dict):
                 # Recursively check nested dictionaries
@@ -270,7 +259,7 @@ class Game:
 
         self.save_data()
 
-    def set_title(self, new_title='< WESTERN RAID >'):
+    def set_title(self, new_title=BASE_TITLE):
         self.title_name = new_title if new_title else self.title_name
         pg.display.set_caption(f'{self.title_name} {self.title_ver}')
     
@@ -317,13 +306,28 @@ class Game:
         self.level = level.Level(self.base_level, self.base_config, self)
 
     def set_level(self, lv, is_mouse=False):
+        level_found = False
+
         # Only allow levels avaliable in list
         if lv in LEVEL_COUNT and lv in ALLOWED_LEVELS:
             if self.base_level != lv:
-                self.sound.play_sfx('ui_select')
                 self.base_level = lv
+                level_found = True
             elif is_mouse:
                 self.enter_level()
+        else:
+            for other_lv in LEVEL_COUNT:
+                if not other_lv in ALLOWED_LEVELS:
+                    continue
+
+                if (other_lv < lv < self.base_level) or (other_lv > lv > self.base_level):
+                    print(other_lv, lv, self.base_level)
+                    self.base_level = other_lv
+                    level_found = True
+                    break
+
+        if level_found:
+            self.sound.play_sfx('ui_select')
         else:
             self.sound.play_sfx('push')
 
@@ -346,8 +350,9 @@ class Game:
 
         full_score = 0
 
-        for levels in ALLOWED_LEVELS:
-            full_score += self.data[f"level{levels}"]["best_score"]
+        for lvl in LEVEL_COUNT:
+            if lvl in ALLOWED_LEVELS:
+                full_score += self.data[f"level{lvl}"]["best_score"]
 
         new_best = self.data[f"total_score"] < full_score
         self.text.new_best_text.enabled = new_best
@@ -355,8 +360,17 @@ class Game:
 
         if score_type == 'victory':
             self.data[f"level{lv}"]["wins"] += 1
-            if lv + 1 in ALLOWED_LEVELS:
-                self.data[f"level{lv + 1}"]["unlocked"] = True
+            unlocked_next = False
+
+            for other_lv in LEVEL_COUNT:
+                if unlocked_next:
+                    break
+
+                next_lv = other_lv if other_lv != lv else None
+                if next_lv in ALLOWED_LEVELS:
+                    self.data[f"level{next_lv}"]["unlocked"] = True
+                    unlocked_next = True
+
         elif score_type == 'defeat':
             self.data[f"level{lv}"]["defeats"] += 1
 

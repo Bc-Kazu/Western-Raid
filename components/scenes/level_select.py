@@ -152,7 +152,7 @@ class LevelSelect(GameScene):
             LEVEL_ICONS[i].set_alpha(100)
 
         # Set active level to highlighted state
-        if game.base_level in ALLOWED_LEVELS:
+        if game.base_level in LEVEL_COUNT and game.base_level in ALLOWED_LEVELS:
             i = game.base_level
             if not self.level_selected:
                 level_names = [

@@ -10,15 +10,14 @@ import pygame as pg
 import os
 import inspect
 from random import choice
+
 from utils.text import Text
 from utils.colors import Colors
 from constants import LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
 from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
-
-from datetime import datetime
+from configurations.caption_config import RANDOM_INIT_CAPTION
 
 # Get the current local date and time
-local_datetime = datetime.now()
 colors = Colors()
 pg.init()
 
@@ -29,32 +28,6 @@ PYGAME_IMAGE = pg.image.load(f'assets/pygame.png').convert_alpha()
 PYGAME_IMAGE = pg.transform.scale(PYGAME_IMAGE, (150, 150))
 PYGAME_IMAGE_RECT = PYGAME_IMAGE.get_rect()
 PYGAME_IMAGE_RECT.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-
-if local_datetime.hour < 12:
-    day_message = 'Morning'
-elif local_datetime.hour < 19:
-    day_message = 'Afternoon'
-else:
-    day_message = 'Evening'
-
-RANDOM_INIT_CAPTION = [
-    'Making the sky a little brighter',
-    'Preparing for another galaxy trip',
-    'His name is Alt, and hers is Zia!',
-    "It's time to Western the Raid",
-    'Preparing absolute Cinema',
-    'Loading chiptune bangers',
-    'Avoiding school like a GAMER',
-    'Going to school like a GAMER',
-    'Remember to drink water!',
-    'Remember to eat water!',
-    'Remember to water the drink!',
-    'Inspired by Breakout!',
-    'Inspired by Pizza Tower, too!',
-    'Still waiting for a good caption',
-    'Forgetting what to write',
-    f'Good {day_message}, {os.getlogin()} :)',
-]
 
 pg.display.set_caption(choice(RANDOM_INIT_CAPTION))
 pg.display.set_icon(PYGAME_IMAGE)

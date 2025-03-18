@@ -27,15 +27,15 @@ LEVEL_CONFIG = [
             [
                 ["basic", 80, False, -15],
                 ["skilled", 20, False, 10],
-                ["tangler", 20, True, 0],
+                ["hitman", 2, False, 6],
                 ["bomber", 20, True, 0],
-                ["hitman", 10, True, 0],
+                ["tangler", 15, True, 0],
                 ["robber", 5, True, 0],
             ],
         "terrain_noise": 10,
         "terrain_area_reduction": 1,
 
-        "round_time": 300,
+        "round_time": 3,
         "max_bandits": 2,
         "max_spawn_count": 2,
         "bandit_spawnrate": 300,

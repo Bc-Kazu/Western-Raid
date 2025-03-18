@@ -22,6 +22,9 @@ for level in LEVEL_COUNT:
         "p2_score": 0,
     }
 
+first_lv = DATA_FORMAT.get(f'level{LEVEL_COUNT[0]}')
+first_lv['unlocked'] = True
+
 for player in range(1, 3):
     DATA_FORMAT[f'p{player}_stats'] = {
         "bullets_reflected": 0,

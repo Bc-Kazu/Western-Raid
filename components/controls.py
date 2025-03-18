@@ -118,7 +118,7 @@ def handle_events(game):
                 game.scene.set_title(game)
                 game.set_music('menu')
 
-    if input_once(game, pg.K_k) and game.scene.name == 'menu':
+    if input_once(game, pg.K_k) and game.scene.name == 'menu' and game.player_1:
         if game.block_skin == 'happy_cat':
             game.set_skin()
             game.set_block()

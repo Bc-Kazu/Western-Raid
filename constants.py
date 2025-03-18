@@ -8,6 +8,14 @@ components constants, and ui_sprites-related configurations.
 from utils.colors import Colors
 colors = Colors()
 
+# Game info configuration
+BASE_TITLE = '< WESTERN RAID >'
+RAVE_TITLE = '< WESTERN RAVE >'
+VERSION = 'v0.9.3 DEMO'
+MENU_MUSIC = 'menu'
+
+DATA_PATH = 'configurations/player_data.json'
+
 # Screen configuration
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 620
@@ -15,6 +23,13 @@ SCREEN_HEIGHT = 620
 # Level access configuration
 LEVEL_COUNT = [1]
 ALLOWED_LEVELS = [1, 2, 3]
+
+# Constant player variables
+BASE_SHIELD_X = 130
+BASE_SHIELD_Y = 20
+SHIELD_DISTANCE = 70
+BASE_PLAYER_SPEED = 4
+FPS = 60
 
 # Basic color configuration
 PLAYER_COLORS = [colors.bright_green, colors.bright_purple]
@@ -121,12 +136,3 @@ TOWER_COLORS = [
         colors.indigo,
     ],
 ]
-
-# Constant variables
-BASE_SHIELD_X = 130
-BASE_SHIELD_Y = 20
-SHIELD_DISTANCE = 70
-
-BASE_PLAYER_SPEED = 4
-BASE_ENEMY_SPEED = 2
-MAX_BULLET_SPEED = 5
