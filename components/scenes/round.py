@@ -251,7 +251,7 @@ class Round(GameScene):
         process['tick'] += 1
         velocity = process['player_velocity'][player.id]
         player.set_velocity(velocity)
-        player.set_offset(None, [4 if velocity[0] > 0 else -4, 0])
+        player.set_eyes_offset([4 if velocity[0] > 0 else -4, 0])
 
         if velocity[1] > -1 and not process['start_fall']:
             process['start_fall'] = True

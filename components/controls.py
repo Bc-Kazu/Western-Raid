@@ -1,7 +1,7 @@
 """
 Module that handles all input interactions with the game
 """
-from assets import WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES, LEVEL_FRAMES_RECT
+from assets import WASD_RECT_A, ARROWS_RECT_A, LEVEL_FRAMES, LEVEL_FRAMES_RECT, MYSTERIOUS_RECT
 from utils.colors import Colors
 colors = Colors()
 
@@ -19,6 +19,7 @@ def handle_events(game):
     game.keys_pressed = keys
     mouse_states = {'left': 1, 'scroll': 2, 'right': 3}
     mouse_input = 0
+    mouse_wheel = None
 
     for event in pg.event.get():
         # Quit the components
@@ -27,6 +28,8 @@ def handle_events(game):
 
         if event.type == pg.MOUSEBUTTONDOWN:
             mouse_input = event.button
+        if event.type == pg.MOUSEWHEEL:
+            mouse_wheel = event
 
         if event.type == pg.KEYDOWN:
             game.key_ui_pressed = True
@@ -53,6 +56,10 @@ def handle_events(game):
                 game.add_player('WASD')
             if ARROWS_RECT_A.collidepoint(mouse_pos):
                 game.add_player('ARROWS')
+            if MYSTERIOUS_RECT.collidepoint(mouse_pos):
+                game.text.mysterious_text.toggle(True)
+                game.sound.play_sfx('player_shoot')
+
         elif mouse_input == mouse_states['right']:
             for player in [game.player_1, game.player_2]:
                 if player and game.ufo_skins[player.id].rect.collidepoint(mouse_pos):
@@ -75,6 +82,19 @@ def handle_events(game):
             game.add_player('WASD')
         if keys[pg.K_UP] or keys[pg.K_LEFT] or keys[pg.K_DOWN] or keys[pg.K_RIGHT]:
             game.add_player('ARROWS')
+
+    if game.scene.name == 'menu' and game.scene.on_credits:
+        max_top = game.scene.ui_offset[1] < game.scene.credits_offset[1]
+        max_bottom = game.scene.ui_offset[1] > game.scene.credits_offset[1] * 2
+        if (keys[pg.K_w] or keys[pg.K_UP]) and max_top:
+            game.scene.set_offset([0, game.scene.ui_offset[1] + 2])
+        if (keys[pg.K_s] or keys[pg.K_DOWN]) and max_bottom:
+            game.scene.set_offset([0, game.scene.ui_offset[1] - 2])
+
+        if mouse_wheel and mouse_wheel.y < 0 and max_bottom:
+            game.scene.set_offset([0, game.scene.ui_offset[1] + mouse_wheel.y * 15])
+        if mouse_wheel and mouse_wheel.y > 0 and max_top:
+            game.scene.set_offset([0, game.scene.ui_offset[1] + mouse_wheel.y * 15])
 
     if game.scene.name == 'level_select' and not game.scene.state:
         if input_once(game, pg.K_RIGHT) or input_once(game, pg.K_d):
@@ -106,6 +126,9 @@ def handle_events(game):
             game.sound.play_sfx('remove')
             game.player_1 = None
             game.player_2 = None
+
+    if input_once(game, pg.K_c) and game.scene.name == 'menu':
+        game.scene.set_credits(not game.scene.on_credits)
 
     if input_once(game, pg.K_r):
         if game.scene.name == 'menu' and game.data['level1']['wins'] > 0:

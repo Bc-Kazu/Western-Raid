@@ -6,7 +6,7 @@ from random import randint
 from math import log
 
 from constants import BASE_SHIELD_X, BASE_SHIELD_Y, BASE_PLAYER_SPEED, SHIELD_DISTANCE
-from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
+from configurations.pickup_config import POWER_UPS, ITEMS
 from assets import PLAYER_CONFIG, GADGET_CONFIG
 from components.game_object import GameObject
 import pygame as pg
@@ -96,7 +96,6 @@ class Player(GameObject):
         self.facing_up = False
         self.last_key = ''
         self.last_direction = [0, 0]
-        self.rect_offset = [0, 0]
         self.eyes_offset = [0, 0]
 
         # Value for the number of times an input has been pressed
@@ -323,9 +322,8 @@ class Player(GameObject):
             self.kill()
             self.shield_tick = 0
             game.sound.play_sfx('player_damage')
-    
-    def set_offset(self, rect_offset=None, eyes_offset=None):
-        self.rect_offset = rect_offset
+
+    def set_eyes_offset(self, eyes_offset=None):
         self.eyes_offset = eyes_offset
 
     def set_eyes(self, name):
@@ -375,8 +373,8 @@ class Player(GameObject):
             self.outline.set_alpha(128)
 
         if game.scene.name == 'defeat':
-            self.rect.center = (game.screen_width / 2, game.screen_height - 160)
+            offset = -50 if self.id == 1 else 50
+            self.rect.center = (game.screen_width / 2 + offset, game.screen_height - 160)
             self.facing_up = False
-            if self.rect_offset:
-                self.rect.x += self.rect_offset[0]
-                self.rect.y += self.rect_offset[1]
+            self.set_eyes_offset([-2 if self.id == 1 else 50, 2])
+            self.set_eyes('closed_eyes')

@@ -88,17 +88,17 @@ class LevelSelect(GameScene):
                     player.set_eyes('shock_eyes')
 
             new_x = game.screen_width // 2 + self.player_offset[player.id]
-            new_y = game.player_menu_y
-            player.set_offset(None, [-4, 0])
+            new_y = game.player_menu_pos[1]
+            player.set_eyes_offset([-4, 0])
             falling = self.state['tick'] >= self.state['fall_interval']
 
             if not falling:
                 new_x += self.player_shake
-                player.set_offset(None, [-3, 0])
+                player.set_eyes_offset([-4, 0])
                 self.state['fall_offset'][player.id] -= self.fall_speed / 3
             elif self.state['tick'] < self.state['end_interval']:
                 offset = self.fall_offset_list[self.fall_index[player.id]]
-                player.set_offset(None, offset)
+                player.set_eyes_offset(offset)
                 self.fall_speed *= 1.02
                 self.state['fall_offset'][player.id] += self.fall_speed
                 player.set_eyes('squint_eyes')
@@ -125,6 +125,11 @@ class LevelSelect(GameScene):
     def draw(self, game):
         game.screen.fill(colors.space_blue)
 
+        if not self.tween_finished:
+            self.tween_interface()
+
+        self.set_player_pos(game)
+
         if game.title_name == '< WESTERN RAID >':
             game.stars.update(game)
             self.bobbing_interval = 30
@@ -132,7 +137,7 @@ class LevelSelect(GameScene):
             for player in [game.player_1, game.player_2]:
                 if player and not self.level_selected:
                     player.set_eyes('base_eyes')
-                    player.set_offset(None, [-4, 0])
+                    player.set_eyes_offset([-4, 0])
 
         else:
             game.win_stars.update(game)

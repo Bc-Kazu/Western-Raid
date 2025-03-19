@@ -35,7 +35,7 @@ LEVEL_CONFIG = [
         "terrain_noise": 10,
         "terrain_area_reduction": 1,
 
-        "round_time": 3,
+        "round_time": 300,
         "max_bandits": 2,
         "max_spawn_count": 2,
         "bandit_spawnrate": 300,

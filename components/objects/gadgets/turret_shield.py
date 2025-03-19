@@ -15,6 +15,7 @@ class TurretShield(GameObject):
         self.offscreen_limit = 0
 
         self.base_health = 5
+        self.push_force = 25
         self.health = self.base_health
 
         # Other sprites settings
@@ -189,6 +190,10 @@ class TurretShield(GameObject):
 
                     if bullet.name == 'dynamite':
                         bullet.explode(game)
+
+        for bandit in game.level.bandits:
+            if bandit.name == 'bomber' and bandit.rect.colliderect(self.shield_rect):
+                bandit.push(self.shield_rect)
 
 
     def draw(self, game):

@@ -29,6 +29,7 @@ class GameObject:
         self.sprite = config.get('image', self.NIL_IMAGE).copy()
         self.sprite = pg.transform.scale(self.sprite, self.size)
         self.rect = self.sprite.get_rect()
+        self.rect_offset = [0, 0]
 
         # Object state attributes
         self.alive = False
@@ -190,6 +191,21 @@ class GameObject:
         # Resizes the sprite in the same position
         self.sprite = pg.transform.scale(self.sprite, self.size)
         self.rect = pg.Rect(self.rect.topleft, self.size)
+
+    def set_offset(self, *args):
+        if len(args) == 0:
+            self.rect_offset = [0, 0]
+        elif len(args) == 1 and isinstance(args[0], (tuple, list)):
+            self.rect_offset = list(args[0])
+        elif len(args) == 2:
+            self.rect_offset[0] = args[0]
+            self.rect_offset[1] = args[1]
+
+    def set_offset_x(self, x=0):
+        self.rect_offset[0] = x
+
+    def set_offset_y(self, y=0):
+        self.rect_offset[1] = y
 
     # Changes or resets the color of the object, including alpha values.
     def set_color(self, custom=None, custom_sprite=None):

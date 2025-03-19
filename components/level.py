@@ -216,8 +216,6 @@ class Level:
             if instance.alive:
                 instance.update(game)
 
-                if instance.type == 'bullet':
-                    self.ufo.collide_check(game, instance)
                 if instance.type == 'enemy' and instance.active:
                     self.bandit_count += 1
                 if instance.type == 'text' and instance.style == 'popup':
@@ -266,6 +264,7 @@ class Level:
                 game.player_2.update(game)
 
         self.ufo.update(game)
+        self.ufo.collide_check(game)
         self.update_instance(game, self.map)
         self.update_instance(game, self.objects)
         self.update_instance(game, self.gadgets)

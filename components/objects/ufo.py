@@ -14,7 +14,7 @@ from utils.colors import Colors
 colors = Colors()
 
 def check_best_powerup(game, name):
-    best = None
+    best = 0
     if game.player_1 and name in game.player_1.PU_list:
         best = game.player_1.PU_list[name]
     if game.player_2 and name in game.player_2.PU_list:
@@ -64,7 +64,8 @@ class Ufo(GameObject):
 
         self.space_shield_max = 0
         self.space_shield_hp = 0
-        self.space_shield_cd = 300
+        self.base_shield_cd = 420
+        self.space_shield_cd = self.base_shield_cd
 
         self.regenerate = False
         self.regen_safe = 0
@@ -132,40 +133,48 @@ class Ufo(GameObject):
                 self.blocks[index].set_position(pos)
                 index += 1
 
-    def collide_check(self, game, bullet):
+    def collide_check(self, game):
         if not self.can_collide:
             return
 
-        if (self.space_shield_rect.colliderect(bullet.rect) and bullet.owner.type == 'enemy'
-                and self.space_shield_hp > 0):
-            self.space_shield_update(-1)
+        for bandit in game.level.bandits:
+            if (bandit.name == 'bomber' and self.space_shield_rect.colliderect(bandit.rect)
+                    and self.space_shield_hp > 0):
+                bandit.push(self.space_shield_rect)
 
-            game.sound.play_sfx('shield_hit')
+        for bullet in game.level.bullets:
+            if not bullet.alive or bullet.owner.type == 'player':
+                continue
 
-            best_extra = game.player_1
-            if game.player_2 and 'extra_reflect' in game.player_2.PU_list:
-                if 'extra_reflect' in game.player_1.PU_list:
-                    if game.player_2.PU_list['extra_reflect'] > best_extra.PU_list['extra_reflect']:
-                        best_extra = game.player_2
+            if self.space_shield_rect.colliderect(bullet.rect) and self.space_shield_hp > 0:
+                self.space_shield_update(-1)
 
-            bullet.reflect(self.space_shield_rect, best_extra, game)
-            return
+                game.sound.play_sfx('shield_hit')
 
-        # check the collides by the lists
-        if self.blocks or bullet.owner.type != 'player':
-            blocks_alive = 0
+                best_extra = game.player_1
+                if game.player_2 and 'extra_reflect' in game.player_2.PU_list:
+                    if 'extra_reflect' in game.player_1.PU_list:
+                        if game.player_2.PU_list['extra_reflect'] > best_extra.PU_list['extra_reflect']:
+                            best_extra = game.player_2
 
-            for block in self.blocks:
-                if block.collide_check(bullet):
-                    self.take_damage(game, block)
+                bullet.reflect(self.space_shield_rect, best_extra, game)
+                return
 
-                    if bullet.name == 'dynamite':
-                        bullet.explode(game)
-                if block.strength > 0:
-                    blocks_alive += 1
+            # check the collides by the lists
+            if self.blocks:
+                blocks_alive = 0
 
-            if blocks_alive <= 0:
-                self.kill()
+                for block in self.blocks:
+                    if block.collide_check(bullet):
+                        self.take_damage(game, block)
+
+                        if bullet.name == 'dynamite':
+                            bullet.explode(game)
+                    if block.strength > 0:
+                        blocks_alive += 1
+
+                if blocks_alive <= 0:
+                    self.kill()
 
     def take_damage(self, game, block):
         if block.strength > 1:
@@ -266,10 +275,10 @@ class Ufo(GameObject):
         best_cooldown = check_best_powerup(game, 'recovery')
         best_size = check_best_powerup(game, 'shield_size')
 
-        max_health = 1 + (best_max_health if best_max_health else 0)
-        cooldown = 300 - (30 * best_cooldown if best_cooldown else 0)
-        size_x = int(self.size[0] * 1.5) + (20 * best_size if best_size else 0)
-        size_y = int(self.size[1] * 1.5) + (20 * best_size if best_size else 0)
+        max_health = 1 + best_max_health
+        cooldown = self.base_shield_cd - (40 * best_cooldown)
+        size_x = int(self.size[0] * 1.5) + (20 * best_size)
+        size_y = int(self.size[1] * 1.5) + (20 * best_size)
 
         self.space_shield = pg.Surface((size_x, size_y), pg.SRCALPHA)
         self.space_shield.fill(self.color)

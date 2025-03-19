@@ -13,7 +13,7 @@ from random import choice
 
 from utils.text import Text
 from utils.colors import Colors
-from constants import LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
 from configurations.caption_config import RANDOM_INIT_CAPTION
 
@@ -23,6 +23,7 @@ pg.init()
 
 # Temporary scren values, do not use these in other files
 SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+CLOCK = pg.time.Clock()
 
 PYGAME_IMAGE = pg.image.load(f'assets/pygame.png').convert_alpha()
 PYGAME_IMAGE = pg.transform.scale(PYGAME_IMAGE, (150, 150))
@@ -47,7 +48,7 @@ PYGAME_HAPPY_IMAGE = pg.transform.scale(PYGAME_HAPPY_IMAGE, (150, 150))
 
 POWERED_BY_TEXT = Text('POWERED BY', (SCREEN_WIDTH // 2, PYGAME_IMAGE_RECT.top - 10),
                          TEXT_FONT, colors.pale_yellow)
-PYGAME_TEXT = Text('PYGAME', (SCREEN_WIDTH // 2,PYGAME_IMAGE_RECT.bottom),
+PYGAME_TEXT = Text('PYGAME', (SCREEN_WIDTH // 2, PYGAME_IMAGE_RECT.bottom),
                          NORMAL_FONT, colors.light_yellow)
 PYGAME_TEXT.set_background(True)
 INIT_LOADING_TEXT = Text('LOADING GAME...', (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.3),
@@ -57,6 +58,7 @@ INIT_LOADING_DESC = Text('This game automatically saves your data!',
 BLACK_SCREEN = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SRCALPHA)
 BLACK_SCREEN.fill(colors.black)
 
+artificial_loading = 0
 loading_progress = 0
 def sfx(name):
     sound = pg.mixer.Sound(f'assets/SFX/{name}.wav')
@@ -66,6 +68,7 @@ def sfx(name):
 def init_loading(string, progress=None, reset_progress=False):
     global loading_progress
     pg.event.pump()
+
     loading_progress += progress if progress else 0
     # string = f'{string} ({loading_progress})' if progress else f'{string}'
 
@@ -77,18 +80,18 @@ def init_loading(string, progress=None, reset_progress=False):
     elif loading_progress < 120:
         BLACK_SCREEN.set_alpha(0)
 
-    if loading_progress > 240:
-        new_alpha = BLACK_SCREEN.get_alpha() + 3
+    if loading_progress > 220:
+        new_alpha = BLACK_SCREEN.get_alpha() + 5
         if new_alpha > 255:
             new_alpha = 255
         BLACK_SCREEN.set_alpha(new_alpha)
 
     SCREEN.fill((0, 0, 0))
-    if loading_progress == 220:
+    if loading_progress == 200:
         sfx('points_extra')
         INIT_LOADING_TEXT.set_text('LOADED!')
         pg.display.set_icon(PYGAME_HAPPY_IMAGE)
-    if loading_progress < 220:
+    if loading_progress < 200:
         SCREEN.blit(PYGAME_IMAGE, PYGAME_IMAGE_RECT)
     else:
         SCREEN.blit(PYGAME_HAPPY_IMAGE, PYGAME_IMAGE_RECT)
@@ -107,6 +110,8 @@ def init_loading(string, progress=None, reset_progress=False):
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
+
+    CLOCK.tick(FPS)
 
     # if reset_progress:
         # loading_progress = 0
@@ -330,6 +335,10 @@ ARROWS_CONTROLS_B = pg.transform.scale(ARROWS_CONTROLS_B, (55, 36))
 WASD_RECT_B = WASD_CONTROLS_B.get_rect()
 ARROWS_RECT_B = ARROWS_CONTROLS_B.get_rect()
 init_loading('loading assets', 6)
+
+MYSTERIOUS_DUDE = UI_CACHE['typing_dude'].copy()
+MYSTERIOUS_DUDE = pg.transform.scale(MYSTERIOUS_DUDE, (50, 50))
+MYSTERIOUS_RECT = MYSTERIOUS_DUDE.get_rect()
 
 # Creating level icons, frames and locks
 LEVEL_ICONS = [None,

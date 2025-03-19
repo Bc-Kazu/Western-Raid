@@ -16,7 +16,7 @@ class TextStorage:
         self.player1_text = Text('PLAYER 1 :', (game.screen_width / 2 - 100, 360), TEXT_FONT, (180, 255, 180))
         self.player2_text = Text('PLAYER 2 :', (game.screen_width / 2 + 100, 360), TEXT_FONT, (255, 180, 255))
         self.select_text = Text('- CHOOSE PLAYER CONTROLS -',(game.screen_width / 2, 270), TEXT_FONT)
-        self.volume_text = Text('0 = Mute     - & + keys = Change Music     '
+        self.controls_text = Text('0 = Mute     - & + keys = Change Music     '
                                 '[ & ] keys = Change SFX     Backspace = Remove Players',
                               (game.screen_width / 2, 600), SMALL_FONT, (200, 200, 200))
         self.start_text = Text('< PRESS ENTER TO START >',(game.screen_width / 2, 270), TEXT_FONT)
@@ -25,6 +25,28 @@ class TextStorage:
 
         self.choose_text = Text('use WASD or ARROW keys to select your player',
                                 (game.screen_width / 2, 540), TEXT_FONT, (220, 150, 50))
+        self.mysterious_text = Text('[ He cannot talk, but is very clearly lost ]',
+                 (200, 800), SMALL_FONT, colors.window_crimson)
+        self.mysterious_text.toggle(False)
+
+        self.menu_list = [
+            self.title_text, self.player1_text, self.player2_text, self.select_text,
+            self.controls_text, self.start_text, self.full_score_text, self.new_best_text,
+            self.choose_text]
+        MID = game.screen_width // 2.4
+        self.credits_list = [
+            Text('> press C for credits <', (MID, -150), TEXT_FONT, colors.grey),
+            Text('-- CREDITS --', (MID, -50), NORMAL_FONT),
+            Text('CREATOR - BcDev (Paulo)', (MID, 0), TEXT_FONT),
+            Text('INSPIRED BY - Breakout! (1976)', (MID, 80), TEXT_FONT),
+            Text('ORIGINATED FROM - UEA Est, College Project', (MID, 120), TEXT_FONT),
+            Text('= SPECIAL THANKS =', (MID, 190), TEXT_FONT, colors.pastel_purple),
+            Text('My Teams and colleagues - Awesome people', (MID, 230), SMALL_FONT, colors.pastel_purple),
+            Text('DaFluffyPotato - Awesome youtuber', (MID, 260), SMALL_FONT, colors.pastel_purple),
+            Text('SFG Middlent - Awesome tips', (MID, 290), SMALL_FONT, colors.pastel_purple),
+            Text('Dogs - Awesome animals', (MID, 320), SMALL_FONT, colors.pastel_purple),
+            Text('Cats - Awesome too I guess...', (MID, 350), SMALL_FONT, colors.pastel_purple),
+        ]
 
         # MENU text configurations
         self.new_best_text.toggle(False)

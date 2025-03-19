@@ -25,7 +25,7 @@ from components.objects.bandit_types import (
     basic, bomber, dicer, hitman, shielded, skilled, tipsy, boomstick, robber, tangler)
 
 from assets import (init_loading, LEVEL_FRAMES, BULLET_CONFIG, CARD_CONFIG, BANDITS_CONFIG,
-                    DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE)
+                    DYNAMITE_CONFIG, BLOCK_CACHE, PLAYER1_IMAGE, UFO_CACHE, CLOCK, SCREEN)
 from constants import PLAYER_COLORS, ALLOWED_LEVELS, LEVEL_COUNT, SCREEN_WIDTH, SCREEN_HEIGHT, FPS, MENU_MUSIC, VERSION, \
     BASE_TITLE, DATA_PATH
 from configurations.data_config import DATA_FORMAT
@@ -38,7 +38,7 @@ class Game:
     def __init__(self):
         self.data = {}
         self.scene = None
-        self.clock = pg.time.Clock()
+        self.clock = CLOCK
         self.player_1 = None
         self.player_2 = None
         self.level = None
@@ -49,7 +49,7 @@ class Game:
         self.FPS = FPS
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
-        self.screen = pg.display.set_mode((self.screen_width, self.screen_height))
+        self.screen = SCREEN
         self.screen_limit = pg.Rect(0, 0, self.screen_width, self.screen_height)
         self.tick = 0
 
@@ -120,7 +120,8 @@ class Game:
         self.escape_hold_time = 90
 
         self.player_bobbing = 10
-        self.player_menu_y = 460
+        self.base_menu_pos = [0, 460]
+        self.player_menu_pos = [0, 460]
 
         # Loading starter configurations
         self.title_name = BASE_TITLE
@@ -321,7 +322,6 @@ class Game:
                     continue
 
                 if (other_lv < lv < self.base_level) or (other_lv > lv > self.base_level):
-                    print(other_lv, lv, self.base_level)
                     self.base_level = other_lv
                     level_found = True
                     break
@@ -360,19 +360,21 @@ class Game:
 
         if score_type == 'victory':
             self.data[f"level{lv}"]["wins"] += 1
-            unlocked_next = False
-
-            for other_lv in LEVEL_COUNT:
-                if unlocked_next:
-                    break
-
-                next_lv = other_lv if other_lv != lv else None
-                if next_lv in ALLOWED_LEVELS:
-                    self.data[f"level{next_lv}"]["unlocked"] = True
-                    unlocked_next = True
-
+            self.unlock_next_level()
         elif score_type == 'defeat':
             self.data[f"level{lv}"]["defeats"] += 1
+
+    def unlock_next_level(self):
+        unlocked_next = False
+
+        for other_lv in LEVEL_COUNT:
+            if unlocked_next:
+                break
+
+            next_lv = other_lv if other_lv != self.level.index else None
+            if next_lv in ALLOWED_LEVELS:
+                self.data[f"level{next_lv}"]["unlocked"] = True
+                unlocked_next = True
 
     def set_hud(self, new_text):
         self.sound.play_sfx('ui_select2')
@@ -395,10 +397,11 @@ class Game:
                 continue
 
             new_x = self.screen_width // 2 + player_offset[player.id]
-            new_y = self.player_menu_y
+            new_x += self.player_menu_pos[0]
+            new_y = self.player_menu_pos[1]
             new_y -= self.player_bobbing if player.id % 2 == 0 else -self.player_bobbing
 
-            player.set_offset(None, [-4, 0])
+            player.set_eyes_offset([-4, 0])
             player.set_position(new_x, new_y, True)
             player.draw(self)
 

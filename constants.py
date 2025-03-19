@@ -21,8 +21,8 @@ SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 620
 
 # Level access configuration
-LEVEL_COUNT = [1]
-ALLOWED_LEVELS = [1, 2, 3]
+LEVEL_COUNT = [1, 2, 3]
+ALLOWED_LEVELS = [1, 3]
 
 # Constant player variables
 BASE_SHIELD_X = 130

@@ -36,6 +36,7 @@ class Text:
 
         self.blink_tick = 0
         self.blink_interval = 15
+        self.rect_offset = [0, 0]
 
     def preset(self, style='base', velocity=(0, 0), lifetick=0):
         self.style = style
@@ -48,6 +49,21 @@ class Text:
     def set_blink(self, blink, interval=None):
         self.blink = blink
         if interval: self.blink_interval = interval
+
+    def set_offset(self, *args):
+        if len(args) == 0:
+            self.rect_offset = [0, 0]
+        elif len(args) == 1 and isinstance(args[0], (tuple, list)):
+            self.rect_offset = list(args[0])
+        elif len(args) == 2:
+            self.rect_offset[0] = args[0]
+            self.rect_offset[1] = args[1]
+
+    def set_offset_x(self, x=0):
+        self.rect_offset[0] = x
+
+    def set_offset_y(self, y=0):
+        self.rect_offset[1] = y
 
     def set_color_blink(self, color_blink, interval=None, color=None, color2=None):
         self.color_blink = color_blink
@@ -141,13 +157,8 @@ class Text:
                 if not game and custom_screen:
                     custom_screen.blit(self.icon, icon_rect)
 
+            new_rect = (self.rect[0] + self.rect_offset[0], self.rect[1] + self.rect_offset[1])
             if game:
-                if isinstance(self.rect, tuple):
-                    game.screen.blit(render_text, render_text.get_rect(center=self.rect))
-                else:
-                    game.screen.blit(render_text, render_text.get_rect(self.rect))
+                game.screen.blit(render_text, render_text.get_rect(center=new_rect))
             if not game and custom_screen:
-                if isinstance(self.rect, tuple):
-                    custom_screen.blit(render_text, render_text.get_rect(center=self.rect))
-                else:
-                    custom_screen.blit(render_text, render_text.get_rect(self.rect))
+                custom_screen.blit(render_text, render_text.get_rect(center=new_rect))

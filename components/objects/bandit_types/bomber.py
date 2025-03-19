@@ -15,6 +15,7 @@ class Bandit(BanditModel):
         self.random_near_ufo = randint(60, 120)
         self.push_weight = 1.5
         self.push_interval = 12
+        self.gadget_safe = True
 
         # Values for explosion process
         self.explode = [False, 0, 90, False, False]
