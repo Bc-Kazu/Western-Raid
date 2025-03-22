@@ -76,8 +76,8 @@ class Game:
         # Getting pool classes for each object/dynamic class
         self.bullet_pool_dict = {
             "bullet": Pool(Bullet, BULLET_CONFIG, 50),
-            "card": Pool(Bullet, CARD_CONFIG, 5),
-            "dynamite": Pool(Bullet, DYNAMITE_CONFIG, 5),
+            "dynamite": Pool(Bullet, DYNAMITE_CONFIG, 15),
+            "card": Pool(Bullet, CARD_CONFIG, 1),
         }
 
         self.bandit_pool_dict = {
@@ -307,6 +307,9 @@ class Game:
         self.level = level.Level(self.base_level, self.base_config, self)
 
     def set_level(self, lv, is_mouse=False):
+        if self.scene.name == 'level_select' and self.scene.level_selected:
+            return
+
         level_found = False
 
         # Only allow levels avaliable in list
@@ -328,6 +331,9 @@ class Game:
 
         if level_found:
             self.sound.play_sfx('ui_select')
+
+            if self.scene.name == 'level_select':
+                self.scene.update_selected(self)
         else:
             self.sound.play_sfx('push')
 

@@ -9,7 +9,7 @@ class Bandit(BanditModel):
     def __init__(self, config, bandit_id):
         super().__init__(config, bandit_id)
         self.can_shoot = False
-        self.base_drop_chances = {'power_up': 16, 'item': 60, 'brick': 0}
+        self.base_drop_chances = {'power_up': 15, 'item': 60, 'brick': 0}
         self.points_value = 40
         self.move_interval_base = [10, 60]
         self.random_near_ufo = randint(60, 120)

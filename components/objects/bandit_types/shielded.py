@@ -53,9 +53,11 @@ class Bandit(BanditModel):
 
     def shield_check(self, game):
         for bullet in game.level.bullets:
-            if bullet.owner.type != 'player':
+            owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'player'
+            if owned_by_enemy:
                 continue
-            elif bullet.rect.colliderect(self.shield_hitbox) and self.shield_enabled:
+
+            if bullet.rect.colliderect(self.shield_hitbox) and self.shield_enabled:
                 # Get the relative position of the collision
                 self.shield_health -= 1
                 self.shield.fill(colors.tan, special_flags=pg.BLEND_RGBA_MULT)

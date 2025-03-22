@@ -1,3 +1,5 @@
+import math
+
 import pygame as pg
 
 class Explosion:
@@ -12,6 +14,7 @@ class Explosion:
         self.color = (255, 255, 255)
         self.explode_color1 = (255, 130, 0)
         self.explode_color2 = (255, 240, 0)
+        self.push_force = (size[0] + size[1]) // 2  # Getting the size medium as force
 
         self.ufo_collided = False
         self.already_hit = []    # List of objects that already got hit, to avoid multiple checks
@@ -43,8 +46,24 @@ class Explosion:
             self.alive = False
             self.already_hit = []
 
+    def push_check(self, instance):
+        # Gets the distance threshold from the object to the rect
+        direction_x = instance.rect.centerx - self.rect.centerx
+        direction_y = instance.rect.centery - self.rect.centery
+        magnitude = math.sqrt(direction_x ** 2 + direction_y ** 2)
+        magnitude //= 10
+        magnitude = 1 if magnitude == 0 else magnitude
+
+        mag_force = self.push_force // magnitude
+        old_force = self.push_force
+        self.push_force = mag_force
+
+        instance.push(self)
+        self.push_force = old_force
+
     def collide_player(self, game, player):
         if self.rect.colliderect(player.hitbox):
+            self.push_check(player)
             player.damage(game)
 
     def collide_ufo(self, game):
@@ -86,6 +105,7 @@ class Explosion:
                             (hasattr(gadget, "is_placed") and gadget.is_placed)):
                         gadget.damage(game, 3)
                         if gadget.alive:
+                            self.push_check(gadget)
                             self.already_hit.append(gadget)
 
             for terrain in game.level.map:
@@ -106,6 +126,7 @@ class Explosion:
                     bandit.damage(game, 3)
 
                     if bandit.alive:
+                        self.push_check(bandit)
                         self.already_hit.append(bandit)
 
             for bullet in game.level.bullets:

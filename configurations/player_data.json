@@ -1,37 +1,53 @@
 {
-    "total_score": 9930,
-    "accumulated_score": 16600,
-    "terrain_destroyed": 87,
-    "blocks_destroyed": 451,
-    "blocks_restored": 236,
+    "total_score": 16170,
+    "accumulated_score": 24960,
+    "terrain_destroyed": 88,
+    "blocks_destroyed": 270,
+    "blocks_restored": 210,
     "gadgets_placed": 0,
     "level1": {
         "unlocked": true,
-        "wins": 3,
-        "defeats": 1,
-        "best_score": 7490,
-        "p1_score": 7490,
-        "p2_score": 1125
+        "wins": 1,
+        "defeats": 0,
+        "best_score": 5840,
+        "p1_score": 5840,
+        "p2_score": 0
+    },
+    "level2": {
+        "unlocked": false,
+        "wins": 0,
+        "defeats": 0,
+        "best_score": 0,
+        "p1_score": 0,
+        "p2_score": 0
+    },
+    "level3": {
+        "unlocked": true,
+        "wins": 1,
+        "defeats": 2,
+        "best_score": 10330,
+        "p1_score": 10330,
+        "p2_score": 0
     },
     "p1_stats": {
-        "bullets_reflected": 476,
-        "bandits_killed": 491,
-        "bandits_pushed": 308,
-        "items_collected": 147,
-        "powerups_collected": 35,
-        "bandit_contacts": 13,
-        "bullets_shot": 128,
-        "damaged": 34
+        "bullets_reflected": 530,
+        "bandits_killed": 635,
+        "bandits_pushed": 295,
+        "items_collected": 161,
+        "powerups_collected": 32,
+        "bandit_contacts": 16,
+        "bullets_shot": 85,
+        "damaged": 19
     },
     "p2_stats": {
-        "bullets_reflected": 36,
-        "bandits_killed": 27,
-        "bandits_pushed": 30,
-        "items_collected": 25,
+        "bullets_reflected": 0,
+        "bandits_killed": 0,
+        "bandits_pushed": 0,
+        "items_collected": 0,
         "powerups_collected": 0,
-        "bandit_contacts": 8,
+        "bandit_contacts": 0,
         "bullets_shot": 0,
-        "damaged": 7
+        "damaged": 0
     },
     "achievements": {
         "defeat_A": false,
@@ -57,21 +73,5 @@
         "finish_story": false,
         "lucky_statue": false,
         "secret_boss": false
-    },
-    "level2": {
-        "unlocked": false,
-        "wins": 0,
-        "defeats": 0,
-        "best_score": 0,
-        "p1_score": 0,
-        "p2_score": 0
-    },
-    "level3": {
-        "unlocked": true,
-        "wins": 0,
-        "defeats": 6,
-        "best_score": 2440,
-        "p1_score": 2440,
-        "p2_score": 50
     }
 }

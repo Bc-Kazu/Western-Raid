@@ -8,7 +8,7 @@ from utils.colors import Colors
 from utils.text import Text
 colors = Colors()
 
-class TurretShield(GameObject):
+class ShieldPylon(GameObject):
     def __init__(self, config, turret_id=None):
         super().__init__(config, turret_id)
         self.screen_limited = True
@@ -30,7 +30,7 @@ class TurretShield(GameObject):
         self.placing_time = 4
 
         self.pointer = Text('v', (0, 0), TEXT_FONT, colors.light_yellow)
-        self.pointer.rect = (self.rect.centerx, self.rect.centery - self.size[1])
+        self.pointer.set_position(self.rect.centerx, self.rect.centery - self.size[1])
         self.pointer_tick = 0
         self.pointer_interval = 20
         self.pointer_pos = 5
@@ -48,10 +48,10 @@ class TurretShield(GameObject):
         self.shield_interval = 360
 
         self.place_timer = Text(str(self.placing_time), (0, 0), TEXT_FONT, colors.window_white)
-        self.place_timer.rect = (self.rect.centerx, self.rect.centery)
+        self.place_timer.set_position(self.rect.centerx, self.rect.centery)
 
         self.health_indicator = Text(str(self.health), (0, 0), TEXT_FONT, colors.pure_shadow)
-        self.health_indicator.rect = (self.rect.centerx, self.rect.centery)
+        self.health_indicator.set_position(self.rect.centerx, self.rect.centery)
 
     def kill(self):
         super().kill()
@@ -138,7 +138,7 @@ class TurretShield(GameObject):
             self.place_timer.set_position(self.owner.rect.centerx, self.owner.rect.y - 40)
 
             new_y = self.rect.centery - self.size[1] - self.pointer_pos
-            self.pointer.rect = (self.rect.centerx, new_y)
+            self.pointer.set_position(self.rect.centerx, new_y)
 
             if self.tick % self.pointer_interval == 0:
                 self.pointer_pos = -self.pointer_pos
@@ -171,10 +171,9 @@ class TurretShield(GameObject):
 
     def collide_check(self, game):
         for bullet in game.level.bullets:
-            if not bullet.owner.type == 'enemy':
-                continue
+            owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
 
-            if not self.stuck and self.owner.type == 'player':
+            if not self.stuck and owned_by_enemy:
                 if self.shield_rect.colliderect(bullet.rect) and self.shield_health > 0:
                     self.shield_update(-1)
 
@@ -183,13 +182,12 @@ class TurretShield(GameObject):
                     return
 
             # Verify bullet collision with bandit
-            if bullet.rect.colliderect(self.rect) and bullet.alive:
-                if bullet.owner.type == 'enemy':
-                    self.damage(game, 1)
-                    bullet.kill()
+            if bullet.rect.colliderect(self.rect) and owned_by_enemy:
+                self.damage(game, 1)
+                bullet.kill()
 
-                    if bullet.name == 'dynamite':
-                        bullet.explode(game)
+                if bullet.name == 'dynamite':
+                    bullet.explode(game)
 
         for bandit in game.level.bandits:
             if bandit.name == 'bomber' and bandit.rect.colliderect(self.shield_rect):

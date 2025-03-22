@@ -197,17 +197,20 @@ class Round(GameScene):
 
             if blocks_built >= max_blocks:
                 layers_built += 1
+                point_multi = 1
                 pg.time.delay(100)
                 game.sound.play_sfx('points')
 
                 if layers_built >= 2:
                     game.sound.play_sfx('powerup_get')
+                    point_multi = 2.5
                 if layers_built >= 3:
                     game.sound.play_sfx('start')
+                    point_multi = 5
 
                 game.sound.play_sfx(f'reward{layers_built}')
-                if game.player_1: game.player_1.get_score(game, 1000 * layers_built)
-                if game.player_2: game.player_2.get_score(game, 1000 * layers_built)
+                if game.player_1: game.player_1.get_score(game, 1000 * point_multi)
+                if game.player_2: game.player_2.get_score(game, 1000 * point_multi)
             else:
                 break
 
@@ -493,9 +496,7 @@ class Round(GameScene):
         draw_queue = []
 
         for terrain in game.level.map:
-            terrain_Zindex = terrain.rect.y + int(terrain.size[1] / 2) if terrain.size[
-                                                                              1] < 90 else terrain.rect.y + int(
-                terrain.size[1] / 1.4)
+            terrain_Zindex = terrain.rect.bottom - 30
             draw_queue.append((terrain_Zindex, terrain))
 
         if game.player_1:
@@ -525,7 +526,7 @@ class Round(GameScene):
                 self._show_controls(game, game.player_1)
 
             game.text.p1_points_text.string = str("{:05d}".format(game.player_1.score))
-            game.text.p1_points_text.rect = (90, 30)
+            game.text.p1_points_text.set_position(90, 30)
             game.text.p1_points_text.draw(game)
 
         if game.player_2:
@@ -533,7 +534,7 @@ class Round(GameScene):
                 self._show_controls(game, game.player_2)
 
             game.text.p2_points_text.string = str("{:05d}".format(game.player_2.score))
-            game.text.p2_points_text.rect = (game.screen_width - 90, 30)
+            game.text.p2_points_text.set_position(game.screen_width - 90, 30)
             game.text.p2_points_text.draw(game)
 
         if game.ufo.always_on_top:

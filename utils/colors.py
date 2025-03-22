@@ -103,8 +103,14 @@ class Colors:
         self.cerulean = (0, 123, 167)
         self.sad_orange = (50, 15, 0)
 
-        # Shadow colors
+        # Light and shadow colors
         self.transparent = (255, 255, 255, 0)
+        self.low_light = (255, 255, 255, 30)
+        self.mid_light = (255, 255, 255, 76)
+        self.light = (255, 255, 255, 128)
+        self.strong_light = (255, 255, 255, 174)
+        self.pure_light = (255, 255, 255, 245)
+
         self.weak_shadow = (0, 0, 0, 30)
         self.light_shadow = (0, 0, 0, 76)
         self.shadow = (0, 0, 0, 128)

@@ -95,6 +95,17 @@ class BanditModel(GameObject):
         super().spawn(position, velocity, owner)
         self.set_color()
 
+    '''def set_tank(self):
+        self.set_size((int(self.size[0] * 1.7), int(self.size[1] * 1.7)))
+        self.health += 2
+        self.drop_odds_mult(3)
+        
+        min_velocity = self.destined_velocity
+        self.destined_velocity -= 2
+        if self.destined_velocity < min_velocity <= 2:
+            self.destined_velocity = min_velocity'''
+
+
     def get_drop(self):
         # Chance to give the bandit an item to drop at death
         if randint(0, self.drop_chances['power_up']) >= randint(0, 100):
@@ -181,6 +192,7 @@ class BanditModel(GameObject):
                          int((direction_y / magnitude) * self.bullet_speed))
 
             new_bullet = game.bullet_pool_dict[self.bullet_type].get()
+            new_bullet.set_max_velocity(self.bullet_speed)
             new_bullet.spawn(self.rect.center, direction, self)
             game.level.bullets.append(new_bullet)
 
@@ -219,7 +231,6 @@ class BanditModel(GameObject):
         if self.rect.colliderect(player.hitbox) and not self.player_touched:
             game.data[f"p{player.id}_stats"]["bandit_contacts"] += 1
             self.player_touched = True
-            print(game.data[f"p{player.id}_stats"]["bandit_contacts"])
 
     def update(self, game):
         if self.tick == 0:

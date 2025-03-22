@@ -96,7 +96,7 @@ class Menu(GameScene):
         game.text.title_text.set_text(self.title_anim[self.title_index])
         game.text.title_text.draw(game)
         game.text.controls_text.draw(game)
-        game.text.full_score_text.rect = (game.screen_width / 2, 180)
+        game.text.full_score_text.set_position(game.screen_width / 2, 180)
         game.text.full_score_text.string = str("TOTAL SCORE: {:08d}".format(game.data["total_score"]))
         game.text.full_score_text.draw(game)
         game.text.new_best_text.draw(game)

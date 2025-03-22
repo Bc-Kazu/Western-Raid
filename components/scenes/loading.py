@@ -16,13 +16,21 @@ class Loading(GameScene):
         self.dots_tick = 0
 
         self.loading_tick = 0
-        self.loading_interval = 120
+        self.loading_interval = 150
         self.loading_tips = [
             'Use + or - keys to change music volume!',
             'Use [ or ] keys to change sound effect volume!',
             'Press 0 to mute/unmute music!',
             'Hold ESC in round to return to menu!',
             'Press BACKSPACE on menu to remove players!',
+            'Bandits give points and loot only when killed!',
+            'Reflect bullets with your shield!',
+            'Always collect bricks!',
+            'You can push things with your shield!',
+            'Stay defensive, and determined!',
+            'Place gadgets strategically!',
+            'Careful! Gadgets can be damaged and destroyed!',
+            'Use your time as a ghost to collect things!'
         ]
 
     def draw(self, game):

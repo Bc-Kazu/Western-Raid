@@ -206,8 +206,8 @@ UFO_CONFIG = {
 GADGET_CONFIG = {
     'turret_shooter': {'name': 'turret_shooter', 'type': 'gadget', 'size': (60, 60),
         'image': GADGET_CACHE['turret_shooter'].copy(), 'can_hold': True},
-    'turret_shield': {'name': 'turret_shield', 'type': 'gadget', 'size': (60, 60),
-                       'image': GADGET_CACHE['turret_shield'].copy(), 'can_hold': True},
+    'shield_pylon': {'name': 'shield_pylon', 'type': 'gadget', 'size': (60, 60),
+                       'image': GADGET_CACHE['shield_pylon'].copy(), 'can_hold': True},
     'bot_shooter': {'name': 'bot_shooter', 'type': 'gadget', 'size': (40, 40),
                        'image': GADGET_CACHE['bot_shooter'].copy(), 'can_hold': False},
 }
@@ -340,6 +340,9 @@ MYSTERIOUS_DUDE = UI_CACHE['typing_dude'].copy()
 MYSTERIOUS_DUDE = pg.transform.scale(MYSTERIOUS_DUDE, (50, 50))
 MYSTERIOUS_RECT = MYSTERIOUS_DUDE.get_rect()
 
+TEXT = SMALL_FONT.render('hi', True, colors.white)
+TEXT.get_rect()
+
 # Creating level icons, frames and locks
 LEVEL_ICONS = [None,
     TERRAIN_CACHE['cactus1'].copy(),
@@ -362,13 +365,16 @@ for level in LEVEL_COUNT:
     offset = 160 * (level - 1)
     LEVEL_ICONS[level] = pg.transform.scale(LEVEL_ICONS[level], (80, 80))
     LEVEL_ICONS[level].fill(ICON_COLORS[level], special_flags=pg.BLEND_RGBA_MULT)
-    LEVEL_ICONS_RECT[level] = (base_rect[0] + offset, base_rect[1])
+    LEVEL_ICONS_RECT[level] = LEVEL_ICONS[level].get_rect()
+    LEVEL_ICONS_RECT[level].topleft = (base_rect[0] + offset, base_rect[1])
 
     LEVEL_FRAMES[level] = UI_FRAME.copy()
-    LEVEL_FRAMES_RECT[level] = (base_rect[0] - 10 + offset, base_rect[1] - 10)
+    LEVEL_FRAMES_RECT[level] = LEVEL_FRAMES[level].get_rect()
+    LEVEL_FRAMES_RECT[level].topleft = (base_rect[0] - 10 + offset, base_rect[1] - 10)
 
     LEVEL_LOCKS[level] = pg.transform.scale(UI_CACHE['locked'].copy(), (80, 80))
-    LEVEL_LOCKS_RECT[level] = (base_rect[0] + offset, base_rect[1])
+    LEVEL_LOCKS_RECT[level] = LEVEL_LOCKS[level].get_rect()
+    LEVEL_LOCKS_RECT[level].topleft = (base_rect[0] + offset, base_rect[1])
     init_loading('loading assets', 3)
 
 init_loading('loading assets', 10, True)

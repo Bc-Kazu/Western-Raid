@@ -1,7 +1,7 @@
 from random import randint, choice, choices
 
 from components.objects.gadgets.bot_shooter import BotShooter
-from components.objects.gadgets.turret_shield import TurretShield
+from components.objects.gadgets.shield_pylon import ShieldPylon
 from components.objects.gadgets.turret_shooter import TurretShooter
 from configurations.pickup_config import POWER_UPS, ITEMS, BRICKS
 from assets import LEVELS_ENVIROMENT, PICKUPS_CONFIG, SMALL_FONT, TEXT_FONT, GADGET_CONFIG
@@ -47,6 +47,7 @@ class Level:
         self.can_spawn_bandits = True
         self.time_elapsed = 0
         self.bandit_count = 0
+        self.bandits_spawned = 0
 
         # List for modules to render and update within the level
         self.objects = []
@@ -141,7 +142,7 @@ class Level:
 
     def spawn_gadget(self, game, name, player):
         class_list = {'turret_shooter': TurretShooter,
-                      'turret_shield': TurretShield,
+                      'shield_pylon': ShieldPylon,
                       'bot_shooter': BotShooter}
 
         if name in class_list:
@@ -195,6 +196,7 @@ class Level:
                 bandit = game.bandit_pool_dict[chosen_bandit[0]].get()
                 bandit.spawn(start_pos, None, self)
                 self.bandits.append(bandit)
+                self.bandits_spawned += 1
 
     def spawn_message(self, style, text, position):
         message = Text(text, position, SMALL_FONT)
@@ -202,11 +204,14 @@ class Level:
 
         if style == 'popup':
             if text[1].isdigit():
-                message.preset('popup', (0, -4), 50)
+                message.preset('popup', (0, -4), 40)
             elif text[-2:] == 'PU':
                 message.set_font(TEXT_FONT)
                 message.preset('popup', (0, -5), 80)
                 message.set_color_blink(True, 8, colors.light_pink)
+            elif text[:3] == 'GOT':
+                message.preset('popup', (0, -4), 60)
+                message.set_color_blink(True, 8, colors.bright_yellow)
 
         self.message_popups.append(message)
 

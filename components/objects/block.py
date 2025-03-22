@@ -48,8 +48,8 @@ class Block(GameObject):
 
     def collide_check(self, bullet):
         # Checks if the bullet_sprites collides w ufo
-        if (self.rect.colliderect(bullet.rect) and bullet.owner.type == 'enemy'
-                and self.strength >= 1 and bullet.alive):
+        owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
+        if self.rect.colliderect(bullet.rect) and owned_by_enemy and self.strength >= 1:
             bullet.kill()
             if self.can_die: self.kill()
             return True

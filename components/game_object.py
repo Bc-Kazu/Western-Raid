@@ -305,12 +305,14 @@ class GameObject:
             rect = other_object
 
         # Calculating the relative position with both vectors
-        relative_collision = self.rect.clip(rect).center
-        offset_vector = pg.math.Vector2(self.rect.center) - pg.math.Vector2(relative_collision)
+        this_center = pg.math.Vector2(self.rect.center)
+        other_center = pg.math.Vector2(rect.center)
+        offset_vector = this_center - other_center
 
         # This function just normalizes the vector values in unit (-1 to 1)
         if offset_vector.length() != 0:
             offset_vector.normalize_ip()
+
         force_x = (offset_vector.x * push_force) / self.push_weight
         force_y = (offset_vector.y * push_force) / self.push_weight
 

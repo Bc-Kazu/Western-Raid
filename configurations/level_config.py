@@ -72,7 +72,7 @@ LEVEL_CONFIG = [
         "music": 'sandwreck',
         "spawn_types":
             [
-                ["basic", 30, False, -20],
+                ["basic", 20, False, -10],
                 ["skilled", 50, False, -10],
                 ["boomstick", 30, False, 10],
                 ["bomber", 5, False, 25],
@@ -84,7 +84,7 @@ LEVEL_CONFIG = [
         "terrain_area_reduction": 2,
 
         "round_time": 240,
-        "max_bandits": 4,
+        "max_bandits": 3,
         "max_spawn_count": 1,
         "bandit_spawnrate": 200,
         "bandit_spawn_multi": [1, 3],

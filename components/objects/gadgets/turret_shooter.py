@@ -37,16 +37,16 @@ class TurretShooter(GameObject):
         self.placing_time = 4
 
         self.pointer = Text('v', (0, 0), TEXT_FONT, colors.light_yellow)
-        self.pointer.rect = (self.rect.centerx, self.rect.centery - self.size[1])
+        self.pointer.set_position(self.rect.centerx, self.rect.centery - self.size[1])
         self.pointer_tick = 0
         self.pointer_interval = 20
         self.pointer_pos = 5
 
         self.place_timer = Text(str(self.placing_time), (0, 0), TEXT_FONT, colors.window_white)
-        self.place_timer.rect = (self.rect.centerx, self.rect.centery)
+        self.place_timer.set_position(self.rect.centerx, self.rect.centery)
 
         self.health_indicator = Text(str(self.health), (0, 0), TEXT_FONT, colors.pure_shadow)
-        self.health_indicator.rect = (self.rect.centerx, self.rect.centery)
+        self.health_indicator.set_position(self.rect.centerx, self.rect.centery)
 
         # Shooting settings
         self.can_shoot = True
@@ -145,7 +145,7 @@ class TurretShooter(GameObject):
             self.place_timer.set_position(self.owner.rect.centerx, self.owner.rect.y - 40)
 
             new_y = self.rect.centery - self.size[1] - self.pointer_pos
-            self.pointer.rect = (self.rect.centerx, new_y)
+            self.pointer.set_position(self.rect.centerx, new_y)
 
             if self.tick % self.pointer_interval == 0:
                 self.pointer_pos = -self.pointer_pos
@@ -208,14 +208,15 @@ class TurretShooter(GameObject):
 
     def collide_check(self, game):
         for bullet in game.level.bullets:
-            # Verify bullet collision with bandit
-            if bullet.rect.colliderect(self.rect) and bullet.alive:
-                if bullet.owner.type == 'enemy':
-                    self.damage(game, 1)
-                    bullet.kill()
+            owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
 
-                    if bullet.name == 'dynamite':
-                        bullet.explode(game)
+            # Verify bullet collision with bandit
+            if bullet.rect.colliderect(self.rect) and owned_by_enemy:
+                self.damage(game, 1)
+                bullet.kill()
+
+                if bullet.name == 'dynamite':
+                    bullet.explode(game)
 
     def draw(self, game):
         super().draw(game)

@@ -68,12 +68,14 @@ def handle_events(game):
                     game.player_count = 2 - player.id
                     game.sound.play_sfx('remove')
 
+            for particle in game.stars.particles:
+                if particle.rect.collidepoint(mouse_pos):
+                    particle.color = colors.window_light_yellow
+                    game.sound.play_sfx('block_break_extra')
+
     if mouse_input == 1 and game.scene.name == 'level_select':
         for level in LEVEL_FRAMES.keys():
-            rect = LEVEL_FRAMES[level].get_rect()
-            rect.topleft = LEVEL_FRAMES_RECT[level]
-
-            if rect.collidepoint(mouse_pos):
+            if LEVEL_FRAMES_RECT[level].collidepoint(mouse_pos):
                 game.set_level(level, True)
 
     # Detecting player joining the components

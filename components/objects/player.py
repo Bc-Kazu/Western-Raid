@@ -36,6 +36,8 @@ class Player(GameObject):
         self.controls = choosen_controls
         self.color = color
         self.current_eyes = None
+        self.can_push = True
+        self.push_stops_movement = False
         self.eyes_dict = {}
         self.key_mapping = self.CONTROL_MAPPING[self.controls]
         self.control_keys = self.key_mapping.values()
@@ -150,6 +152,8 @@ class Player(GameObject):
 
     def get_item(self, game, item):
         item_got = False
+        item_name = item.replace('_', ' ').upper()
+
         if item == 'shield':
             self.shield_buff_hp += 1
             item_got = self.shield_buff_hp <= ITEMS[item][2]
@@ -157,13 +161,14 @@ class Player(GameObject):
                 self.shield_buff_hp = ITEMS[item][2]
 
             self.shield_buff.set_alpha(self.shield_buff_hp * 20)
-        if item == 'healing_ufo':
+        if item == 'auto_heal':
             item_got = game.ufo.set_regenerate(True, self, game)
         if item in GADGET_CONFIG:
             item_got = game.level.spawn_gadget(game, item, self)
 
         if item_got:
             game.sound.play_sfx('item_get')
+            game.level.spawn_message('popup', f'GOT {item_name}', self.rect.center)
         else:
             game.sound.play_sfx('points')
             self.get_score(game, ITEMS[item][3], True, self.rect.center)
@@ -374,6 +379,7 @@ class Player(GameObject):
 
         if game.scene.name == 'defeat':
             offset = -50 if self.id == 1 else 50
+            offset = 0 if not game.player_2 else offset
             self.rect.center = (game.screen_width / 2 + offset, game.screen_height - 160)
             self.facing_up = False
             self.set_eyes_offset([-2 if self.id == 1 else 50, 2])

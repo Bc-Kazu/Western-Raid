@@ -9,22 +9,22 @@ POWER_UPS = {
     'extra_block': ['extra_block', 50, 3, 100],
 
     'auto_shoot': ['auto_shoot', 40, 3, 100],
-    'recovery': ['recovery', 40, 3, 150],
+    'recovery': ['recovery', 40, 3, 100],
 
+    'extra_reflect': ['extra_reflect', 30, 3, 150],
     'magnet': ['magnet', 30, 2, 150],
-    'ghost_fury': ['ghost_fury', 30, 2, 100],
-    'extra_reflect': ['extra_reflect', 30, 2, 150],
+    'ghost_fury': ['ghost_fury', 30, 2, 150],
 
     'space_shield': ['space_shield', 15, 1, 300],
 }
 
 ITEMS = {
-    'bomb': ['bomb', 60, 0, 0],
     'shield': ['shield', 60, 3, 50],
-    'turret_shooter': ['turret_shooter', 30, 5, 80],
-    'bot_shooter': ['bot_shooter', 20, 5, 80],
-    'turret_shield': ['turret_shield', 20, 3, 80],
-    'healing_ufo': ['healing_ufo', 20, 1, 100],
+    'bomb': ['bomb', 55, 0, 0],
+    'turret_shooter': ['turret_shooter', 25, 5, 100],
+    'shield_pylon': ['shield_pylon', 25, 3, 100],
+    'bot_shooter': ['bot_shooter', 20, 5, 100],
+    'auto_heal': ['auto_heal', 15, 1, 150],
     'gift_bomb': ['gift_bomb', 0.3, 0, 0],
 }
 

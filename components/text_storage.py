@@ -26,7 +26,7 @@ class TextStorage:
         self.choose_text = Text('use WASD or ARROW keys to select your player',
                                 (game.screen_width / 2, 540), TEXT_FONT, (220, 150, 50))
         self.mysterious_text = Text('[ He cannot talk, but is very clearly lost ]',
-                 (200, 800), SMALL_FONT, colors.window_crimson)
+                 (200, 800), SMALL_FONT, colors.mid_light)
         self.mysterious_text.toggle(False)
 
         self.menu_list = [
@@ -71,7 +71,7 @@ class TextStorage:
                     Text(f'XXXXXX:',(game.screen_width // 2, 300), NORMAL_FONT, colors.white))
             setattr(self, f'level{level}_best',
                     Text(f'BEST:',(game.screen_width // 2, 340), TEXT_FONT, colors.white))
-            setattr(self, f'level{level}_select',
+            setattr(self, f'level{level}_index',
                     Text(f'LEVEL {level}:', (150 + (offset * (level - 1)), 150),
                          TEXT_FONT, colors.grey if level <= 3 else (100, 0, 0)))
 

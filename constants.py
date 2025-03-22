@@ -11,7 +11,7 @@ colors = Colors()
 # Game info configuration
 BASE_TITLE = '< WESTERN RAID >'
 RAVE_TITLE = '< WESTERN RAVE >'
-VERSION = 'v0.9.3 DEMO'
+VERSION = 'v0.9.0 DEMO'
 MENU_MUSIC = 'menu'
 
 DATA_PATH = 'configurations/player_data.json'
@@ -23,6 +23,14 @@ SCREEN_HEIGHT = 620
 # Level access configuration
 LEVEL_COUNT = [1, 2, 3]
 ALLOWED_LEVELS = [1, 3]
+
+LEVEL_NAMES = [
+    'LOCKED',
+    'DESERT',
+    'SALOON',
+    'BARREN',
+    'CARTEL',
+    '???']
 
 # Constant player variables
 BASE_SHIELD_X = 130

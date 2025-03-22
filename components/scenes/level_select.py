@@ -2,7 +2,7 @@
 ''' ========== HANDLING EVERYTHING THAT SHOWS IN LEVEL SELECT  ========== '''
 ''' ===================================================================== '''
 
-from constants import LEVEL_COUNT, ALLOWED_LEVELS
+from constants import LEVEL_COUNT, ALLOWED_LEVELS, LEVEL_NAMES
 from assets import LEVEL_FRAMES, LEVEL_ICONS, LEVEL_FRAMES_RECT, LEVEL_ICONS_RECT, LEVEL_LOCKS, LEVEL_LOCKS_RECT
 
 from components.game_scene import GameScene
@@ -58,8 +58,8 @@ class LevelSelect(GameScene):
             game.sound.play_sfx('start')
             game.sound.play_sfx('ufo_break')
 
-            lv_name = getattr(game.text, f"level{self.level_selected}_select")
-            lv_name.set_color_blink(True, 8, colors.green, colors.white)
+            level_index = getattr(game.text, f"level{self.level_selected}_index")
+            level_index.set_color_blink(True, 8, colors.green, colors.white)
 
             self.state['initialize'] = True
         else:
@@ -119,16 +119,50 @@ class LevelSelect(GameScene):
             self.set_state()
             game.start_loading()
 
-            lv_name = getattr(game.text, f"level{self.level_selected}_select")
-            lv_name.set_color_blink(False)
+            level_index = getattr(game.text, f"level{self.level_selected}_index")
+            level_index.set_color_blink(False)
+
+    def update_selected(self, game):
+        for i in LEVEL_COUNT:
+            # Set active level to highlighted state
+            if i == game.base_level:
+                level_index = getattr(game.text, f"level{i}_index")
+                level_name = getattr(game.text, f"level{i}_name")
+                level_best = getattr(game.text, f"level{i}_best")
+
+                if not self.level_selected:
+                    unlocked = game.data[f'level{i}']['unlocked']
+                    lv_name = f'---< [ {LEVEL_NAMES[i] if unlocked else LEVEL_NAMES[0]} ] >---'
+                    best_text = 'BEST SCORE: ' + "{:06d}".format(game.data[f'level{i}']['best_score'])
+                    level_index.set_color(colors.white)
+                    level_name.set_text(lv_name)
+                    level_best.set_text(best_text)
+
+                level_index.set_color(colors.white)
+                LEVEL_FRAMES[i].set_alpha(255)
+                LEVEL_ICONS[i].set_alpha(255)
+            else:
+                LEVEL_FRAMES[i].set_alpha(100)
+                LEVEL_ICONS[i].set_alpha(100)
 
     def draw(self, game):
-        game.screen.fill(colors.space_blue)
+        if not self.initialize:
+            self.initialize = True
 
+            for i in LEVEL_COUNT:
+                level_index = getattr(game.text, f"level{i}_index")
+                level_index.set_color(colors.grey)
+                level_index.set_position(LEVEL_FRAMES_RECT[i].centerx, level_index.rect.centery)
+                if not i in ALLOWED_LEVELS:
+                    level_index.set_color(colors.dark_red)
+
+            self.update_selected(game)
+
+        game.screen.fill(colors.space_blue)
+        self.tick += 1
+        self.set_player_pos(game)
         if not self.tween_finished:
             self.tween_interface()
-
-        self.set_player_pos(game)
 
         if game.title_name == '< WESTERN RAID >':
             game.stars.update(game)
@@ -146,43 +180,6 @@ class LevelSelect(GameScene):
             for player in [game.player_1, game.player_2]:
                 if player and not self.level_selected:
                     player.set_eyes('happy_eyes')
-
-
-        self.tick += 1
-
-        for i in LEVEL_COUNT:
-            if not self.level_selected:
-                getattr(game.text, f"level{i}_select").set_color(colors.grey)
-            LEVEL_FRAMES[i].set_alpha(100)
-            LEVEL_ICONS[i].set_alpha(100)
-
-        # Set active level to highlighted state
-        if game.base_level in LEVEL_COUNT and game.base_level in ALLOWED_LEVELS:
-            i = game.base_level
-            if not self.level_selected:
-                level_names = [
-                    'LOCKED',
-                    'DESERT',
-                    'SALOON',
-                    'BARREN',
-                    'CARTEL',
-                    '???']
-
-                unlocked = game.data[f'level{i}']['unlocked']
-                lv_name = f'---< [ {level_names[i] if unlocked else level_names[0]} ] >---'
-                best_text = 'BEST SCORE: ' + "{:06d}".format(game.data[f'level{i}']['best_score'])
-                getattr(game.text, f"level{i}_select").set_color(colors.white)
-                getattr(game.text, f"level{i}_name").set_text(lv_name)
-                getattr(game.text, f"level{i}_best").set_text(best_text)
-                getattr(game.text, f"level{i}_name").draw(game)
-                getattr(game.text, f"level{i}_best").draw(game)
-
-            LEVEL_FRAMES[i].set_alpha(255)
-            LEVEL_ICONS[i].set_alpha(255)
-
-
-        for i in LEVEL_COUNT:
-            getattr(game.text, f"level{i}_select").draw(game)
 
         if not self.level_selected:
             game.text.level_select.draw(game)
@@ -204,6 +201,14 @@ class LevelSelect(GameScene):
         for i in LEVEL_COUNT:
             game.screen.blit(LEVEL_FRAMES[i], LEVEL_FRAMES_RECT[i])
             game.screen.blit(LEVEL_ICONS[i], LEVEL_ICONS_RECT[i])
+            level_index = getattr(game.text, f"level{i}_index")
+            level_index.draw(game)
+
+            if i == game.base_level:
+                level_name = getattr(game.text, f"level{i}_name")
+                level_best = getattr(game.text, f"level{i}_best")
+                level_name.draw(game)
+                level_best.draw(game)
 
             if not game.data[f"level{i}"]["unlocked"]:
                 game.screen.blit(LEVEL_LOCKS[i], LEVEL_LOCKS_RECT[i])

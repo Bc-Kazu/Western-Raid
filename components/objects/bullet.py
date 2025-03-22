@@ -18,11 +18,14 @@ class Bullet(GameObject):
         self.buff = None
         self.wild_tick = [0, randint(15, 60)]
         self.times_reflected = 0
+        self.screen_reflected = 0
         self.sfx_interval = 0
         self.screen_limited = True
         self.max_velocity = 10
         self.max_lifetime = 10
         self.explosion_size = (3 * self.size[0], 3 * self.size[1])
+        self.can_explode = False
+        self.is_extra = False
 
         self.screen_reflect_tick = 0
         self.screen_reflect_interval = 15
@@ -35,11 +38,15 @@ class Bullet(GameObject):
             self.set_buff(choice(['protection', 'duplicate', 'evil', 'lucky']))
         if self.name == 'dynamite':
             self.reset_sprite()
+            self.set_color()
+            self.can_explode = True
+            self.explosion_size = (3 * self.size[0], 3 * self.size[1])
 
     def reset(self):
         super().reset()
         self.buff = None
         self.times_reflected = 0
+        self.screen_reflected = 0
         self.wild_tick = [0, randint(15, 60)]
 
     def set_owner(self, owner):
@@ -75,20 +82,21 @@ class Bullet(GameObject):
             self.sprite = pg.transform.rotate(self.sprite, 90)
 
         self.screen_reflect_tick += 1
-        if 0 < self.times_reflected <= 1 and self.owner and self.owner.type == 'player':
+        can_reflect = 0 < self.times_reflected and self.screen_reflected < 1
+        if can_reflect and self.owner and self.owner.type == 'player':
             if self.screen_reflect_tick > self.screen_reflect_interval:
                 if self.rect.left <= 0 or self.rect.right >= game.screen_width:
                     if self.velocity_y == 0:
                         self.velocity_y = randint(-5, 5)
                     self.velocity_x *= -1
                     self.screen_reflect_tick = 0
-                    self.times_reflected += 1
+                    self.screen_reflected += 1
                 if self.rect.top <= 0 or self.rect.bottom >= game.screen_height:
                     if self.velocity_x == 0:
                         self.velocity_x = randint(-5, 5)
                     self.velocity_y *= -1
                     self.screen_reflect_tick = 0
-                    self.times_reflected += 1
+                    self.screen_reflected += 1
 
     def reflect(self, rect, player=None, game=None):
         self.times_reflected += 1
@@ -106,9 +114,12 @@ class Bullet(GameObject):
         speed_x = min(max(round(speed_x * 5, 1), -5), 5)
         speed_y = min(max(round(speed_y * 5, 1), -5), 5)
 
-        if self.sfx_interval >= 15:
-            self.sfx_interval = 0
-            game.sound.play_sfx('bounce')
+        # Adjust direction depending on bullet movement
+        if speed_x == 0 == speed_y:
+            speed_x = self.velocity_x * -1
+            speed_y = self.velocity_y * -1
+
+        self.set_velocity(speed_x, speed_y)
 
         if player and game:
             self.set_owner(player)
@@ -126,40 +137,48 @@ class Bullet(GameObject):
                     self.set_size(self.size[0] + boost, self.size[1] + boost)
 
             extra_count = player.PU_list.get('extra_reflect', 0)
-            is_player = 100 if player else 250
-            if randint(0, 33 * extra_count) > randint(0, is_player):
-                BASE_SPREAD_ANGLE = 25
-                MAX_SPREAD = 90
+            success = randint(0, 50 + 10 * extra_count) > randint(0, 100)
+            if extra_count > 0 and success:
+                angle = 15 * extra_count
+                self.spread(game, extra_count, angle)
 
-                # Get base reflection angle
-                base_angle = math.atan2(speed_y, speed_x)
-                extra_count = player.PU_list['extra_reflect']
+        if self.sfx_interval >= 15:
+            self.sfx_interval = 0
+            game.sound.play_sfx('bounce')
 
-                # Determine total spread (increase with bullet count)
-                spread_angle = min(BASE_SPREAD_ANGLE * extra_count, MAX_SPREAD)
+    def spread(self, game, count, spread_angle=45, max_angle=90):
+        # Get base reflection angle
+        base_angle = math.atan2(self.velocity_y, self.velocity_x)
+        total_bullets = count + 1
 
-                # Generate spread angles
-                angles = [
-                    base_angle + math.radians(spread_angle * (i - (extra_count - 1) / 2) / max(extra_count - 1, 1))
-                    for i in range(extra_count)]
+        # Determine total spread (increase with bullet count)
+        spread_angle = min(spread_angle * count, max_angle)
 
-                for angle in angles:
-                    speed_x = math.cos(angle) * 5
-                    speed_y = math.sin(angle) * 5
-                    new_bullet = game.bullet_pool_dict[self.name].get()
-                    new_bullet.set_max_velocity(5)
-                    new_bullet.spawn(self.rect.center, (speed_x, speed_y), player)
-                    game.level.bullets.append(new_bullet)
+        # Generate spread angles
+        angles = [
+            base_angle + math.radians(spread_angle * (i - (total_bullets - 1) / 2) / max(total_bullets - 1, 1))
+            for i in range(total_bullets)]
 
-        # Adjust direction depending on bullet movement
-        if speed_x == 0 == speed_y:
-            speed_x = self.velocity_x * -1
-            speed_y = self.velocity_y * -1
+        for bullet_angle in angles:
+            speed_x = math.cos(bullet_angle) * 5
+            speed_y = math.sin(bullet_angle) * 5
+            self.spawn_from_self(game, (speed_x, speed_y))
 
-        self.set_velocity(speed_x, speed_y)
+        self.kill()
+        self.can_explode = False
+
+    def spawn_from_self(self, game, velocity, can_reflect=True):
+        new_bullet = game.bullet_pool_dict[self.name].get()
+        new_bullet.set_max_velocity(5)
+        new_bullet.spawn(self.rect.center, velocity, self.owner)
+        new_bullet.set_size(self.size)
+        game.level.bullets.append(new_bullet)
+
+        if can_reflect:
+            new_bullet.times_reflected += 1
 
     def player_collide(self, game, player):
-        if not player or self.owner.type == 'player' or not player.alive:
+        if not player or not self.owner or not player.alive:
             return
 
         # Check player shield collision to apply bullet reflection
@@ -199,7 +218,7 @@ class Bullet(GameObject):
                     game.sound.play_sfx('buff')
                     self.kill()
                 # Damaging the bandit
-                elif self.owner.type == 'player':
+                elif self.owner and self.owner.type == 'player':
                     bandit.damage(game, 1)
                     self.kill()
 
@@ -210,6 +229,6 @@ class Bullet(GameObject):
                         game.data[f"p{self.owner.id}_stats"]["bandits_killed"] += 1
                         break
 
-        if not self.alive and self.name == 'dynamite':
+        if not self.alive and self.can_explode:
             self.explode(game)
 

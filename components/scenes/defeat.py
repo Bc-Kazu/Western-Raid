@@ -18,7 +18,7 @@ class Defeat(GameScene):
         game.text.lost_text.draw(game)
 
         final_score = game.player_1.score + (game.player_2.score if game.player_2 else 0)
-        game.text.full_score_text.rect = (265, 250)
+        game.text.full_score_text.set_position(265, 250)
         game.text.full_score_text.string = str("FINAL SCORE: {:06d}".format(final_score))
         game.text.full_score_text.draw(game)
         game.text.return_text.draw(game)
