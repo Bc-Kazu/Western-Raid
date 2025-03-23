@@ -151,8 +151,8 @@ class Terrain(GameObject):
             self.area_rect.y += self.size[1] // 3
 
     def draw(self, game):
-        if game.debug:
-            game.screen.blit(self.area_surface, self.area_rect)
+        #if game.debug:
+            #game.screen.blit(self.area_surface, self.area_rect)
 
         super().draw(game)
 

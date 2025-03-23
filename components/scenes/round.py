@@ -543,11 +543,11 @@ class Round(GameScene):
         for message in game.level.message_popups:
             message.draw(game)
 
-        if game.debug:
+        '''if game.debug:
             if game.player_1:
                 game.screen.blit(game.player_1.hitbox_area, game.player_1.hitbox)
             if game.player_2:
-                game.screen.blit(game.player_2.hitbox_area, game.player_2.hitbox)
+                game.screen.blit(game.player_2.hitbox_area, game.player_2.hitbox)'''
 
         timer_blacklist = ['init_cutscene', 'victory', 'defeat']
         if not self.state or not self.state['name'] in timer_blacklist:

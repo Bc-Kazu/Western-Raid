@@ -286,8 +286,8 @@ class BanditModel(GameObject):
             self.shoot(game, self.target)
 
     def draw(self, game):
-        if game.debug:
-            game.screen.blit(self.movement_surface, self.movement_rect)
+        # if game.debug:
+            # game.screen.blit(self.movement_surface, self.movement_rect)
 
         super().draw(game)
 

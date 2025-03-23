@@ -252,8 +252,8 @@ class BotShooter(GameObject):
     def draw(self, game):
         super().draw(game)
 
-        if game.debug:
-            game.screen.blit(self.shoot_area, self.shoot_rect)
+        # if game.debug:
+            # game.screen.blit(self.shoot_area, self.shoot_rect)
 
         if self.visible:
             game.screen.blit(self.sprite, self.rect)

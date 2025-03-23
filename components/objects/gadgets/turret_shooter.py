@@ -224,7 +224,7 @@ class TurretShooter(GameObject):
     def draw(self, game):
         super().draw(game)
 
-        if game.debug or not self.is_placed:
+        if not self.is_placed:
             game.screen.blit(self.shoot_area, self.shoot_rect)
 
         if self.visible:
