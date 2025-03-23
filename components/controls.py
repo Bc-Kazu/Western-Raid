@@ -7,20 +7,36 @@ colors = Colors()
 
 import pygame as pg
 
-def input_once(game, key):
-    if game.keys_pressed[key] and not game.key_ui_pressed:
-        game.key_ui_pressed = True
-        return True
-    else:
+def input_once(game, given_keys, AND_MODE=False):
+    if not AND_MODE:
+        for key in given_keys if isinstance(given_keys, list) else [given_keys]:
+            if key in game.keys_pressed_once and game.key_ui_pressed:
+                game.key_ui_pressed = False
+                return True
+
         return False
+    else:
+        pressed = True
+
+        for key in given_keys if isinstance(given_keys, list) else [given_keys]:
+            if game.keys_pressed[key] and game.key_ui_pressed:
+                continue
+            else:
+                pressed = False
+
+        game.key_ui_pressed = not pressed
+        return pressed
+
 
 def handle_events(game):
     keys = pg.key.get_pressed()
     game.keys_pressed = keys
+    game.keys_pressed_once = []
     mouse_states = {'left': 1, 'scroll': 2, 'right': 3}
     mouse_input = 0
     mouse_wheel = None
 
+    # ========== Getting the events and inputs ========== #
     for event in pg.event.get():
         # Quit the components
         if event.type == pg.QUIT:
@@ -33,6 +49,7 @@ def handle_events(game):
 
         if event.type == pg.KEYDOWN:
             game.key_ui_pressed = True
+            game.keys_pressed_once.append(event.key)
         elif event.type == pg.KEYUP:
             game.key_ui_pressed = False
 
@@ -41,8 +58,11 @@ def handle_events(game):
                 game.text.escape_text.set_color()
                 game.text.quit_text.set_color()
 
+            if event.key == pg.K_RETURN:
+                game.return_tick = 0
+                game.text.data_reset_accept.set_color()
 
-    # ========== UI Button interactions ========== #
+    # ========== UI Mouse interactions ========== #
     mouse_pos = pg.mouse.get_pos()
 
     if game.scene.name == 'menu':
@@ -78,13 +98,14 @@ def handle_events(game):
             if LEVEL_FRAMES_RECT[level].collidepoint(mouse_pos):
                 game.set_level(level, True)
 
-    # Detecting player joining the components
+    # ========== Player joining inputs ========== #
     if game.scene.name == 'menu' or game.scene.name == 'round':
         if keys[pg.K_w] or keys[pg.K_a] or keys[pg.K_s] or keys[pg.K_d]:
             game.add_player('WASD')
         if keys[pg.K_UP] or keys[pg.K_LEFT] or keys[pg.K_DOWN] or keys[pg.K_RIGHT]:
             game.add_player('ARROWS')
 
+    # ========== Scene scrolling inputs ========== #
     if game.scene.name == 'menu' and game.scene.on_credits:
         max_top = game.scene.ui_offset[1] < game.scene.credits_offset[1]
         max_bottom = game.scene.ui_offset[1] > game.scene.credits_offset[1] * 2
@@ -98,23 +119,26 @@ def handle_events(game):
         if mouse_wheel and mouse_wheel.y > 0 and max_top:
             game.scene.set_offset([0, game.scene.ui_offset[1] + mouse_wheel.y * 15])
 
+    # ========== level selection inputs ========== #
     if game.scene.name == 'level_select' and not game.scene.state:
-        if input_once(game, pg.K_RIGHT) or input_once(game, pg.K_d):
+        if input_once(game, [pg.K_RIGHT, pg.K_d]):
             game.set_level(game.base_level + 1)
-        if input_once(game, pg.K_LEFT) or input_once(game, pg.K_a):
+        if input_once(game, [pg.K_LEFT, pg.K_a]):
             game.set_level(game.base_level - 1)
 
-    if input_once(game, pg.K_RETURN) and not game.scene.state:
+    if input_once(game, pg.K_RETURN):
         if game.scene.name == 'menu':
-            if game.player_1:
-                game.set_scene('level_select')
-                game.sound.play_sfx('ui_select')
-                return
-            else:
-                game.text.choose_text.toggle(True)
-                game.text.choose_text.set_color_blink(True)
-                game.set_hud(game.text.choose_text)
-                game.sound.play_sfx('push')
+            if not game.scene.state:
+                if game.player_1:
+                    game.set_scene('level_select')
+                    game.sound.play_sfx('ui_select')
+                    return
+                else:
+                    # Refuse joining if no players selected
+                    game.text.choose_text.toggle(True)
+                    game.text.choose_text.set_color_blink(True)
+                    game.set_hud(game.text.choose_text)
+                    game.sound.play_sfx('push')
 
         # Starting level if possible
         if game.scene.name == 'level_select' and game.player_1:
@@ -123,15 +147,31 @@ def handle_events(game):
             game.sound.play_sfx('ui_select')
             game.game_reset()
 
-    if input_once(game, pg.K_BACKSPACE):
-        if game.scene.name == 'menu' and (game.player_1 or game.player_2):
-            game.sound.play_sfx('remove')
-            game.player_1 = None
-            game.player_2 = None
+    if keys[pg.K_RETURN]:
+        if game.scene.state and game.scene.state['name'] == 'data_reset':
+            if game.return_tick > game.return_interval:
+                game.return_tick = 0
+                game.data_reset()
+                game.scene.set_state()
+            else:
+                game.return_tick += 1
+                game.text.data_reset_accept.set_color(
+                    (max(0, 255 - game.return_tick * 3), 255,
+                     max(0, 255 - game.return_tick * 3)))
 
+    # Removing players by keyboard
+    if input_once(game, pg.K_BACKSPACE):
+        if game.scene.name == 'menu':
+            if not game.scene.state and (game.player_1 or game.player_2):
+                game.sound.play_sfx('remove')
+                game.player_1 = None
+                game.player_2 = None
+
+    # Toggling credits
     if input_once(game, pg.K_c) and game.scene.name == 'menu':
         game.scene.set_credits(not game.scene.on_credits)
 
+    # Input for super cool menu background and music
     if input_once(game, pg.K_r):
         if game.scene.name == 'menu' and game.data['level1']['wins'] > 0:
             if game.title_name == '< WESTERN RAID >':
@@ -143,6 +183,7 @@ def handle_events(game):
                 game.scene.set_title(game)
                 game.set_music('menu')
 
+    # ========== Cat mode inputs (meow :3) ========== #
     if input_once(game, pg.K_k) and game.scene.name == 'menu' and game.player_1:
         if game.block_skin == 'happy_cat':
             game.set_skin()
@@ -159,6 +200,7 @@ def handle_events(game):
             game.text.muted.set_text(f'CAT YES :)')
             game.set_hud(game.text.muted)
 
+    # Some weird effect I added that I forgot the use of
     if input_once(game, pg.K_F7):
         if game.player_1 is not None:
             game.player_1.set_super()
@@ -166,32 +208,39 @@ def handle_events(game):
         if game.player_2 is not None:
             game.player_2.set_super()
 
+    # ========== Data Reset inputs ========== #
+    if input_once(game, [pg.K_LSHIFT, pg.K_BACKSPACE], True):
+        if game.scene.name == 'menu' and not game.scene.state:
+            game.scene.set_state('data_reset')
+
 
     # Checking for quitting scene or game
     if keys[pg.K_ESCAPE]:
         game.esc_pressed = True
 
         if game.scene.name == 'menu':
-            if game.escape_tick > game.escape_hold_time:
+            if game.escape_tick > game.escape_interval:
                 game.running = False
             else:
                 game.escape_tick += 1
-                new_color = (255, 255, 255, min(0 + game.escape_tick * 3, 255))
-                game.text.quit_text.set_color(new_color)
+                game.text.quit_text.set_alpha(game.escape_tick * 3)
+
+            if game.scene.state and game.scene.state['name'] == 'data_reset':
+                game.scene.reset_state('data_reset')
+                game.scene.set_state()
 
         if game.scene.name == 'level_select' and not game.scene.state:
             game.sound.play_sfx('ui_select')
             game.set_scene('menu')
 
         if game.scene.name == 'round':
-            if game.escape_tick > game.escape_hold_time:
+            if game.escape_tick > game.escape_interval:
                 game.escape_tick = 0
                 game.set_scene('menu')
                 game.game_reset()
             else:
                 game.escape_tick += 1
-                new_color = (255, 255, 255, min(0 + game.escape_tick * 3, 255))
-                game.text.escape_text.set_color(new_color)
+                game.text.escape_text.set_alpha(game.escape_tick * 3)
     else:
         game.esc_pressed = False
 

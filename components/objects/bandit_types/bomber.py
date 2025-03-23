@@ -15,16 +15,25 @@ class Bandit(BanditModel):
         self.random_near_ufo = randint(60, 120)
         self.push_weight = 1.5
         self.push_interval = 12
-        self.gadget_safe = True
 
         # Values for explosion process
-        self.explode = [False, 0, 90, False, False]
+        self.explosion_time = 6
+        self.exploded = False
+        self.explode_switch = False
+        self.switch_tick = 0
+        self.switch_interval = 16
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         self.random_near_ufo = randint(60, 120)
-        self.explode = [False, 0, 90, False, False]
         super().spawn(position, velocity, owner)
         super().set_color()
+        self.move_tick = self.move_interval
+        self.spawn_grace = False
+
+        self.explosion_time = 6
+        self.exploded = False
+        self.explode_switch = False
+        self.switch_interval = 16
 
     def update(self, game):
         super().update(game)
@@ -33,21 +42,22 @@ class Bandit(BanditModel):
             self.max_magnitude, self.min_magnitude = 9999, self.random_near_ufo
             self.follow(game.ufo.rect)
 
-        # System to handle the entire process of bandit causing explosion
-        self.explode[1] += 1
+        self.explode_process(game)
 
-        if 6 <= self.lifetime < 8:
-            if self.explode[1] >= 8:
-                self.explode[1] = 0
-                self.explode[3] = not self.explode[3]
 
-                if self.explode[3]:
-                    self.set_color(colors.red)
-                else:
-                    self.set_color(colors.light_orange)
-        elif self.lifetime >= 8 and not self.explode[0]:  # Creating the explosion
+    # System to handle the entire process of bandit causing explosion
+    def explode_process(self, game):
+        if self.explosion_time >  self.lifetime >= self.explosion_time - 2:
+            self.switch_tick += 1
+
+            if self.switch_tick > self.switch_interval:
+                self.switch_tick = 0
+                self.explode_switch = not self.explode_switch
+                self.switch_interval = (self.switch_interval - 2) if self.switch_interval > 4 else 4
+                self.set_color(colors.red if self.explode_switch else colors.orange)
+        elif self.lifetime >= self.explosion_time and not self.exploded:  # Creating the explosion
             self.kill()
-            self.explode[0] = False
+            self.exploded = False
             explosion_size = (self.size[0] * 2, self.size[1] * 2)
             new_explosion = Explosion(game, self.rect.center, explosion_size)
             game.level.objects.append(new_explosion)

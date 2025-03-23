@@ -55,6 +55,7 @@ class Game:
 
         # Key configuration
         self.keys_pressed = []
+        self.keys_pressed_once = []
         self.debug = False
         self.key_ui_pressed = False
 
@@ -117,7 +118,11 @@ class Game:
 
         self.esc_pressed = False
         self.escape_tick = 0
-        self.escape_hold_time = 90
+        self.escape_interval = 90
+
+        self.return_pressed = False
+        self.return_tick = 0
+        self.return_interval = 180
 
         self.player_bobbing = 10
         self.base_menu_pos = [0, 460]
@@ -206,6 +211,11 @@ class Game:
                 data[key] = self.sort_data(data.get(key, {}), value)
 
         return data
+
+    def data_reset(self):
+        self.data = DATA_FORMAT.copy()
+        self.save_data()
+        self.sound.play_sfx('explode2')
 
     def set_scene(self, name):
         self.scene = self.scene_dict[name](name, self.screen)

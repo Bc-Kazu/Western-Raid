@@ -2,13 +2,28 @@
 ''' ========== HANDLING EVERYTHING IN THE MENU SCREEN =========== '''
 ''' ============================================================= '''
 
-from assets import WASD_CONTROLS_A, WASD_RECT_A, ARROWS_CONTROLS_A, ARROWS_RECT_A, MYSTERIOUS_DUDE, MYSTERIOUS_RECT
+from assets import WASD_CONTROLS_A, WASD_RECT_A, ARROWS_CONTROLS_A, ARROWS_RECT_A, MYSTERIOUS_DUDE, MYSTERIOUS_RECT, \
+    BLACK_SCREEN
 
 from components.game_scene import GameScene
 from utils.colors import Colors
 colors = Colors()
 
 class Menu(GameScene):
+    RESET_DATA_STATE = {
+        'name': 'data_reset',
+        'initialize': False,
+        'tick': 0,
+        'fade_interval': 30,
+        'accept': False,
+        'decline': False,
+        'finalize': False,
+    }
+
+    BASE_STATE_DICT = {
+        RESET_DATA_STATE['name']: RESET_DATA_STATE.copy()
+    }
+
     def __init__(self, name, screen):
         super().__init__(name, screen)
         super().reset()
@@ -38,6 +53,37 @@ class Menu(GameScene):
         offset = self.credits_offset[:] if toggle else [0, 0]
         self.on_credits = toggle
         self.start_tween(offset, (-self.ui_offset[1] // 8) if self.ui_offset[1] != 0 else 45)
+
+    def _data_reset_process(self, game):
+        if not self.state['initialize']:
+            self.state['initialize'] = True
+            BLACK_SCREEN.set_alpha(0)
+            game.text.data_reset.set_alpha(0)
+            game.text.data_reset_warn.set_alpha(0)
+            game.text.data_reset_accept.set_alpha(0)
+            game.text.data_reset_decline.set_alpha(0)
+
+        self.state['tick'] += 1
+        if self.state['tick'] < self.state['fade_interval']:
+            new_alpha = (BLACK_SCREEN.get_alpha() + 6)
+            new_alpha = 255 if new_alpha > 255 else new_alpha
+            BLACK_SCREEN.set_alpha(new_alpha)
+            game.text.data_reset.set_alpha(new_alpha)
+            game.text.data_reset_warn.set_alpha(new_alpha)
+            game.text.data_reset_accept.set_alpha(new_alpha)
+            game.text.data_reset_decline.set_alpha(new_alpha)
+        else:
+            BLACK_SCREEN.set_alpha(200)
+            game.text.data_reset.set_alpha(255)
+            game.text.data_reset_warn.set_alpha(255)
+            game.text.data_reset_accept.set_alpha(255)
+            game.text.data_reset_decline.set_alpha(255)
+
+        game.screen.blit(BLACK_SCREEN, (0, 0))
+        game.text.data_reset.draw(game)
+        game.text.data_reset_warn.draw(game)
+        game.text.data_reset_accept.draw(game)
+        game.text.data_reset_decline.draw(game)
 
     def draw(self, game):
         game.screen.fill(colors.space_blue)
@@ -152,3 +198,6 @@ class Menu(GameScene):
 
         if game.esc_pressed:
             game.text.quit_text.draw(game)
+
+        if self._state_check('data_reset'):
+            self._data_reset_process(game)

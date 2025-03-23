@@ -24,6 +24,7 @@ class BanditModel(GameObject):
         self.drop_chances = self.base_drop_chances
         self.spawn_grace = True
         self.player_touched = False
+        self.player_pushed = False
 
         # Toggle if bandit should be detected by gadgets
         self.gadget_safe = False
@@ -80,6 +81,7 @@ class BanditModel(GameObject):
         self.shoot_interval = self.base_shoot_interval
         self.spawn_grace = True
         self.player_touched = False
+        self.player_pushed = False
 
         self.movement_surface = pg.Surface((self.move_range, self.move_range), pg.SRCALPHA)
         self.movement_surface.fill(colors.purple)
@@ -212,7 +214,7 @@ class BanditModel(GameObject):
                     game.level.spawn_pickup(self.get_drop(), self.rect.center)
 
     def collide_check(self, game, player):
-        if not player:
+        if not player or self.stuck:
             return
 
         # Check if the player's shield is being hit
@@ -223,6 +225,7 @@ class BanditModel(GameObject):
             if success_push:
                 game.sound.play_sfx('push')
                 game.data[f"p{player.id}_stats"]["bandits_pushed"] += 1
+                self.player_pushed = True
 
                 if self.lifetime < 2:
                     self.lifetime = 2

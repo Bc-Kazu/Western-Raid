@@ -25,12 +25,17 @@ class Bandit(BanditModel):
         self.steal_interval = randint(40, 70)
         self.push_interval = 30
         self.push_weight = 1.7
+        self.times_pushed = 0
 
     def kill(self):
         super().kill()
+        self.lose_steal()
+
+    def lose_steal(self):
         if self.stealing_target:
             self.stealing_target.stolen = False
             self.stealing_target.targeted_to_steal = False
+            self.stealing_target = None
 
     def spawn(self, position=(0, 0), velocity=(0, 0), owner=None):
         super().spawn(position, velocity, owner)
@@ -42,8 +47,7 @@ class Bandit(BanditModel):
         self.steal_interval = randint(100, 160)
 
     def get_steal_target(self, instance_list):
-        if self.stealing_target:
-            self.stealing_target.stolen = False
+        self.lose_steal()
 
         if len(instance_list) > 0:
             choosen_target = choice(instance_list)
@@ -51,6 +55,15 @@ class Bandit(BanditModel):
                     and choosen_target.is_placed):
                 self.stealing_target = choice(instance_list)
                 self.stealing_target.targeted_to_steal = True
+
+    def push(self, other_object):
+        success = super().push(other_object)
+
+        if success:
+            self.times_pushed += 1
+
+        if self.times_pushed >= 5:
+            self.lose_steal()
 
     def is_close_enough(self):
         if self.stealing_target:

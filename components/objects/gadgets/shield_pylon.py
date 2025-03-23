@@ -27,6 +27,7 @@ class ShieldPylon(GameObject):
         # Object state settings
         self.can_place = True
         self.is_placed = False
+        self.shield_enabled = False
         self.placing_time = 4
 
         self.pointer = Text('v', (0, 0), TEXT_FONT, colors.light_yellow)
@@ -74,6 +75,7 @@ class ShieldPylon(GameObject):
 
         self.shield_health = self.shield_max_health
         self.shield_interval = 360 - 30 * owner.PU_list.get('recovery', 0)
+        self.shield_enabled = False
 
         self.shield = pg.Surface((size_x, size_y), pg.SRCALPHA)
         self.shield.fill(colors.white)
@@ -85,6 +87,7 @@ class ShieldPylon(GameObject):
         self.orb_sprite.fill(self.color, special_flags=pg.BLEND_RGBA_MULT)
         self.can_place = True
         self.is_placed = False
+
         # Transparent sprites to indicate placement mode
         self.sprite.set_alpha(128)
         self.orb_sprite.set_alpha(128)
@@ -117,10 +120,13 @@ class ShieldPylon(GameObject):
         self.orb_rect.y -= self.orb_sprite.get_size()[1] // 2
 
         if self.is_placed:
+            self.shield_enabled = self.shield_health > 0
+            if self.stolen:
+                self.shield_enabled = False
+                return
+
             self.collide_check(game)
 
-            if self.stolen:
-                return
             if self.tick % self.shield_interval == 0:
                 self.shield_update(1)
         else:
@@ -170,15 +176,18 @@ class ShieldPylon(GameObject):
                 self.kill()
 
     def collide_check(self, game):
+        if self.stuck:
+            return
+
         for bullet in game.level.bullets:
             owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
 
-            if not self.stuck and owned_by_enemy:
+            if owned_by_enemy and self.shield_enabled:
                 if self.shield_rect.colliderect(bullet.rect) and self.shield_health > 0:
                     self.shield_update(-1)
 
                     game.sound.play_sfx('shield_hit')
-                    bullet.reflect(self.shield_rect, self.owner, game)
+                    bullet.reflect(game, self.shield_rect, self.owner)
                     return
 
             # Verify bullet collision with bandit
@@ -190,8 +199,10 @@ class ShieldPylon(GameObject):
                     bullet.explode(game)
 
         for bandit in game.level.bandits:
-            if bandit.name == 'bomber' and bandit.rect.colliderect(self.shield_rect):
-                bandit.push(self.shield_rect)
+            possible_bandits = ['bomber']
+            if bandit.name in possible_bandits and bandit.rect.colliderect(self.shield_rect):
+                if not bandit.player_pushed and self.shield_enabled:
+                    bandit.push(self.shield_rect)
 
 
     def draw(self, game):
@@ -200,7 +211,12 @@ class ShieldPylon(GameObject):
         if self.visible:
             game.screen.blit(self.sprite, self.rect)
             game.screen.blit(self.orb_sprite, self.orb_rect)
-            game.screen.blit(self.shield, self.shield_rect)
+
+            if self.shield_enabled:
+                game.screen.blit(self.shield, self.shield_rect)
+                self.orb_sprite.set_alpha(255)
+            else:
+                self.orb_sprite.set_alpha(128)
 
             if not self.is_placed:
                 self.pointer.draw(game)

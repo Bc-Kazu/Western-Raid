@@ -158,7 +158,7 @@ class Ufo(GameObject):
                         if game.player_2.PU_list['extra_reflect'] > best_extra.PU_list['extra_reflect']:
                             best_extra = game.player_2
 
-                bullet.reflect(self.space_shield_rect, best_extra, game)
+                bullet.reflect(game, self.space_shield_rect, best_extra)
                 return
 
             # check the collides by the lists

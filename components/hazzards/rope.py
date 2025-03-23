@@ -30,7 +30,7 @@ class Rope:
         self.health = 15
         self.tick = 0
         self.max_lifetick = 60
-        self.enabled = True
+        self.rope_enabled = True
         self.alive = True
         self.owner = owner
 
@@ -66,14 +66,13 @@ class Rope:
         self.collide_check(game)
 
         if self.enrolled_target and self.enrolled_target.type == 'player':
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key in self.enrolled_target.control_keys:
-                        self.damage(game, 1)
+            for key in self.enrolled_target.control_keys:
+                if key in game.keys_pressed_once:
+                    self.damage(game, 1)
 
 
         if self.tick >= self.max_lifetick:
-            self.enabled = False
+            self.rope_enabled = False
         if self.tick >= self.wrapped_lifetick:
             self.kill()
 
@@ -87,7 +86,7 @@ class Rope:
             self.wrapped_rope_rect.center = target.rect.center
             self.hit = True
             self.enrolled_target = target
-            self.enabled = False
+            self.rope_enabled = False
             target.stuck = True
             game.sound.play_sfx('stuck')
 
@@ -101,7 +100,7 @@ class Rope:
                 return
 
     def collide_check(self, game):
-        if self.alive and self.enabled and not self.hit:
+        if self.alive and self.rope_enabled and not self.hit:
             # Checking collision with many different modules
             if game.player_1:
                 self.collide_player(game, game.player_1)
@@ -133,8 +132,12 @@ class Rope:
                 new_center = (new_center[0], new_center[1] + 8)
                 self.wrapped_rope_rect.center = new_center
 
+            for bullet in game.level.bullets:
+                if bullet.rect.colliderect(self.wrapped_rope_rect):
+                    self.damage(game, 3)
+
     def draw(self, game):
-        if self.alive and self.enabled:
+        if self.alive and self.rope_enabled:
             game.screen.blit(self.sprite, self.rect)
 
             if game.debug:

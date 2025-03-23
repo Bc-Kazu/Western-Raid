@@ -33,6 +33,10 @@ class Text:
         self.blink_color = (255, 255, 240)
         self.blink_color2 = self.base_color
         self.background_color = (0, 0, 0)
+        self.alpha = 255
+
+        if len(self.current_color) > 3:
+            self.alpha = self.current_color[3]
 
         self.icon = None
         self.icon_size = 50
@@ -55,9 +59,9 @@ class Text:
         new_rect.center = self.rect.center
         self.rect = new_rect
 
-        if len(self.current_color) > 3:
+        if self.alpha < 255:
             self.text.convert_alpha()
-            self.text.set_alpha(self.current_color[3])
+            self.text.set_alpha(self.alpha)
 
         if self.icon:
             self.icon_rect = (self.rect.x - self.icon_size + self.icon_offset[0],
@@ -155,11 +159,18 @@ class Text:
         self.font = new_font
         self.update_text()
 
+    def set_alpha(self, alpha):
+        alpha = 255 if alpha > 255 else alpha
+        alpha = 0 if alpha < 0 else alpha
+        self.alpha = alpha
+        self.update_text()
+
     def set_color(self, new_color=None):
-        if new_color:
-            self.current_color = new_color
-        else:
-            self.current_color = self.base_color
+        new_color = new_color if new_color else self.base_color
+        self.current_color = new_color
+
+        if len(self.current_color) > 3:
+            self.set_alpha(self.current_color[3])
 
         self.update_text()
 

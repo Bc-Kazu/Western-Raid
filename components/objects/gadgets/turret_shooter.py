@@ -207,6 +207,9 @@ class TurretShooter(GameObject):
                 self.kill()
 
     def collide_check(self, game):
+        if self.stuck:
+            return
+
         for bullet in game.level.bullets:
             owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
 

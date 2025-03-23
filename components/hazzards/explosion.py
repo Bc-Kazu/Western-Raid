@@ -134,7 +134,7 @@ class Explosion:
                     continue
 
                 if self.rect.colliderect(bullet.rect):
-                    bullet.kill()
+                    bullet.reflect(game, self.rect)
 
     def draw(self, game):
         if self.alive:

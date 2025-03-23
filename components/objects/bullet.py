@@ -98,7 +98,7 @@ class Bullet(GameObject):
                     self.screen_reflect_tick = 0
                     self.screen_reflected += 1
 
-    def reflect(self, rect, player=None, game=None):
+    def reflect(self, game, rect, owner=None):
         self.times_reflected += 1
         self.set_max_velocity(5)
 
@@ -121,13 +121,13 @@ class Bullet(GameObject):
 
         self.set_velocity(speed_x, speed_y)
 
-        if player and game:
-            self.set_owner(player)
+        if owner and owner.type == 'player':
+            self.set_owner(owner)
 
-            if 'bullet_size' in player.PU_list:
+            if 'bullet_size' in owner.PU_list:
                 boost = 0
-                if self.times_reflected <= player.PU_list['bullet_size']:
-                    boost = 3 * player.PU_list['bullet_size']
+                if self.times_reflected <= owner.PU_list['bullet_size']:
+                    boost = 3 * owner.PU_list['bullet_size']
                 elif self.times_reflected < 16 and self.name == 'bullet':
                     boost = 2
                 elif self.times_reflected < 8 and self.name == 'card':
@@ -136,7 +136,7 @@ class Bullet(GameObject):
                 if boost > 0:
                     self.set_size(self.size[0] + boost, self.size[1] + boost)
 
-            extra_count = player.PU_list.get('extra_reflect', 0)
+            extra_count = owner.PU_list.get('extra_reflect', 0)
             success = randint(0, 50 + 10 * extra_count) > randint(0, 100)
             if extra_count > 0 and success:
                 angle = 15 * extra_count
@@ -183,7 +183,7 @@ class Bullet(GameObject):
 
         # Check player shield collision to apply bullet reflection
         if self.rect.colliderect(player.shield_rect) and self.owner.type == 'enemy':
-            self.reflect(player.shield_rect, player, game)
+            self.reflect(game, player.shield_rect, player)
             self.set_owner(player)
             game.data[f"p{player.id}_stats"]["bullets_reflected"] += 1
         # Check if the player is being hit to damage them

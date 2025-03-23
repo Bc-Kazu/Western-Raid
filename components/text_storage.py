@@ -59,6 +59,15 @@ class TextStorage:
         self.choose_text.set_color_blink(False, 8, (200, 100, 0))
         self.choose_text.toggle(False)
 
+        # Data reset text
+        self.data_reset = Text('RESET YOUR DATA?',(game.screen_width / 2, 180), TITLE_FONT)
+        self.data_reset_warn = Text('Warning: This will rest all of your progress',
+                                    (game.screen_width / 2, 250), TEXT_FONT, colors.red)
+
+        self.data_reset_accept = Text('< ENTER - RESET >',(game.screen_width / 2, 300), TEXT_FONT)
+        self.data_reset_decline = Text('< ESC - DECLINE >',(game.screen_width / 2, 350), TEXT_FONT)
+
+
         # ===============================================================
         # Creating LEVEL SELECT text/messages
         self.level_select = Text('= SELECT A LEVEL =', (game.screen_width / 2, 60), NORMAL_FONT)

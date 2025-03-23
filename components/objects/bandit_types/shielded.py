@@ -53,7 +53,7 @@ class Bandit(BanditModel):
 
     def shield_check(self, game):
         for bullet in game.level.bullets:
-            owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'player'
+            owned_by_enemy = bullet.alive and bullet.owner and bullet.owner.type == 'enemy'
             if owned_by_enemy:
                 continue
 
@@ -65,7 +65,7 @@ class Bandit(BanditModel):
 
                 # Convert bullet's ownership to the bandit
                 bullet.set_owner(self)
-                bullet.reflect(self.shield_hitbox, None, game)
+                bullet.reflect(game, self.shield_hitbox)
 
                 if self.shield_health <= 0:
                     game.sound.play_sfx('bandit_damage')

@@ -119,7 +119,9 @@ class PickUp(GameObject):
 
         self.collide_check(game, game.player_1)
         self.collide_check(game, game.player_2)
-        self.bomb_check(game)
+
+        if self.can_explode:
+            self.explode_process(game)
 
         new_y = self.rect.centery - self.size[1] - self.pointer_pos
         self.pointer.set_position(self.rect.centerx, new_y)
@@ -127,30 +129,29 @@ class PickUp(GameObject):
         if self.tick % self.pointer_interval == 0:
             self.pointer_pos = -self.pointer_pos
 
-    def bomb_check(self, game):
-        if self.can_explode:
-            if self.lifetime >= self.max_lifetime - 2:
-                if self.tick % self.blink_interval == 0:
-                    self.explode_switch = not self.explode_switch
-                    self.blink_interval = (self.blink_interval - 2) if self.blink_interval > 4 else 4
-                    self.set_color(colors.red if self.explode_switch else colors.orange)
+    def explode_process(self, game):
+        if self.lifetime >= self.max_lifetime - 2:
+            if self.tick % self.blink_interval == 0:
+                self.explode_switch = not self.explode_switch
+                self.blink_interval = (self.blink_interval - 2) if self.blink_interval > 4 else 4
+                self.set_color(colors.red if self.explode_switch else colors.orange)
 
-            if self.lifetime >= self.max_lifetime - 1 and not self.is_blinking:
-                self.set_blink(True, self.blink_interval)
+        if self.lifetime >= self.max_lifetime - 1 and not self.is_blinking:
+            self.set_blink(True, self.blink_interval)
 
-            if self.lifetime >= self.max_lifetime and not self.exploded:  # Creating the explosion
-                self.kill()
-                self.exploded = False
-                if self.name != 'gift_bomb':
-                    explosion_size = (self.size[0] * 3, self.size[1] * 3)
-                else:
-                    explosion_size = (self.size[0] * 5, self.size[1] * 5)
+        if self.lifetime >= self.max_lifetime and not self.exploded:  # Creating the explosion
+            self.kill()
+            self.exploded = False
+            if self.name != 'gift_bomb':
+                explosion_size = (self.size[0] * 3, self.size[1] * 3)
+            else:
+                explosion_size = (self.size[0] * 5, self.size[1] * 5)
 
-                new_explosion = Explosion(game, self.rect.center, explosion_size)
-                game.level.objects.append(new_explosion)
+            new_explosion = Explosion(game, self.rect.center, explosion_size)
+            game.level.objects.append(new_explosion)
 
-                if self.name == 'gift_bomb':
-                    new_explosion.set_color(colors.red, colors.green)
+            if self.name == 'gift_bomb':
+                new_explosion.set_color(colors.red, colors.green)
 
     def blink_frame(self):
         if self.tick % self.blink_interval == 0:
